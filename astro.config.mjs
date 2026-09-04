@@ -19,6 +19,13 @@ const env = {
   ...loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), ''),
   ...process.env,
 };
+
+// TEMP DIAGNOSTIC — remove once the Vercel build env-var mystery is solved.
+console.log('[diag] process.env.PUBLIC_SANITY_PROJECT_ID present:', 'PUBLIC_SANITY_PROJECT_ID' in process.env);
+console.log('[diag] process.env.PUBLIC_SANITY_PROJECT_ID value:', JSON.stringify(process.env.PUBLIC_SANITY_PROJECT_ID));
+console.log('[diag] resolved env.PUBLIC_SANITY_PROJECT_ID:', JSON.stringify(env.PUBLIC_SANITY_PROJECT_ID));
+console.log('[diag] VERCEL:', process.env.VERCEL, '| VERCEL_ENV:', process.env.VERCEL_ENV);
+console.log('[diag] all PUBLIC_/NEXT_PUBLIC_ keys in process.env:', Object.keys(process.env).filter((k) => k.startsWith('PUBLIC_') || k.startsWith('NEXT_PUBLIC_')));
 const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, SITE_URL } = env;
 
 /* Ship Studio dev preview + Vercel both build statically; content is pulled at build time
