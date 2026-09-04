@@ -1,65 +1,48 @@
-# Astro Static Marketing Site Starter
+# srdjan-jovic-portfolio
 
-A minimal Astro starter with Tailwind CSS for building static marketing sites with Ship Studio.
+Portfolio site of Srdjan Jovic (Webflow developer), migrated from Webflow to
+**Astro 7** + **Sanity** (headless CMS), deployed on **Vercel**.
 
-## Features
+## Stack
 
-- **Astro 5** - Static site generation with island architecture
-- **Tailwind CSS 4** - Modern utility-first CSS with CSS variables
-- **Dark Mode** - Automatic dark/light theme based on system preferences
-- **Google Fonts** - Space Grotesk (display) + DM Sans (body)
-- **Responsive** - Mobile-first design patterns
+- Astro 7 (static output) + `@astrojs/vercel`
+- Sanity embedded Studio at `/studio` (`@sanity/astro`)
+- GSAP + Lenis for the ported Webflow interactions
+- The 3 original Webflow CSS files, kept verbatim (`src/styles/webflow/`)
 
-## Getting Started
+## Local development
 
 ```bash
-npm install
-npm run dev
+npm install          # run from this folder
+cp .env.example .env  # fill in the values
+npm run dev           # http://localhost:4321  (Studio at /studio)
+npm run build
 ```
 
-Open [http://localhost:4321](http://localhost:4321) to view your site.
+## Environment variables
 
-## Project Structure
+See `.env.example`. `SITE_URL` drives canonical URLs, absolute OG images and every
+JSON-LD `url`/`@id` — set it to the production domain.
+
+## Content
+
+Sanity project `jhuyq5eb`, dataset `cms-data-base`. Schema in `src/sanity/schemaTypes/`.
+Deploy schema changes with `npx sanity schema deploy`; regenerate types with
+`npx sanity typegen generate`.
+
+The one-off Webflow CSV import lives in `sanity/migrations/` (`node --env-file=.env sanity/migrations/run.ts`).
+
+## Structure
 
 ```
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro    # Base layout with fonts and styles
-│   ├── pages/
-│   │   └── index.astro     # Homepage
-│   └── styles/
-│       └── global.css      # Tailwind + CSS variables
-├── public/                  # Static assets
-└── astro.config.mjs        # Astro configuration
+src/
+├── components/     shared UI (Nav, Footer, cards, SEO, ...)
+├── layouts/        BaseLayout
+├── lib/
+│   ├── sanity/     client, image, portable text, GROQ queries
+│   └── seo/        JSON-LD builders, canonical helpers
+├── pages/          routes (index, case-study, resources, events, ...)
+├── scripts/        client-side TS (GSAP/Lenis, resource filter, ...)
+├── sanity/         Studio schema + generated types
+└── styles/         webflow/*.css (verbatim) + app.css
 ```
-
-## Commands
-
-| Command         | Action                                       |
-| --------------- | -------------------------------------------- |
-| `npm run dev`   | Start dev server at `localhost:4321`         |
-| `npm run build` | Build production site to `./dist/`           |
-| `npm run preview` | Preview production build locally           |
-
-## Customization
-
-### Colors
-
-Edit the CSS variables in `src/styles/global.css`:
-
-```css
-:root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --muted: #78716c;
-  --accent: #dc2626;
-}
-```
-
-### Fonts
-
-Fonts are loaded via Google Fonts in `src/layouts/Layout.astro`. Update the import URL and CSS variables to change fonts.
-
-## License
-
-MIT
