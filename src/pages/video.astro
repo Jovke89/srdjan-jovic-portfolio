@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const videos = [
+  {
+    poster: '/videos/testimonial_v2-1080p_poster.0000000.jpg',
+    mp4: '/videos/testimonial_v2-1080p_mp4.mp4',
+    webm: '/videos/testimonial_v2-1080p_webm.webm',
+  },
+  {
+    poster:
+      '/videos/0-02-05-fb7bb5fbaa7c549bafbdc921c26a28279b2d814cd27470297262acbfa2f3b51f_8582171613355414_poster.0000000.jpg',
+    mp4: '/videos/0-02-05-fb7bb5fbaa7c549bafbdc921c26a28279b2d814cd27470297262acbfa2f3b51f_8582171613355414_mp4.mp4',
+    webm: '/videos/0-02-05-fb7bb5fbaa7c549bafbdc921c26a28279b2d814cd27470297262acbfa2f3b51f_8582171613355414_webm.webm',
+  },
+];
+---
+
+<BaseLayout seo={{ title: 'video', description: undefined }} chrome={false} mainWrapper={false}>
+  <div class="div-block-4">
+    {
+      videos.map((v) => (
+        <div class="background-video w-background-video w-background-video-atom">
+          <video
+            autoplay
+            loop
+            muted
+            playsinline
+            poster={v.poster}
+            data-object-fit="cover"
+            style={`background-image:url(${v.poster})`}
+          >
+            <source src={v.webm} type="video/webm" />
+            <source src={v.mp4} type="video/mp4" />
+          </video>
+        </div>
+      ))
+    }
+  </div>
+</BaseLayout>

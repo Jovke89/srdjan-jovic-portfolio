@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+/* Webflow's password gate (/.wf_auth) does not exist off Webflow hosting.
+   Kept for parity; the form is inert. Use Vercel deployment protection for
+   real access control. */
+---
+
+<BaseLayout seo={{ title: 'Protected page', noindex: true }} chrome={false} mainWrapper={false}>
+  <div class="utility-page_component">
+    <div class="utility-page_wrapper w-password-page w-form">
+      <form action="#" method="post" class="utility-page_form w-password-page" onsubmit="return false;">
+        <img
+          alt=""
+          width="106"
+          src="https://d3e54v103j8qbb.cloudfront.net/static/utility-lock.ae54711958.svg"
+          class="utility-page_image"
+        />
+        <h3>Protected Page</h3>
+        <input
+          class="form_input w-password-page w-input"
+          maxlength="256"
+          name="pass"
+          placeholder="Enter your password"
+          type="password"
+          id="pass"
+        />
+        <input type="submit" class="button w-password-page w-button" value="Submit" />
+      </form>
+    </div>
+  </div>
+</BaseLayout>

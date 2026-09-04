@@ -1,0 +1,122 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import TestimonialsSection from '../../components/TestimonialsSection.astro';
+import {
+  CASE_STUDIES_LIST_QUERY,
+  SITE_SETTINGS_QUERY,
+  HOME_QUERY,
+} from '../../lib/sanity/queries';
+import { buildCaseStudyListLd } from '../../lib/seo/jsonld';
+import { toPerson } from '../../lib/seo/person';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+
+const [caseStudies, settings, home] = await Promise.all([
+  sanityClient.fetch(CASE_STUDIES_LIST_QUERY),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+  sanityClient.fetch(HOME_QUERY),
+]);
+const person = toPerson(settings);
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+const videoTestimonials = [...(home?.videoTestimonials ?? []), ...(home?.textTestimonials ?? [])];
+
+const jsonld = buildCaseStudyListLd({
+  person,
+  reviews: settings?.homeReviews ?? [],
+  items: (caseStudies ?? []).map((c) => ({
+    name: c.name!,
+    description: c.clientDescription ?? '',
+    slug: c.slug!,
+    image: imgSet(c.cardThumbnail ?? c.coverImage, { width: 1200 })?.src,
+  })),
+});
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Webflow Case Studies',
+    description:
+      "Explore real projects and solutions. View case studies of websites I've designed and built in Webflow for healthcare, fitness, and tech clients.",
+    canonical: absUrl('/case-study'),
+    ogImage,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_hero-projects">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="projects_hero-content-wrapper">
+            <div class="projects_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">portfolio</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="project_heading">
+                <h1 class="case_study-h1-heading heading-style-h1">A closer look at my work</h1>
+              </div>
+              <div class="project_hero-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Explore selected projects I’ve designed and built, from the initial concept and
+                  visual direction to the final Webflow development.
+                </p>
+              </div>
+              <a href="#projects" class="text-color-alternate text-size-regular text-style-allcaps hide-tablet">scroll down</a>
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="projects" class="section_resources-articles">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="projects_content-wrapper">
+            <div class="projects_heading-wrapper">
+              <div class="projects_heading">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">CASE STUDIES</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">Portfolio</h2>
+              </div>
+              <div class="projects_paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Every project here solved a real problem. Real projects. Real solutions. Take a look
+                  at what I built.
+                </p>
+              </div>
+            </div>
+            <div class="projects_list-wrapper w-dyn-list">
+              <div role="list" class="projects_list w-dyn-items">
+                {
+                  (caseStudies ?? []).map((c) => (
+                    <ProjectCard
+                      href={`/case-study/${c.slug}`}
+                      title={c.name!}
+                      text={c.clientDescription ?? undefined}
+                      image={c.cardThumbnail ?? c.coverImage}
+                      cta="view Case Study"
+                    />
+                  ))
+                }
+              </div>
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <TestimonialsSection testimonials={videoTestimonials} />
+</BaseLayout>

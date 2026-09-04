@@ -23,9 +23,16 @@ interface Props {
   bodyClass?: string;
   renderHeroCanvas?: boolean;
   mainWrapper?: boolean;
+  chrome?: boolean;
 }
 
-const { seo, bodyClass, renderHeroCanvas = false, mainWrapper = true } = Astro.props;
+const {
+  seo,
+  bodyClass,
+  renderHeroCanvas = false,
+  mainWrapper = true,
+  chrome = true,
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -63,7 +70,7 @@ const { seo, bodyClass, renderHeroCanvas = false, mainWrapper = true } = Astro.p
   <body class={bodyClass}>
     <div class="page-wrapper">
       <div class="cursor"></div>
-      <Nav />
+      {chrome && <Nav />}
       {
         mainWrapper ? (
           <main class="main-wrapper">
@@ -73,7 +80,7 @@ const { seo, bodyClass, renderHeroCanvas = false, mainWrapper = true } = Astro.p
           <slot />
         )
       }
-      <Footer />
+      {chrome && <Footer />}
     </div>
     {renderHeroCanvas && <canvas id="heroCanvas"></canvas>}
     <SiteScripts />

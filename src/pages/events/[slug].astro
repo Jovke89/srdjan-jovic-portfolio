@@ -1,0 +1,104 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ResponsiveImg from '../../components/ResponsiveImg.astro';
+import InfoRow from '../../components/InfoRow.astro';
+import { EVENT_QUERY, EVENT_SLUGS_QUERY } from '../../lib/sanity/queries';
+import { buildEventLd } from '../../lib/seo/jsonld';
+import { portableTextToHtml, portableTextToPlain } from '../../lib/sanity/portableText';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+
+export async function getStaticPaths() {
+  const slugs = await sanityClient.fetch(EVENT_SLUGS_QUERY);
+  return (slugs ?? []).map((s: { slug: string }) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const event = await sanityClient.fetch(EVENT_QUERY, { slug });
+if (!event) return Astro.redirect('/404');
+
+const bodyHtml = portableTextToHtml(event.body);
+const cover = imgSet(event.coverImage ?? event.thumbnail, { width: 1600 });
+const ogImage = imgSet(event.seo?.ogImage ?? event.coverImage ?? event.thumbnail, { width: 1200 })?.src;
+const description =
+  event.seo?.description || event.overview || portableTextToPlain(event.body).slice(0, 160);
+
+const jsonld = buildEventLd({
+  name: event.name!,
+  description: event.overview || description,
+  slug: slug!,
+  startDate: event.startDate ?? undefined,
+  locationName: event.location ?? undefined,
+  addressLocality: event.location ?? undefined,
+  organizerName: event.host ?? undefined,
+  imageUrl: cover?.src,
+});
+---
+
+<BaseLayout
+  seo={{
+    title: event.seo?.title || event.name!,
+    description,
+    canonical: absUrl(`/events/${slug}`),
+    ogImage,
+    noindex: event.seo?.noIndex ?? false,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_event">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="event_hero-content-wrapper">
+            <div class="event_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">event</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="event_heading">
+                <h1 class="heading-style-h1 is-event-tempate-heading">{event.name}</h1>
+              </div>
+              {
+                event.overview && (
+                  <div class="event_hero-paragraph-wrapper">
+                    <p class="text-size-medium text-style-allcaps">{event.overview}</p>
+                  </div>
+                )
+              }
+              <div class="event_info-wrapper">
+                <div class="section_hero-template-info-wrapper">
+                  <InfoRow index="01" label="year:" value={event.year} />
+                  <InfoRow index="02" label="host:" value={event.host} />
+                  <InfoRow index="03" label="location:" value={event.location} />
+                </div>
+              </div>
+              {
+                cover && (
+                  <div class="event_img-wrapper">
+                    <ResponsiveImg
+                      source={event.coverImage ?? event.thumbnail}
+                      alt={event.name!}
+                      width={1600}
+                      sizes="(max-width: 991px) 100vw, 900px"
+                      class="event_img"
+                      loading="eager"
+                      fetchpriority="high"
+                    />
+                  </div>
+                )
+              }
+              <div class="event_body-mask">
+                <div class="event_body-text w-richtext" set:html={bodyHtml} />
+              </div>
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,6 +1,17 @@
 import { toHTML, type PortableTextHtmlComponents } from '@portabletext/to-html';
-import { toPlainText } from '@portabletext/to-html';
 import { urlFor } from './image';
+
+/** Plain text from a Portable Text array (for meta descriptions, JSON-LD, ToC). */
+function toPlainText(blocks: unknown): string {
+  if (!Array.isArray(blocks)) return '';
+  return blocks
+    .map((block: { _type?: string; children?: { text?: string }[] }) => {
+      if (block?._type !== 'block' || !Array.isArray(block.children)) return '';
+      return block.children.map((c) => c.text ?? '').join('');
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
 
 export function slugify(text: string): string {
   return text

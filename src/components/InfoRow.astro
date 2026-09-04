@@ -1,0 +1,26 @@
+---
+/* Webflow `.info_wrapper`: a numbered [NN] marker + "label:" + a tag value. */
+interface Props {
+  index: string;
+  label: string;
+  value?: string | null;
+}
+const { index, label, value } = Astro.props;
+---
+{
+  value && (
+    <div class="info_wrapper">
+      <div class="text_in-exprecions">
+        <div class="exprecion">[</div>
+        <div class="text-color-alternate text-size-regular text-style-allcaps">{index}</div>
+        <div class="exprecion">]</div>
+      </div>
+      <div class="tag_wrapper">
+        <div class="text-size-medium text-style-allcaps">{label}</div>
+        <div class="tag">
+          <div class="text-size-regular text-style-allcaps">{value}</div>
+        </div>
+      </div>
+    </div>
+  )
+}

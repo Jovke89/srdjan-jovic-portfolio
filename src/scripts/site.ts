@@ -282,11 +282,84 @@ function initHeroOverlap() {
     .to(hero, { scale: 0.7, opacity: 0, ease: 'none' });
 }
 
+/* --- Video testimonials (lazy-load + click to play), ported from the
+   Webflow per-item embed script --- */
+function initVideoTestimonials() {
+  document.querySelectorAll<HTMLElement>('.video-wrap').forEach((wrap) => {
+    if (wrap.dataset.vidInit === 'true') return;
+    wrap.dataset.vidInit = 'true';
+    const video = wrap.querySelector<HTMLVideoElement>('.video-el');
+    const spinner = wrap.querySelector<HTMLElement>('.vid-spinner');
+    const btn = wrap.querySelector<HTMLElement>('.vid-btn');
+    const icon = wrap.querySelector<SVGElement>('.vid-icon');
+    const src = wrap.dataset.src;
+    if (!video || !spinner || !btn || !icon || !src) {
+      wrap.style.display = 'none';
+      return;
+    }
+    const ensureLoaded = () => {
+      if (!video.src) video.src = src;
+    };
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              ensureLoaded();
+              observer.unobserve(video);
+            }
+          });
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(video);
+    } else {
+      ensureLoaded();
+    }
+    const toggleVideo = () => {
+      ensureLoaded();
+      if (video.paused) {
+        const p = video.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {
+            icon.innerHTML = '<polygon points="6,4 20,12 6,20"/>';
+          });
+        }
+        icon.innerHTML =
+          '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      } else {
+        video.pause();
+        icon.innerHTML = '<polygon points="6,4 20,12 6,20"/>';
+        btn.style.opacity = '1';
+      }
+    };
+    wrap.addEventListener('click', toggleVideo);
+    wrap.addEventListener('mouseenter', () => {
+      btn.style.opacity = '1';
+    });
+    wrap.addEventListener('mouseleave', () => {
+      if (!video.paused) btn.style.opacity = '0';
+    });
+    video.addEventListener('waiting', () => {
+      spinner.style.display = 'flex';
+    });
+    video.addEventListener('playing', () => {
+      spinner.style.display = 'none';
+    });
+    video.addEventListener('error', () => {
+      spinner.style.display = 'none';
+      wrap.style.cursor = 'default';
+      wrap.removeEventListener('click', toggleVideo);
+    });
+  });
+}
+
 /* --- boot --- */
 function boot() {
   initCopyrightYear();
   initStagerButtons();
   initBlinkNav();
+  initVideoTestimonials();
 
   const mm = gsap.matchMedia();
 

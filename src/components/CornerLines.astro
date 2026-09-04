@@ -1,0 +1,37 @@
+---
+/* The four decorative corner-line groups Webflow repeats inside most sections. */
+interface Props {
+  top?: boolean;
+}
+const { top = true } = Astro.props;
+---
+{
+  top && (
+    <>
+      <div class="lines_absoulute-position is-left-top">
+        <div class="lines_wrapper">
+          <div class="line is-up" />
+          <div class="line is-vertical is-short" />
+        </div>
+      </div>
+      <div class="lines_absoulute-position is-right-top">
+        <div class="lines_wrapper">
+          <div class="line is-up" />
+          <div class="line is-vertical is-short" />
+        </div>
+      </div>
+    </>
+  )
+}
+<div class="lines_absoulute-position is-right-tbottom">
+  <div class="lines_wrapper">
+    <div class="line" />
+    <div class="line is-vertical" />
+  </div>
+</div>
+<div class="lines_absoulute-position is-left-bottom">
+  <div class="lines_wrapper">
+    <div class="line" />
+    <div class="line is-vertical" />
+  </div>
+</div>

@@ -1,0 +1,28 @@
+---
+/* Loads the site-wide GSAP/Lenis interactions + HubSpot.
+   hubspotPortalId comes from siteSettings; falls back to the known value. */
+import { sanityClient } from 'sanity:client';
+
+let portalId = '148937674';
+try {
+  const s = await sanityClient.fetch(`*[_id == "siteSettings"][0].hubspotPortalId`);
+  if (s) portalId = s;
+} catch {
+  /* keep fallback */
+}
+---
+
+<script>
+  import '../scripts/site.ts';
+</script>
+{
+  portalId && (
+    <script
+      is:inline
+      src={`https://js.hs-scripts.com/${portalId}.js`}
+      async
+      defer
+      type="text/javascript"
+    />
+  )
+}

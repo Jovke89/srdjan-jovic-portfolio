@@ -1,0 +1,52 @@
+---
+import { imgSet } from '../lib/sanity/image';
+
+interface Props {
+  source: unknown;
+  alt?: string;
+  width?: number;
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  [key: string]: unknown;
+}
+
+const {
+  source,
+  alt,
+  width = 1080,
+  widths,
+  sizes = '(max-width: 991px) 100vw, 50vw',
+  class: className,
+  loading = 'lazy',
+  fetchpriority,
+  ...rest
+} = Astro.props;
+
+const set = imgSet(source, { width, widths });
+const resolvedAlt =
+  alt ??
+  (typeof source === 'object' && source && 'alt' in source
+    ? String((source as { alt?: string }).alt ?? '')
+    : '');
+---
+
+{
+  set && (
+    <img
+      src={set.src}
+      srcset={set.srcset}
+      sizes={sizes}
+      width={set.width}
+      height={set.height}
+      alt={resolvedAlt}
+      loading={loading}
+      fetchpriority={fetchpriority}
+      decoding="async"
+      class={className}
+      {...rest}
+    />
+  )
+}

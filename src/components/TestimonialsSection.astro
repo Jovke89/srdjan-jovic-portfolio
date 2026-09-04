@@ -1,0 +1,117 @@
+---
+/* Shared testimonials section (home + case-study list).
+   List 1 (`is-flex`) = first video testimonial with a header card.
+   List 2 (grid) = the remaining video testimonials as bare players. */
+import ResponsiveImg from './ResponsiveImg.astro';
+import VideoPlayer from './VideoPlayer.astro';
+
+interface Testimonial {
+  name?: string;
+  company?: string;
+  quote?: string;
+  videoUrl?: string | null;
+  photo?: unknown;
+  videoPoster?: unknown;
+}
+interface Props {
+  testimonials: Testimonial[];
+}
+const { testimonials } = Astro.props;
+const withVideo = testimonials.filter((t) => t.videoUrl);
+const [featured, ...rest] = withVideo;
+---
+
+{
+  withVideo.length > 0 && (
+    <section class="section_testimonails">
+      <div class="container-large">
+        <div class="side_lines">
+          <div class="lines_absoulute-position is-right-tbottom">
+            <div class="lines_wrapper">
+              <div class="line" />
+              <div class="line is-vertical" />
+            </div>
+          </div>
+          <div class="lines_absoulute-position is-left-bottom">
+            <div class="lines_wrapper">
+              <div class="line" />
+              <div class="line is-vertical" />
+            </div>
+          </div>
+          <div class="padding-global padding-section-medium">
+            <div class="testimonials_content-wrapper">
+              <div class="testimonials_header">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">what others say</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">Testimonials</h2>
+                <div class="testimonial_paragraph-wrapper">
+                  <p class="text-size-medium text-style-allcaps">
+                    Don't just take my word for it. here's what people who went through the whole
+                    process have
+                  </p>
+                </div>
+              </div>
+              <div class="testimonials_wrapper">
+                {featured && (
+                  <div class="video_testimonial-collection w-dyn-list">
+                    <div role="list" class="video_testimonial-list is-flex w-dyn-items">
+                      <div role="listitem" class="video_testimonial-item w-dyn-item">
+                        <div class="video_testimonail-wrapper">
+                          <div class="video_testimonial-header">
+                            <div class="testimonial_icon">
+                              {featured.photo && (
+                                <ResponsiveImg
+                                  source={featured.photo}
+                                  alt={featured.name ?? ''}
+                                  width={200}
+                                  sizes="80px"
+                                  class="testemonial_img"
+                                />
+                              )}
+                            </div>
+                            <div class="testimonial_content">
+                              <h3 class="heading-style-h4">{featured.name}</h3>
+                              <div class="card_badge-wrapper">
+                                <div>CEO:</div>
+                                <div class="tag">
+                                  <div class="text-size-regular text-style-allcaps">
+                                    {featured.company}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="video_palyer-wrapper">
+                            <VideoPlayer src={featured.videoUrl} poster={featured.videoPoster} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {rest.length > 0 && (
+                  <div class="video_testimonial-collection w-dyn-list">
+                    <div role="list" class="video_testimonial-list w-dyn-items">
+                      {rest.map((t) => (
+                        <div role="listitem" class="video_testimonial-item w-dyn-item">
+                          <div class="testimonal_grid-item">
+                            <div class="video_palyer-wrapper">
+                              <VideoPlayer src={t.videoUrl} poster={t.videoPoster} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

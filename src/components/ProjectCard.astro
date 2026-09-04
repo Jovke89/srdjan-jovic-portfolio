@@ -1,0 +1,35 @@
+---
+/* Shared list card for case studies and events (Webflow `.project_item`). */
+import ResponsiveImg from './ResponsiveImg.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  text?: string;
+  image?: unknown;
+  imageAlt?: string;
+  cta: string;
+}
+const { href, title, text, image, imageAlt, cta } = Astro.props;
+---
+
+<div role="listitem" class="projects_item-wrapper w-dyn-item">
+  <article class="project_item">
+    <a href={href} class="project_item-img-wrapper w-inline-block">
+      {
+        image ? (
+          <ResponsiveImg source={image} alt={imageAlt ?? title} class="project_item-img" />
+        ) : (
+          <div class="project_item-img"></div>
+        )
+      }
+    </a>
+    <div class="project_item-content-wrapper">
+      <h3 class="heading-style-h3">{title}</h3>
+      {text && <p class="text-size-medium text-style-allcaps">{text}</p>}
+    </div>
+    <a data-stager-btn href={href} class="button w-inline-block">
+      <div data-stager-text>{cta}</div>
+    </a>
+  </article>
+</div>

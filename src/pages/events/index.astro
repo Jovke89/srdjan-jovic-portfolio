@@ -1,0 +1,113 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { EVENTS_LIST_QUERY, SITE_SETTINGS_QUERY } from '../../lib/sanity/queries';
+import { buildEventsListLd, type PersonSettings } from '../../lib/seo/jsonld';
+import { toPerson } from '../../lib/seo/person';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+
+const [events, settings] = await Promise.all([
+  sanityClient.fetch(EVENTS_LIST_QUERY),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+]);
+const person: PersonSettings = toPerson(settings);
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+
+const jsonld = buildEventsListLd({
+  person,
+  events: (events ?? []).map((e) => ({
+    name: e.name!,
+    description: e.overview ?? '',
+    slug: e.slug!,
+    image: imgSet(e.coverImage ?? e.thumbnail, { width: 1200 })?.src,
+  })),
+});
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Events & Conferences',
+    description:
+      "A collection of conferences and events I've attended, the people I've met, and the ideas I've taken with me as a Webflow developer.",
+    canonical: absUrl('/events'),
+    ogImage,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_hero-projects">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <CornerLines />
+          <div class="events_hero-content-wrapper">
+            <div class="events_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">events</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="project_heading">
+                <h1 class="heading-style-h1 is-events-mobile-heading">Events &amp; Conferences</h1>
+              </div>
+              <div class="project_hero-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  A collection of events, conferences, and experiences that have shaped the way I
+                  think about design, development, and the web.
+                </p>
+              </div>
+              <a href="#events" class="text-color-alternate text-size-regular text-style-allcaps hide-tablet">scroll down</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="events" class="section_resources-articles">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="projects_content-wrapper">
+            <div class="events_heading-wrapper">
+              <div class="events_heading">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">EVENTS &amp; EXPERIENCES</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">Where Ideas Begin</h2>
+              </div>
+              <div class="projects_paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  A collection of conferences and events I’ve attended, the people I’ve met, and the
+                  ideas I’ve taken with me.
+                </p>
+              </div>
+            </div>
+            <div class="projects_list-wrapper w-dyn-list">
+              <div role="list" class="projects_list w-dyn-items">
+                {
+                  (events ?? []).map((e) => (
+                    <ProjectCard
+                      href={`/events/${e.slug}`}
+                      title={e.name!}
+                      text={e.overview ?? undefined}
+                      image={e.thumbnail ?? e.coverImage}
+                      cta="view event"
+                    />
+                  ))
+                }
+              </div>
+              {(events ?? []).length === 0 && <div class="w-dyn-empty"><div>No items found.</div></div>}
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

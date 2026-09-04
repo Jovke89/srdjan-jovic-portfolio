@@ -1,0 +1,320 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ResponsiveImg from '../../components/ResponsiveImg.astro';
+import InfoRow from '../../components/InfoRow.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { CASE_STUDY_QUERY, CASE_STUDY_SLUGS_QUERY } from '../../lib/sanity/queries';
+import { buildArticleLd } from '../../lib/seo/jsonld';
+import { toPerson } from '../../lib/seo/person';
+import { SITE_SETTINGS_QUERY } from '../../lib/sanity/queries';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+
+export async function getStaticPaths() {
+  const slugs = await sanityClient.fetch(CASE_STUDY_SLUGS_QUERY);
+  return (slugs ?? []).map((s: { slug: string }) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const [cs, settings, related] = await Promise.all([
+  sanityClient.fetch(CASE_STUDY_QUERY, { slug }),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+  sanityClient.fetch(
+    `*[_type == "caseStudy" && slug.current != $slug] | order(order asc)[0...3]{
+      name, "slug": slug.current, clientDescription, cardThumbnail{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } }
+    }`,
+    { slug },
+  ),
+]);
+if (!cs) return Astro.redirect('/404');
+
+const person = toPerson(settings);
+const hero = imgSet(cs.coverImage, { width: 1600 });
+const ogImage = imgSet(cs.seo?.ogImage ?? cs.coverImage ?? cs.cardThumbnail, { width: 1200 })?.src;
+const description = cs.seo?.description || cs.clientDescription || '';
+
+const marqueeRows = [
+  (cs.marqueeImages ?? []).slice(0, 3),
+  (cs.marqueeImages ?? []).slice(3, 6),
+].filter((r) => r.length);
+
+const jsonld = buildArticleLd({
+  headline: cs.name!,
+  description,
+  slug: slug!,
+  datePublished: cs.datePublished ?? undefined,
+  dateModified: cs.dateModified ?? undefined,
+  imageUrl: hero?.src,
+  person,
+  clientOrg: {
+    name: cs.name ?? undefined,
+    description: cs.clientDescription ?? undefined,
+    url: cs.currentWebsite ?? undefined,
+  },
+});
+---
+
+<BaseLayout
+  seo={{
+    title: cs.seo?.title || cs.name!,
+    description,
+    canonical: absUrl(`/case-study/${slug}`),
+    ogImage,
+    noindex: cs.seo?.noIndex ?? false,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_hero-case-template">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="hero_animation-target">
+            <div class="section_hero-case-content-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">client</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="padding-bottom padding-small"></div>
+              <div class="case_template-hero-heading">
+                <h1 class="heading-style-h1 is-case-template-heading">{cs.name}</h1>
+                {cs.clientDescription && <p class="text-size-medium text-style-allcaps">{cs.clientDescription}</p>}
+              </div>
+              <div class="padding-bottom padding-large"></div>
+              <div class="section_hero-template-info-wrapper">
+                <InfoRow index="01" label="client:" value={cs.name} />
+                <InfoRow index="02" label="year:" value={cs.year} />
+                <InfoRow index="03" label="industry:" value={cs.industry?.name} />
+              </div>
+              <div class="padding-bottom padding-large"></div>
+            </div>
+            <div class="case_template-hero-img-wrapper">
+              <div class="hero_img-wrapper-template">
+                {
+                  hero && (
+                    <ResponsiveImg
+                      source={cs.coverImage}
+                      alt={cs.name!}
+                      width={1600}
+                      sizes="(max-width: 991px) 100vw, 1100px"
+                      class="case_template-hero-img"
+                      loading="eager"
+                      fetchpriority="high"
+                    />
+                  )
+                }
+                {
+                  cs.currentWebsite && (
+                    <div class="view_site-btn-wrapper">
+                      <a href={cs.currentWebsite} target="_blank" rel="noopener" class="view_site-btn w-inline-block">
+                        <div class="text-block">View Website</div>
+                      </a>
+                    </div>
+                  )
+                }
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    (cs.overviewParagraph || marqueeRows.length > 0) && (
+      <section class="section_overview">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="overwier_content-wrapper">
+                <div class="overview_heading-wrapper">
+                  <div class="role_heading">
+                    <h2 class="heading-style-h2">Overview</h2>
+                  </div>
+                  {cs.overviewParagraph && (
+                    <div class="overwiev_paragraph-wrapper">
+                      <p class="text-size-medium text-style-allcaps">{cs.overviewParagraph}</p>
+                    </div>
+                  )}
+                </div>
+                {marqueeRows.length > 0 && (
+                  <div class="marquee_modal-wrapper">
+                    {marqueeRows.map((row, i) => (
+                      <div class="marquee">
+                        {[0, 1].map(() => (
+                          <div class={`marquee-content ${i % 2 === 0 ? 'scroll' : 'scroll-reverse'}`}>
+                            {row.map((img: unknown) => (
+                              <ResponsiveImg source={img} width={800} sizes="40vw" class="marque_img" />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (cs.challengeParagraph1 || cs.challengeParagraph2 || cs.challengeImage) && (
+      <section class="section_challenge">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="section_challenge-content-wrapper">
+                <div class="challenge_heading-wrapper">
+                  <div class="role_heading"><h2 class="heading-style-h2">The Challenge</h2></div>
+                </div>
+                <div class="role_content">
+                  <div class="role_paragraph-wrapper">
+                    {cs.challengeParagraph1 && <p class="text-size-medium text-style-allcaps">{cs.challengeParagraph1}</p>}
+                    {cs.challengeParagraph2 && <p class="text-size-medium text-style-allcaps">{cs.challengeParagraph2}</p>}
+                  </div>
+                  {cs.challengeImage && (
+                    <div class="challenge_img-wrapper">
+                      <ResponsiveImg source={cs.challengeImage} alt={`${cs.name} — the challenge`} width={900} />
+                    </div>
+                  )}
+                </div>
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (cs.roleParagraph1 || cs.roleParagraph2 || cs.roleImage) && (
+      <section class="section_role">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="section_role-content-wrapper">
+                <div class="role_heading-wrapper">
+                  <div class="role_heading"><h2 class="heading-style-h2">My role</h2></div>
+                </div>
+                <div class="role_content">
+                  {cs.roleImage && (
+                    <div class="role_img-wrapper">
+                      <ResponsiveImg source={cs.roleImage} alt={`${cs.name} — my role`} width={900} />
+                    </div>
+                  )}
+                  <div class="role_paragraph-wrapper">
+                    {cs.roleParagraph1 && <p class="text-size-medium text-style-allcaps">{cs.roleParagraph1}</p>}
+                    {cs.roleParagraph2 && <p class="text-size-medium text-style-allcaps">{cs.roleParagraph2}</p>}
+                  </div>
+                </div>
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (cs.approachParagraph || cs.approachImage) && (
+      <section class="section_approach">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="section_approach-content-wrapper">
+                <div class="approach_heading-wrapper">
+                  <div class="approach_heading"><h2 class="heading-style-h2">Technical Approach</h2></div>
+                </div>
+                <div class="approach_content">
+                  {cs.approachParagraph && (
+                    <div class="approach_paragraph-wrapper">
+                      <p class="text-size-medium text-style-allcaps">{cs.approachParagraph}</p>
+                    </div>
+                  )}
+                  {cs.approachImage && (
+                    <div class="approach_img-wrapper">
+                      <ResponsiveImg source={cs.approachImage} alt={`${cs.name} — technical approach`} width={900} />
+                    </div>
+                  )}
+                </div>
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    cs.keyTakeaway && (
+      <section class="section_key-takeaway">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="key_takeaway-content-wrapper">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">in the end</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">Key Takeaway</h2>
+                <p class="text-size-medium text-style-allcaps">{cs.keyTakeaway}</p>
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (related ?? []).length > 0 && (
+      <section class="section_projcets-related">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="projects_content-wrapper">
+                <div class="projects_heading-wrapper">
+                  <div class="projects_heading">
+                    <div class="text_in-exprecions">
+                      <div class="exprecion">[</div>
+                      <h2 class="text-color-alternate text-size-regular text-style-allcaps">related works</h2>
+                      <div class="exprecion">]</div>
+                    </div>
+                    <h2 class="heading-style-h2">See others projects</h2>
+                  </div>
+                </div>
+                <div class="realted_projects-list-wrapper w-dyn-list">
+                  <div role="list" class="related_projects-list w-dyn-items">
+                    {(related ?? []).map((r: any) => (
+                      <ProjectCard
+                        href={`/case-study/${r.slug}`}
+                        title={r.name}
+                        text={r.clientDescription}
+                        image={r.cardThumbnail}
+                        cta="view Case Study"
+                      />
+                    ))}
+                  </div>
+                </div>
+                <CornerLines />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
