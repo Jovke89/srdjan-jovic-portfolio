@@ -1,0 +1,98 @@
+/* App-level styles layered on top of the 3 Webflow CSS files.
+   Keep this minimal, the Webflow files own the design. */
+
+/* Custom cursor (ported from the Webflow head embed) */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 1em;
+  height: 1em;
+  pointer-events: none;
+  border-radius: 50%;
+  background-color: rgba(255, 76, 36, 0.3);
+  transition: width 0.3s, height 0.3s, background-color 0.3s;
+  mix-blend-mode: normal;
+}
+body:has(a:hover) .cursor,
+body:has(button:hover) .cursor,
+body:has([data-cursor]:hover) .cursor {
+  width: 3em;
+  height: 3em;
+  background-color: rgba(255, 76, 36, 0.3);
+}
+@media (hover: none) and (pointer: coarse) {
+  .cursor {
+    display: none;
+  }
+}
+
+/* Lenis smooth-scroll helper styles (ported from Webflow head embed) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Site background canvas (ported from Webflow footer embed) */
+#heroCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Nav-link blink (ported from Webflow footer embed) */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Keyboard focus visibility on all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 0.125rem solid #ffc000;
+  outline-offset: 0.125rem;
+}
+
+/* Respect reduced-motion: kill Webflow/GSAP-driven motion, reveal content */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cursor,
+  #heroCanvas {
+    display: none !important;
+  }
+  .loading-container {
+    display: none !important;
+  }
+}

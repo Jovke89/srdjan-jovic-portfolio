@@ -1,0 +1,340 @@
+/* Site-wide interactions. Ported 1:1 from the Webflow custom-code embeds,
+   moved to npm GSAP + Lenis. All motion is gated behind
+   prefers-reduced-motion via gsap.matchMedia(). */
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { CustomEase } from 'gsap/CustomEase';
+import { SplitText } from 'gsap/SplitText';
+import Lenis from 'lenis';
+import { initHeroCanvas } from './hero-canvas';
+
+gsap.registerPlugin(ScrollTrigger, CustomEase, SplitText);
+
+/* --- Copyright year (matches the Webflow inline script) --- */
+function initCopyrightYear() {
+  const el = document.getElementById('currentYear');
+  if (el) el.textContent = String(new Date().getFullYear());
+}
+
+/* --- Custom cursor --- */
+function initCustomCursor() {
+  const cursor = document.querySelector('.cursor');
+  if (!cursor) return () => {};
+  gsap.set('.cursor', { xPercent: -50, yPercent: -50 });
+  const xTo = gsap.quickTo('.cursor', 'x', { duration: 0.6, ease: 'power3' });
+  const yTo = gsap.quickTo('.cursor', 'y', { duration: 0.6, ease: 'power3' });
+  const onMove = (e: MouseEvent) => {
+    xTo(e.clientX);
+    yTo(e.clientY);
+  };
+  window.addEventListener('mousemove', onMove);
+  return () => window.removeEventListener('mousemove', onMove);
+}
+
+/* --- Stager button (letter roll on [data-stager-text]) --- */
+function initStagerButtons() {
+  document.querySelectorAll<HTMLElement>('[data-stager-text]').forEach((el) => {
+    if (el.dataset.stagerInit) return;
+    el.dataset.stagerInit = '1';
+    const original = el.textContent ?? '';
+    el.innerHTML = '';
+    el.style.position = 'relative';
+    el.style.overflow = 'hidden';
+    el.style.display = 'inline-block';
+    const rowIn = document.createElement('span');
+    rowIn.style.cssText = 'display:flex;';
+    const rowOut = document.createElement('span');
+    rowOut.style.cssText =
+      'display:flex; position:absolute; top:50%; left:0; right:0; justify-content:center; transform:translateY(-50%);';
+    original.split('').forEach((char, i) => {
+      const delay = i * 25 + 'ms';
+      const s1 = document.createElement('span');
+      s1.textContent = char === ' ' ? ' ' : char;
+      s1.style.cssText = `display:inline-block; transition:transform 0.5s ${delay}, opacity 0.4s ${delay}; transition-timing-function:cubic-bezier(0.76,0,0.24,1);`;
+      rowIn.appendChild(s1);
+      const s2 = document.createElement('span');
+      s2.textContent = char === ' ' ? ' ' : char;
+      s2.style.cssText = `display:inline-block; transform:translateY(120%); opacity:0; transition:transform 0.5s ${delay}, opacity 0.4s ${delay}; transition-timing-function:cubic-bezier(0.76,0,0.24,1);`;
+      rowOut.appendChild(s2);
+    });
+    el.appendChild(rowIn);
+    el.appendChild(rowOut);
+    const btn = el.closest<HTMLElement>('[data-stager-btn]');
+    if (!btn) return;
+    btn.addEventListener('mouseenter', () => {
+      rowIn.querySelectorAll('span').forEach((s) => {
+        (s as HTMLElement).style.transform = 'translateY(-120%)';
+        (s as HTMLElement).style.opacity = '0';
+      });
+      rowOut.querySelectorAll('span').forEach((s) => {
+        (s as HTMLElement).style.transform = 'translateY(0)';
+        (s as HTMLElement).style.opacity = '1';
+      });
+    });
+    btn.addEventListener('mouseleave', () => {
+      rowIn.querySelectorAll('span').forEach((s) => {
+        (s as HTMLElement).style.transform = '';
+        (s as HTMLElement).style.opacity = '';
+      });
+      rowOut.querySelectorAll('span').forEach((s) => {
+        (s as HTMLElement).style.transform = 'translateY(120%)';
+        (s as HTMLElement).style.opacity = '0';
+      });
+    });
+  });
+}
+
+/* --- Blink nav link on hover --- */
+function initBlinkNav() {
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  document.querySelectorAll<HTMLElement>('.blink-btn').forEach((link) => {
+    link.addEventListener('mouseenter', () => {
+      const text = link.querySelector<HTMLElement>('.button_text-blink');
+      if (text) text.style.animation = 'blink 0.15s step-start infinite';
+    });
+    link.addEventListener('mouseleave', () => {
+      const text = link.querySelector<HTMLElement>('.button_text-blink');
+      if (text) text.style.animation = '';
+    });
+  });
+}
+
+/* --- GSAP marquee (scroll direction) --- */
+function initMarquee() {
+  document
+    .querySelectorAll<HTMLElement>('[data-marquee-scroll-direction-target]')
+    .forEach((marquee) => {
+      const marqueeContent = marquee.querySelector<HTMLElement>('[data-marquee-collection-target]');
+      const marqueeScroll = marquee.querySelector<HTMLElement>('[data-marquee-scroll-target]');
+      if (!marqueeContent || !marqueeScroll) return;
+      const {
+        marqueeSpeed: speed,
+        marqueeDirection: direction,
+        marqueeDuplicate: duplicate,
+        marqueeScrollSpeed: scrollSpeed,
+      } = marquee.dataset;
+      const marqueeSpeedAttr = parseFloat(speed ?? '0');
+      const marqueeDirectionAttr = direction === 'right' ? 1 : -1;
+      const duplicateAmount = parseInt(duplicate || '0');
+      const scrollSpeedAttr = parseFloat(scrollSpeed ?? '0');
+      const speedMultiplier =
+        window.innerWidth < 479 ? 0.25 : window.innerWidth < 991 ? 0.5 : 1;
+      const marqueeSpeedFinal =
+        marqueeSpeedAttr * (marqueeContent.offsetWidth / window.innerWidth) * speedMultiplier;
+      marqueeScroll.style.marginLeft = `${scrollSpeedAttr * -1}%`;
+      marqueeScroll.style.width = `${scrollSpeedAttr * 2 + 100}%`;
+      if (duplicateAmount > 0) {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < duplicateAmount; i++) {
+          fragment.appendChild(marqueeContent.cloneNode(true));
+        }
+        marqueeScroll.appendChild(fragment);
+      }
+      const marqueeItems = marquee.querySelectorAll('[data-marquee-collection-target]');
+      const animation = gsap
+        .to(marqueeItems, { xPercent: -100, repeat: -1, duration: marqueeSpeedFinal, ease: 'linear' })
+        .totalProgress(0.5);
+      gsap.set(marqueeItems, { xPercent: marqueeDirectionAttr === 1 ? 100 : -100 });
+      animation.timeScale(marqueeDirectionAttr);
+      animation.play();
+      marquee.setAttribute('data-marquee-status', 'normal');
+      ScrollTrigger.create({
+        trigger: marquee,
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          const isInverted = self.direction === 1;
+          const currentDirection = isInverted ? -marqueeDirectionAttr : marqueeDirectionAttr;
+          animation.timeScale(currentDirection);
+          marquee.setAttribute('data-marquee-status', isInverted ? 'normal' : 'inverted');
+        },
+      });
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: marquee, start: '0% 100%', end: '100% 0%', scrub: 0 },
+      });
+      const scrollStart = marqueeDirectionAttr === -1 ? scrollSpeedAttr : -scrollSpeedAttr;
+      const scrollEnd = -scrollStart;
+      tl.fromTo(marqueeScroll, { x: `${scrollStart}vw` }, { x: `${scrollEnd}vw`, ease: 'none' });
+    });
+}
+
+/* --- Text highlight on scroll (was split-type, now GSAP SplitText) --- */
+function initSplitHighlight() {
+  document.querySelectorAll<HTMLElement>('.big_text-animation').forEach((el) => {
+    const split = SplitText.create(el, { type: 'chars,words' });
+    gsap.from(split.chars, {
+      scrollTrigger: { trigger: el, start: 'top 90%', end: 'top -30%', scrub: 5 },
+      opacity: 0.2,
+      stagger: 0.8,
+    });
+  });
+}
+
+/* --- Case-study card stacking (desktop) --- */
+function initCardStacking() {
+  if (window.innerWidth <= 991) return;
+  const cards = gsap.utils.toArray<HTMLElement>('.case_study-card');
+  const wrapper = document.querySelector<HTMLElement>('.case_study-cards-collection');
+  if (!cards.length || !wrapper) return;
+  const cardHeight = 580;
+  wrapper.style.height = cardHeight + 'px';
+  wrapper.style.overflow = 'visible';
+  cards.forEach((card, i) => {
+    gsap.set(card, {
+      zIndex: i + 1,
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      xPercent: -50,
+      yPercent: -50,
+      width: wrapper.offsetWidth + 'px',
+    });
+    if (i !== 0) gsap.set(card, { y: window.innerHeight, opacity: 0 });
+  });
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.case_study-cards-collection',
+      start: 'top 20%',
+      end: `+=${cardHeight * cards.length * 1.1}`,
+      scrub: 0.8,
+      pin: true,
+      pinSpacing: true,
+    },
+  });
+  cards.forEach((card, i) => {
+    if (i < cards.length - 1) {
+      const nextCard = cards[i + 1];
+      tl.set(nextCard, { opacity: 1 }, i * 0.5);
+      tl.to(card, { scale: 0.9, y: -20, duration: 0.5, ease: 'none' }, i * 0.5);
+      tl.to(nextCard, { y: 0, duration: 0.5, ease: 'none' }, i * 0.5);
+    }
+  });
+}
+
+/* --- Page loader (3 steps, desktop) --- */
+function initLoaderThreeSteps() {
+  if (!document.querySelector('.loading-container')) return;
+  const tl = gsap.timeline({ defaults: { ease: 'expo.inOut', duration: 1.2 } });
+  const n1 = gsap.utils.random([2, 3, 4]);
+  const n2 = gsap.utils.random([5, 6]);
+  const n3 = gsap.utils.random([1, 5]);
+  const n4 = gsap.utils.random([7, 8, 9]);
+  tl.set('.loading-container', { display: 'flex', yPercent: 0 });
+  tl.set('.loading__progress-inner', { scaleY: 0 });
+  tl.set('.loading__number-group.is--first .loading__number-wrap, .loading__percentage', { yPercent: 100 });
+  tl.set(
+    '.loading__number-group.is--second .loading__number-wrap, .loading__number-group.is--third .loading__number-wrap',
+    { yPercent: 10 },
+  );
+  tl.to('.loading__progress-inner', { scaleY: Number(`${n1}${n3}`) / 100 });
+  tl.to('.loading__percentage', { yPercent: 0 }, '<');
+  tl.to('.loading__number-group.is--second .loading__number-wrap', { yPercent: (n1 - 1) * -10 }, '<');
+  tl.to('.loading__number-group.is--third .loading__number-wrap', { yPercent: (n3 - 1) * -10 }, '<');
+  tl.to('.loading__progress-inner', { scaleY: Number(`${n2}${n4}`) / 100 });
+  tl.to('.loading__number-group.is--second .loading__number-wrap', { yPercent: (n2 - 1) * -10 }, '<');
+  tl.to('.loading__number-group.is--third .loading__number-wrap', { yPercent: (n4 - 1) * -10 }, '<');
+  tl.to('.loading__progress-inner', { scaleY: 1 });
+  tl.to('.loading__number-group.is--second .loading__number-wrap', { yPercent: -90 }, '<');
+  tl.to('.loading__number-group.is--third .loading__number-wrap', { yPercent: -90 }, '<');
+  tl.to('.loading__number-group.is--first .loading__number-wrap', { yPercent: 0 }, '<');
+  tl.to('.loading-container', { yPercent: -100, duration: 1.15, ease: 'power4.inOut', delay: 0.3 });
+  tl.set('.loading-container', { display: 'none', clearProps: 'transform' });
+  return tl;
+}
+
+/* --- Hero heading stagger (desktop) --- */
+function initHeroHeadingStagger() {
+  if (!document.querySelector('.hero_home-heading')) return;
+  document.fonts.ready.then(() => {
+    SplitText.create('.hero_home-heading', {
+      type: 'words',
+      mask: 'words',
+      autoSplit: true,
+      onSplit(self) {
+        return gsap.from(self.words, {
+          yPercent: 120,
+          duration: 1,
+          stagger: 0.12,
+          ease: 'power4.out',
+          delay: 4.5,
+        });
+      },
+    });
+  });
+}
+
+/* --- Hero section overlap / pin (desktop) --- */
+function initHeroOverlap() {
+  const hero = document.querySelector<HTMLElement>('.section_hero-home');
+  if (!hero) return;
+  gsap
+    .timeline({
+      scrollTrigger: {
+        trigger: hero,
+        start: 'top top',
+        end: '+=80%',
+        scrub: 1,
+        pin: true,
+        pinSpacing: false,
+        anticipatePin: 1,
+      },
+    })
+    .to(hero, { scale: 0.7, opacity: 0, ease: 'none' });
+}
+
+/* --- boot --- */
+function boot() {
+  initCopyrightYear();
+  initStagerButtons();
+  initBlinkNav();
+
+  const mm = gsap.matchMedia();
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const lenis = new Lenis({
+      lerp: 0.1,
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+      anchors: true,
+      allowNestedScroll: true,
+      autoRaf: false,
+    });
+    (window as unknown as { lenis: Lenis }).lenis = lenis;
+    lenis.on('scroll', ScrollTrigger.update);
+    const rafCb = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(rafCb);
+    gsap.ticker.lagSmoothing(0);
+
+    const cleanCanvas = initHeroCanvas();
+    const cleanCursor = initCustomCursor();
+
+    initMarquee();
+    initSplitHighlight();
+
+    setTimeout(() => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      cleanCanvas();
+      cleanCursor();
+      gsap.ticker.remove(rafCb);
+      lenis.destroy();
+    };
+  });
+
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px)', () => {
+    initLoaderThreeSteps();
+    initCardStacking();
+    initHeroHeadingStagger();
+    initHeroOverlap();
+    return () => {};
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}

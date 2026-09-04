@@ -1,0 +1,52 @@
+---
+/* Emits exactly the Webflow head SEO tag set. Deliberately does NOT add
+   og:url / og:site_name / og:locale / twitter:site / robots / keywords —
+   the Webflow export had none of these, and the goal is SEO parity. */
+import { canonicalFor } from '../../lib/seo/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  ogType?: string;
+  twitterCard?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogTitle,
+  ogDescription,
+  ogImage,
+  ogType = 'website',
+  twitterCard = 'summary_large_image',
+  noindex = false,
+} = Astro.props;
+
+const canonicalUrl = canonical ?? canonicalFor(Astro.url.pathname);
+const resolvedOgTitle = ogTitle ?? title;
+const resolvedOgDescription = ogDescription ?? description;
+---
+
+<title>{title}</title>
+{description && <meta name="description" content={description} />}
+{noindex && <meta name="robots" content="noindex" />}
+
+<meta property="og:title" content={resolvedOgTitle} />
+{resolvedOgDescription && <meta property="og:description" content={resolvedOgDescription} />}
+{ogImage && <meta property="og:image" content={ogImage} />}
+<meta property="og:type" content={ogType} />
+
+<meta name="twitter:title" content={resolvedOgTitle} />
+{resolvedOgDescription && <meta name="twitter:description" content={resolvedOgDescription} />}
+{ogImage && <meta name="twitter:image" content={ogImage} />}
+<meta name="twitter:card" content={twitterCard} />
+
+<link rel="canonical" href={canonicalUrl} />
+
+<slot name="jsonld" />

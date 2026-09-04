@@ -1,0 +1,81 @@
+---
+import '../styles/webflow/normalize.css';
+import '../styles/webflow/webflow.css';
+import '../styles/webflow/srdjan-jovic.webflow.css';
+import '../styles/app.css';
+
+import BaseHead from '../components/seo/BaseHead.astro';
+import Nav from '../components/layout/Nav.astro';
+import Footer from '../components/layout/Footer.astro';
+import SiteScripts from '../components/SiteScripts.astro';
+
+interface Props {
+  seo: {
+    title: string;
+    description?: string;
+    canonical?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+    ogType?: string;
+    noindex?: boolean;
+  };
+  bodyClass?: string;
+  renderHeroCanvas?: boolean;
+  mainWrapper?: boolean;
+}
+
+const { seo, bodyClass, renderHeroCanvas = false, mainWrapper = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="w-mod-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <BaseHead {...seo}>
+      <slot name="jsonld" slot="jsonld" />
+    </BaseHead>
+
+    <link href="/favicon.png" rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)" />
+    <link href="/favicon-dark.png" rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: dark)" />
+    <link href="/favicon-48.png" rel="icon" type="image/png" sizes="48x48" />
+    <link href="/webclip-180.png" rel="apple-touch-icon" sizes="180x180" />
+    <link href="/webclip-192.png" rel="icon" type="image/png" sizes="192x192" />
+    <link href="/webclip.png" rel="icon" type="image/png" sizes="512x512" />
+
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Syne-ExtraBold.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/SplineSansMono-Regular.woff2" />
+
+    <slot name="head" />
+
+    <script is:inline>
+      // Webflow CSS scopes some rules to .w-mod-touch
+      (function (o, c) {
+        var n = c.documentElement;
+        if ('ontouchstart' in o || (o.DocumentTouch && c instanceof DocumentTouch)) {
+          n.className += ' w-mod-touch';
+        }
+      })(window, document);
+    </script>
+  </head>
+  <body class={bodyClass}>
+    <div class="page-wrapper">
+      <div class="cursor"></div>
+      <Nav />
+      {
+        mainWrapper ? (
+          <main class="main-wrapper">
+            <slot />
+          </main>
+        ) : (
+          <slot />
+        )
+      }
+      <Footer />
+    </div>
+    {renderHeroCanvas && <canvas id="heroCanvas"></canvas>}
+    <SiteScripts />
+  </body>
+</html>

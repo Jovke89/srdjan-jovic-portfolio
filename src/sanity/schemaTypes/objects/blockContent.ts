@@ -72,5 +72,26 @@ export const blockContent = defineType({
       fields: [defineField({ name: 'html', type: 'text', title: 'HTML' })],
       preview: { select: { html: 'html' }, prepare: ({ html }) => ({ title: 'HTML embed', subtitle: html?.slice(0, 60) }) },
     }),
+    defineArrayMember({
+      type: 'object',
+      name: 'table',
+      title: 'Table',
+      fields: [
+        defineField({ name: 'hasHeader', type: 'boolean', title: 'First row is a header', initialValue: true }),
+        defineField({
+          name: 'rows',
+          type: 'array',
+          of: [
+            defineArrayMember({
+              type: 'object',
+              name: 'tableRow',
+              fields: [defineField({ name: 'cells', type: 'array', of: [{ type: 'string' }] })],
+              preview: { select: { cells: 'cells' }, prepare: ({ cells }) => ({ title: (cells || []).join(' | ') }) },
+            }),
+          ],
+        }),
+      ],
+      preview: { prepare: () => ({ title: 'Table' }) },
+    }),
   ],
 });

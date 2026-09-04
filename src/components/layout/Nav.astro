@@ -1,0 +1,115 @@
+---
+/* Shared navbar. Markup preserved from the Webflow export (w-nav classes kept).
+   webflow.js is not used; the collapse/hamburger is rebuilt below. */
+import Logo from './Logo.astro';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const links = [
+  { label: 'HOme', href: '/' },
+  { label: 'CASE STUDIES', href: '/case-study' },
+  { label: 'resources', href: '/resources' },
+  { label: 'Events', href: '/events' },
+];
+
+function isCurrent(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(href + '/');
+}
+---
+
+<header class="sticky_nav-component">
+  <div
+    data-animation="over-right"
+    data-collapse="medium"
+    data-duration="400"
+    data-easing="ease"
+    data-easing2="ease"
+    role="banner"
+    class="navbar_component w-nav"
+  >
+    <div class="padding-global nav_padding">
+      <div class="container-large nav_container">
+        <a
+          aria-label="logo"
+          href="/"
+          class:list={['brand_logo-wrapper', 'w-nav-brand', isCurrent('/') && 'w--current']}
+          aria-current={isCurrent('/') ? 'page' : undefined}
+        >
+          <div class="svg_icon-code w-embed"><Logo /></div>
+        </a>
+        <nav role="navigation" class="nav_links-wrapper w-nav-menu" id="nav-menu">
+          <ul role="list" class="nav_links-list">
+            {
+              links.map((l) => (
+                <li class="nav_list-link">
+                  <a
+                    href={l.href}
+                    class:list={['nav_link', 'blink-btn', 'w-inline-block', isCurrent(l.href) && 'w--current']}
+                    aria-current={isCurrent(l.href) ? 'page' : undefined}
+                  >
+                    <div class="exprecion">[</div>
+                    <div class="button_text-blink">{l.label}</div>
+                    <div class="exprecion">]</div>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+          <div class="button_mobile">
+            <a data-stager-btn data-wf--button--variant="base" href="/contact" class="button w-inline-block">
+              <div data-stager-text>Contact me</div>
+            </a>
+          </div>
+        </nav>
+        <div class="button_desctiop">
+          <a data-stager-btn data-wf--button--variant="base" href="/contact" class="button w-inline-block">
+            <div data-stager-text>Contact me</div>
+          </a>
+        </div>
+        <button class="menu_hamburger w-nav-button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+          <div class="icon w-icon-nav-menu"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Rebuild the Webflow w-nav collapse (medium breakpoint = 991px) without webflow.js.
+  const nav = document.querySelector<HTMLElement>('.navbar_component');
+  const menu = document.querySelector<HTMLElement>('.w-nav-menu');
+  const button = document.querySelector<HTMLButtonElement>('.menu_hamburger');
+  const BP = 991;
+
+  function isOpen() {
+    return button?.classList.contains('w--open');
+  }
+  function setOpen(open: boolean) {
+    if (!menu || !button) return;
+    button.classList.toggle('w--open', open);
+    menu.classList.toggle('w--nav-menu-open', open);
+    menu.classList.toggle('w--open', open);
+    nav?.classList.toggle('w--open', open);
+    button.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open && window.innerWidth <= BP ? 'hidden' : '';
+    if (open && (window as any).lenis) (window as any).lenis.stop();
+    else if ((window as any).lenis) (window as any).lenis.start();
+  }
+
+  button?.addEventListener('click', () => setOpen(!isOpen()));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      setOpen(false);
+      button?.focus();
+    }
+  });
+  menu?.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', () => {
+      if (isOpen()) setOpen(false);
+    }),
+  );
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > BP && isOpen()) setOpen(false);
+  });
+</script>
