@@ -6,10 +6,14 @@ import { schemaTypes } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 
 // Works both in the Studio (Vite: import.meta.env) and the Sanity CLI (Node: process.env).
+// Same fallback as astro.config.mjs: these aren't secrets (public Sanity dataset
+// identifiers), and env-var resolution at Studio build/deploy time proved unreliable
+// ("Configuration must contain `projectId`" on the deployed Studio), so hardcode them.
 const viteEnv = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
 const projectId =
-  viteEnv.PUBLIC_SANITY_PROJECT_ID ?? process.env.PUBLIC_SANITY_PROJECT_ID ?? '';
-const dataset = viteEnv.PUBLIC_SANITY_DATASET ?? process.env.PUBLIC_SANITY_DATASET ?? '';
+  viteEnv.PUBLIC_SANITY_PROJECT_ID || process.env.PUBLIC_SANITY_PROJECT_ID || 'jhuyq5eb';
+const dataset =
+  viteEnv.PUBLIC_SANITY_DATASET || process.env.PUBLIC_SANITY_DATASET || 'cms-data-base';
 
 const singletonTypes = new Set(['siteSettings']);
 const singletonActions = new Set(['publish', 'discardChanges', 'restore']);
