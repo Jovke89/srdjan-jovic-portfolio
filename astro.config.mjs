@@ -32,6 +32,11 @@ export default defineConfig({
   build: {
     // Emit /contact/index.html so routes match the original Webflow URL shape.
     format: 'directory',
+    // Default page-render concurrency was pushing peak memory over the Vercel
+    // Hobby build machine's 8GB ceiling (silent OOM kill, no error output) once
+    // enough /resources/[slug] pages render concurrently, each doing its own
+    // Sanity fetches. Trade some build time for a lower, steadier memory peak.
+    concurrency: 2,
   },
   integrations: [
     sanity({
