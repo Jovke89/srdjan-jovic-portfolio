@@ -12,5 +12,8 @@ export default defineCliConfig({
     projectId: PUBLIC_SANITY_PROJECT_ID,
     dataset: PUBLIC_SANITY_DATASET,
   },
-  autoUpdates: true,
+  // `npx sanity deploy` hosts Studio at https://srdjan-jovic-portfolio.sanity.studio
+  // (the astro.config.mjs `/studio` redirect points here).
+  studioHost: 'srdjan-jovic-portfolio',
+  deployment: { autoUpdates: true, appId: 'oa68v3ecnieu840q2qg3jqre' },
 });

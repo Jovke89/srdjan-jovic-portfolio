@@ -20,9 +20,14 @@ export default defineConfig({
   output: 'static',
   adapter: vercel({ imageService: false }),
   // Old /case-study* paths kept working after the rename to /case-studies*.
+  // /studio now points at the separately-hosted Sanity Studio (see sanity.cli.ts /
+  // `npx sanity deploy`) instead of a redirect to the old Webflow-era slug shape —
+  // bundling the full Studio React app into this build was silently OOM-killing the
+  // Vercel (Hobby, 8GB) build machine.
   redirects: {
     '/case-study': '/case-studies',
     '/case-study/[slug]': '/case-studies/[slug]',
+    '/studio': 'https://srdjan-jovic-portfolio.sanity.studio',
   },
   build: {
     // Emit /contact/index.html so routes match the original Webflow URL shape.
@@ -34,7 +39,11 @@ export default defineConfig({
       dataset: PUBLIC_SANITY_DATASET,
       apiVersion: '2025-01-01',
       useCdn: true,
-      studioBasePath: '/studio',
+      // No studioBasePath: the embedded-Studio build (a full React SPA bundled into
+      // this Astro build) is what was OOM-killing the Vercel build machine. Studio
+      // now lives at its own Sanity-hosted URL; `redirects['/studio']` above sends
+      // visitors there. `sanity:client` (used by every page) still comes from this
+      // integration regardless of studioBasePath.
     }),
     react(),
     sitemap({
