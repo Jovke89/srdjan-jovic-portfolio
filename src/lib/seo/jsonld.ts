@@ -210,7 +210,7 @@ export function buildResourcesListLd(opts: {
     name: 'Webflow Resources & Insights',
     description:
       'Practical guides, tutorials, comparisons, and insights on Webflow, SEO, AEO, integrations, and automation, based on real-world development experience.',
-    url: '/resource',
+    url: '/resources',
     inLanguage: 'en',
     author: personAuthorWithTitle(opts.person),
     hasPart: opts.articles.map((a) => ({
@@ -322,7 +322,7 @@ export function buildBlogPostingWithFaqLd(opts: {
         inLanguage: 'en',
         isPartOf: {
           '@type': 'Blog',
-          '@id': `${SITE_URL}/resource#blog`,
+          '@id': `${SITE_URL}/resources#blog`,
           name: 'Srdjan Jovic Resources',
         },
         author: {

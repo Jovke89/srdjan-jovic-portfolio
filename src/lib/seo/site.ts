@@ -1,7 +1,7 @@
 /* SITE_URL drives canonical, absolute og:image and every JSON-LD url/@id.
-   Set via the SITE_URL env var; falls back to the Webflow staging domain. */
+   Set via the SITE_URL env var; falls back to the live custom domain. */
 export const SITE_URL = (
-  import.meta.env.SITE_URL || 'https://srdjan-jovic.webflow.io'
+  import.meta.env.SITE_URL || 'https://www.srdjan-jovic.com'
 ).replace(/\/$/, '');
 
 /** Absolute URL for a path, with NO trailing slash (matches the Webflow canonicals). */

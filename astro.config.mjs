@@ -28,7 +28,7 @@ const SITE_URL = env.SITE_URL;
 /* Ship Studio dev preview + Vercel both build statically; content is pulled at build time
    and the site is redeployed by a Sanity publish webhook. */
 export default defineConfig({
-  site: SITE_URL || 'https://srdjan-jovic.webflow.io',
+  site: SITE_URL || 'https://www.srdjan-jovic.com',
   output: 'static',
   adapter: vercel({ imageService: false }),
   // Old /case-study* paths kept working after the rename to /case-studies*.
