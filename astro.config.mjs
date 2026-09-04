@@ -7,11 +7,19 @@ import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
-const {
-  PUBLIC_SANITY_PROJECT_ID,
-  PUBLIC_SANITY_DATASET,
-  SITE_URL,
-} = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), '');
+// `loadEnv` reads `.env` files off disk (for local dev, where Ship Studio/astro dev
+// don't have real process.env vars set). On Vercel there is no `.env` file at all
+// (gitignored) — the real values only ever exist in `process.env`, injected from the
+// dashboard. Spreading `process.env` on top makes real environment variables always
+// win, instead of `loadEnv`'s file/process.env merge silently resolving to undefined
+// (this was the actual cause of every failed Vercel build: `sanity:client` threw
+// "Configuration must contain `projectId`" — not the memory/concurrency red herrings
+// chased before this was traced down).
+const env = {
+  ...loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), ''),
+  ...process.env,
+};
+const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, SITE_URL } = env;
 
 /* Ship Studio dev preview + Vercel both build statically; content is pulled at build time
    and the site is redeployed by a Sanity publish webhook. */
