@@ -10,16 +10,14 @@ document.querySelectorAll<HTMLElement>('.faq_block').forEach((block) => {
   });
 });
 
-// Copy-link share
-document.querySelector<HTMLElement>('[data-share="copy"]')?.addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(location.href);
-    const el = document.querySelector<HTMLElement>('[data-share="copy"]');
-    el?.classList.add('is-copied');
-    setTimeout(() => el?.classList.remove('is-copied'), 1500);
-  } catch {
-    /* ignore */
-  }
+// Copy-link share: same as the original Webflow embed (writeText + feedback),
+// just swapping the alert() for the "Link copied!" tooltip (see app.css).
+const copyBtn = document.querySelector<HTMLElement>('[data-share="copy"]');
+copyBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  navigator.clipboard.writeText(location.href);
+  copyBtn.classList.add('is-copied');
+  setTimeout(() => copyBtn.classList.remove('is-copied'), 1500);
 });
 
 // TOC scrollspy
@@ -34,8 +32,10 @@ if (tocLinks.length) {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const id = entry.target.id;
+          // `.u-toc-current-link` is the Webflow class that actually carries the
+          // yellow left border + 1.5rem left padding for the active TOC link.
           tocLinks.forEach((a) =>
-            a.classList.toggle('is-active', decodeURIComponent(a.hash.slice(1)) === id),
+            a.classList.toggle('u-toc-current-link', decodeURIComponent(a.hash.slice(1)) === id),
           );
         }
       });

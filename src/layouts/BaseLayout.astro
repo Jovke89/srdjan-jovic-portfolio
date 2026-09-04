@@ -21,17 +21,18 @@ interface Props {
     noindex?: boolean;
   };
   bodyClass?: string;
-  renderHeroCanvas?: boolean;
   mainWrapper?: boolean;
   chrome?: boolean;
+  /* The 3-step intro loader is homepage-only. */
+  loader?: boolean;
 }
 
 const {
   seo,
   bodyClass,
-  renderHeroCanvas = false,
   mainWrapper = true,
   chrome = true,
+  loader = false,
 } = Astro.props;
 ---
 
@@ -70,6 +71,55 @@ const {
   <body class={bodyClass}>
     <div class="page-wrapper">
       <div class="cursor"></div>
+      {
+        chrome && loader && (
+          <div class="loading-container">
+            <div class="loading-screen">
+              <div class="loading__progress">
+                <div class="loading__progress-inner" />
+              </div>
+              <div class="loading__numbers">
+                <div class="loading__number-group is--first">
+                  <div class="loading__number-wrap">
+                    <span class="loading__number">1</span>
+                  </div>
+                </div>
+                <div class="loading__number-group is--second">
+                  <div class="loading__number-wrap">
+                    <span class="loading__number">1</span>
+                    <span class="loading__number">2</span>
+                    <span class="loading__number">3</span>
+                    <span class="loading__number">4</span>
+                    <span class="loading__number">5</span>
+                    <span class="loading__number">6</span>
+                    <span class="loading__number">7</span>
+                    <span class="loading__number">8</span>
+                    <span class="loading__number">9</span>
+                    <span class="loading__number">0</span>
+                  </div>
+                </div>
+                <div class="loading__number-group is--third">
+                  <div class="loading__number-wrap">
+                    <span class="loading__number">1</span>
+                    <span class="loading__number">2</span>
+                    <span class="loading__number">3</span>
+                    <span class="loading__number">4</span>
+                    <span class="loading__number">5</span>
+                    <span class="loading__number">6</span>
+                    <span class="loading__number">7</span>
+                    <span class="loading__number">8</span>
+                    <span class="loading__number">9</span>
+                    <span class="loading__number">0</span>
+                  </div>
+                </div>
+                <div class="loading__percentage-wrap">
+                  <span class="loading__percentage">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
       {chrome && <Nav />}
       {
         mainWrapper ? (
@@ -82,7 +132,8 @@ const {
       }
       {chrome && <Footer />}
     </div>
-    {renderHeroCanvas && <canvas id="heroCanvas"></canvas>}
+    {/* Site-wide animated gradient background (desktop only, pointer-events: none). */}
+    {chrome && <canvas id="heroCanvas"></canvas>}
     <SiteScripts />
   </body>
 </html>

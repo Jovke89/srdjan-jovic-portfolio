@@ -46,7 +46,7 @@ export function initHeroCanvas(): () => void {
   function getCurrentColors(): string[] {
     const scrolled = window.scrollY;
     const maxScroll = document.body.scrollHeight - window.innerHeight;
-    const progress = Math.min(scrolled / Math.max(maxScroll, 1), 1);
+    const progress = Math.min(scrolled / maxScroll, 1);
     if (progress < 0.33) {
       const t = progress / 0.33;
       return [

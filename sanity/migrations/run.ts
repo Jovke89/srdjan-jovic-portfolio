@@ -10,19 +10,47 @@ import { retry, sleep } from './lib/retry.ts';
 type Doc = Record<string, unknown>;
 
 async function findIdByLegacy(type: string, legacyId: string): Promise<string | undefined> {
+  // `raw` so an already-unpublished (draft-only) document is still matched and
+  // reused instead of being duplicated on re-run.
   return retry(
-    () => client.fetch(`*[_type == $type && legacyId == $legacyId][0]._id`, { type, legacyId }),
+    () =>
+      client.fetch(
+        `*[_type == $type && legacyId == $legacyId] | order(_id asc)[0]._id`,
+        { type, legacyId },
+        { perspective: 'raw' },
+      ),
     `fetch ${type}`,
   );
 }
 
-async function upsert(type: string, legacyId: string, fields: Doc): Promise<string> {
+async function upsert(
+  type: string,
+  legacyId: string,
+  fields: Doc,
+  opts: { draft?: boolean } = {},
+): Promise<string> {
   const existing = await findIdByLegacy(type, legacyId);
   const base: Doc = { _type: type, legacyId, ...fields };
+
+  // Source-CMS drafts stay as Sanity drafts so they never go live.
+  if (opts.draft) {
+    const baseId = (existing ?? `${type}.${legacyId}`).replace(/^drafts\./, '');
+    const draftId = `drafts.${baseId}`;
+    const saved = await retry(
+      () => client.createOrReplace({ ...base, _id: draftId } as never),
+      `save draft ${type}`,
+    );
+    if (existing && !existing.startsWith('drafts.')) {
+      await retry(() => client.delete(existing), `unpublish ${type}`);
+    }
+    await sleep(80);
+    return saved._id;
+  }
+
   const saved = await retry(
     () =>
       existing
-        ? client.createOrReplace({ ...base, _id: existing } as never)
+        ? client.createOrReplace({ ...base, _id: existing.replace(/^drafts\./, '') } as never)
         : client.create(base as never),
     `save ${type}`,
   );
@@ -256,25 +284,30 @@ async function main() {
       const a = r[`FAQ Answer ${i} (plain)`];
       if (q && a) faqs.push({ _type: 'faqItem', _key: `q${i}`, question: q, answer: a });
     }
-    await upsert('resource', r['Item ID'], {
-      name: r['Name'],
-      slug: slugField(r['Slug']),
-      coverImage: await uploadImage(r['Cover Image'], r['Name']),
-      category: ref(catMap.get(r['Category'])),
-      author: ref(authorMap.get(r['Author'])),
-      publishDate: toIso(r['Publish Date']),
-      dateModified: toIso(r['Updated On']),
-      featured: bool(r['Featured']),
-      timeToRead: r['Time to read'] ? Number(r['Time to read']) : undefined,
-      tldr: htmlToPortableText(r['TL;DR']),
-      body: htmlToPortableText(r['Body Content']),
-      faqs: faqs.length ? faqs : undefined,
-      seo: {
-        _type: 'seo',
-        title: r['Meta Title'] || undefined,
-        description: r['Meta Description'] || undefined,
+    await upsert(
+      'resource',
+      r['Item ID'],
+      {
+        name: r['Name'],
+        slug: slugField(r['Slug']),
+        coverImage: await uploadImage(r['Cover Image'], r['Name']),
+        category: ref(catMap.get(r['Category'])),
+        author: ref(authorMap.get(r['Author'])),
+        publishDate: toIso(r['Publish Date']),
+        dateModified: toIso(r['Updated On']),
+        featured: bool(r['Featured']),
+        timeToRead: r['Time to read'] ? Number(r['Time to read']) : undefined,
+        tldr: htmlToPortableText(r['TL;DR']),
+        body: htmlToPortableText(r['Body Content']),
+        faqs: faqs.length ? faqs : undefined,
+        seo: {
+          _type: 'seo',
+          title: r['Meta Title'] || undefined,
+          description: r['Meta Description'] || undefined,
+        },
       },
-    });
+      { draft: bool(r['Draft']) },
+    );
     rsCount++;
   }
   console.log(`resource: ${rsCount}`);

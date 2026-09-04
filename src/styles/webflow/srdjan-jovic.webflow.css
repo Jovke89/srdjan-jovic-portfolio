@@ -1082,7 +1082,6 @@ figcaption {
 .heading-style-h2 {
   font-family: var(--_srdjan-variables---heading-type-face);
   color: var(--_srdjan-variables---white);
-  font-size: var(--_srdjan-variables---h2-type-face);
   text-wrap: balance;
   margin-bottom: 0;
   font-weight: 700;

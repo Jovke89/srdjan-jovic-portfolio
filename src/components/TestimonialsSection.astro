@@ -101,6 +101,20 @@ const [featured, ...rest] = withVideo;
                             <div class="video_palyer-wrapper">
                               <VideoPlayer src={t.videoUrl} poster={t.videoPoster} />
                             </div>
+                            <div class="testimonial_content is-static-item">
+                              <h3 class="heading-style-h4">{t.name}</h3>
+                              <div class="card_badge-wrapper">
+                                <div>CEO:</div>
+                                <div class="tag">
+                                  <div class="text-size-regular text-style-allcaps">{t.company}</div>
+                                </div>
+                              </div>
+                            </div>
+                            {t.quote && (
+                              <div class="p-wrapper">
+                                <p class="text-size-regular text-style-allcaps">{t.quote}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

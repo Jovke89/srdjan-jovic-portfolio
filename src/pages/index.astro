@@ -35,7 +35,7 @@ const jsonld = buildProfilePageLd({
 
 <BaseLayout
   seo={{ title: 'SRDJAN JOVIC · Webflow Developer', description, canonical: undefined, ogImage }}
-  renderHeroCanvas
+  loader
 >
   <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
 
@@ -57,7 +57,7 @@ const jsonld = buildProfilePageLd({
             </div>
             <div class="padding-bottom padding-medium"></div>
             <div class="hero_btns-wrapper">
-              <a data-stager-btn href="/case-study" class="button w-inline-block">
+              <a data-stager-btn href="/case-studies" class="button w-inline-block">
                 <div data-stager-text>Case studies</div>
               </a>
               <a data-stager-btn href="/contact" class="button w-variant-c4441771-e5aa-24d5-e705-584be2a2fea7 w-inline-block">
@@ -141,7 +141,7 @@ const jsonld = buildProfilePageLd({
                     look at what I built.
                   </p>
                 </div>
-                <a data-stager-btn href="/case-study" class="button w-inline-block">
+                <a data-stager-btn href="/case-studies" class="button w-inline-block">
                   <div data-stager-text>see more works</div>
                 </a>
               </div>
@@ -196,12 +196,12 @@ const jsonld = buildProfilePageLd({
                           )}
                           <div class="padding-bottom padding-medium" />
                           <div class="card_btn-wrapper">
-                            <a data-stager-btn href={`/case-study/${c.slug}`} class="button w-inline-block">
+                            <a data-stager-btn href={`/case-studies/${c.slug}`} class="button w-inline-block">
                               <div data-stager-text>Read Case study</div>
                             </a>
                           </div>
                         </div>
-                        <a href={`/case-study/${c.slug}`} class="case_card-img-wrapper w-inline-block">
+                        <div class="case_card-img-wrapper">
                           {(c.cardThumbnail || c.coverImage) && (
                             <ResponsiveImg
                               source={c.cardThumbnail ?? c.coverImage}
@@ -209,7 +209,7 @@ const jsonld = buildProfilePageLd({
                               class="case_study-card-img"
                             />
                           )}
-                        </a>
+                        </div>
                       </article>
                     </div>
                   ))

@@ -82,24 +82,8 @@
   color: #ffc000;
 }
 
-/* Native FAQ accordion (replaces w-dropdown) */
-.faq_block .faq_dropdown {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.3s ease;
-}
-.faq_block.is-open .faq_dropdown {
-  max-height: 60rem;
-}
-.faq_block .faq_minus {
-  display: none;
-}
-.faq_block.is-open .faq_minus {
-  display: block;
-}
-.faq_block.is-open .faq_plus {
-  display: none;
-}
+/* FAQ accordion (dropdown height, opacity, icon spin) lives in app.css, which
+   is imported after this file — it owns all `.faq_*` accordion behavior. */
 .faq_toggle {
   cursor: pointer;
 }

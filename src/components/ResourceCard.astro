@@ -23,9 +23,10 @@ const href = `/resources/${r.slug}`;
     <div role="listitem" class="resources-articles_item-wrapper w-dyn-item" data-category={categoryName}>
       <article class="project_item">
         <div class="article_item-content-wrapper">
-          <a href={href} class="project_item-img-wrapper w-inline-block">
+          {/* Card is not a link block: only the "read article" button below navigates. */}
+          <div class="project_item-img-wrapper">
             {r.coverImage && <ResponsiveImg source={r.coverImage} alt={r.name ?? ''} class="project_item-img" />}
-          </a>
+          </div>
           <div class="project_item-content-wrapper">
             <div class="article_info">
               <div class="blog_author-wrapper">
@@ -45,9 +46,7 @@ const href = `/resources/${r.slug}`;
                 </div>
               </div>
             </div>
-            <h3 class="heading-style-h4">
-              <a href={href}>{r.name}</a>
-            </h3>
+            <h3 class="heading-style-h4">{r.name}</h3>
           </div>
         </div>
         <div class="article_cta-wrapper">
@@ -66,11 +65,12 @@ const href = `/resources/${r.slug}`;
     </div>
   ) : (
     <div role="listitem" class="w-dyn-item">
-      <div class="resource_grid-item">
+      <article class="resource_grid-item">
         <div class="div-block-7">
-          <a href={href} class="resources_img-wrapper w-inline-block">
+          {/* Card is not a link block: only the "read article" button below navigates. */}
+          <div class="resources_img-wrapper">
             {r.coverImage && <ResponsiveImg source={r.coverImage} alt={r.name ?? ''} class="image" />}
-          </a>
+          </div>
           <div class="resources_content is-static-item">
             <div class="article_info">
               <div class="blog_author-wrapper">
@@ -90,9 +90,7 @@ const href = `/resources/${r.slug}`;
                 </div>
               </div>
             </div>
-            <h3 class="heading-style-h5">
-              <a href={href}>{r.name}</a>
-            </h3>
+            <h3 class="heading-style-h5">{r.name}</h3>
           </div>
           {r.excerpt && (
             <div class="resources_paragraph-wrapper">
@@ -112,7 +110,7 @@ const href = `/resources/${r.slug}`;
             </div>
           </div>
         </div>
-      </div>
+      </article>
     </div>
   )
 }

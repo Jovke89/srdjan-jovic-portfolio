@@ -1,5 +1,6 @@
 import { toHTML, type PortableTextHtmlComponents } from '@portabletext/to-html';
 import { urlFor } from './image';
+import { SITE_URL } from '../seo/site';
 
 /** Plain text from a Portable Text array (for meta descriptions, JSON-LD, ToC). */
 function toPlainText(blocks: unknown): string {
@@ -64,12 +65,15 @@ const components: Partial<PortableTextHtmlComponents> = {
     },
   },
   block: {
+    // `value` here is the single heading block, not an array — toPlainText
+    // needs an array, so wrap it. (Passing it bare silently produced id="" on
+    // every heading, which broke every TOC anchor link and the scrollspy.)
     h2: ({ children, value }) =>
-      `<h2 id="${slugify(toPlainText(value))}">${children}</h2>`,
+      `<h2 id="${slugify(toPlainText([value]))}">${children}</h2>`,
     h3: ({ children, value }) =>
-      `<h3 id="${slugify(toPlainText(value))}">${children}</h3>`,
+      `<h3 id="${slugify(toPlainText([value]))}">${children}</h3>`,
     h4: ({ children, value }) =>
-      `<h4 id="${slugify(toPlainText(value))}">${children}</h4>`,
+      `<h4 id="${slugify(toPlainText([value]))}">${children}</h4>`,
     blockquote: ({ children }) => `<blockquote>${children}</blockquote>`,
     normal: ({ children }) => `<p>${children}</p>`,
   },
@@ -79,8 +83,21 @@ const components: Partial<PortableTextHtmlComponents> = {
     code: ({ children }) => `<code>${children}</code>`,
     link: ({ children, value }) => {
       const raw = (value?.href || '').trim();
-      const href =
+      let href =
         /^(https?:|mailto:|tel:|\/|#)/i.test(raw) && !/^javascript:/i.test(raw) ? raw : '#';
+      // Internal links authored as an absolute URL (this site's own SITE_URL,
+      // or the legacy *.webflow.io staging domain) become relative, so they
+      // keep working once the real domain is connected and never pop a new tab.
+      if (/^https?:\/\//i.test(href)) {
+        try {
+          const url = new URL(href);
+          if (url.origin === new URL(SITE_URL).origin || /(^|\.)webflow\.io$/i.test(url.hostname)) {
+            href = `${url.pathname}${url.search}${url.hash}` || '/';
+          }
+        } catch {
+          /* malformed URL: leave as authored */
+        }
+      }
       const external = /^https?:\/\//i.test(href);
       const attrs = value?.blank || external ? ' target="_blank" rel="noopener noreferrer"' : '';
       return `<a href="${esc(href)}"${attrs}>${children}</a>`;

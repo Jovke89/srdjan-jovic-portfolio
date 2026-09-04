@@ -176,7 +176,9 @@ function initCardStacking() {
   const cards = gsap.utils.toArray<HTMLElement>('.case_study-card');
   const wrapper = document.querySelector<HTMLElement>('.case_study-cards-collection');
   if (!cards.length || !wrapper) return;
-  const cardHeight = 580;
+  /* Cards size to their own content now, so measure the tallest one (while they
+     are still in normal flow) instead of assuming a fixed height. */
+  const cardHeight = Math.max(...cards.map((card) => card.offsetHeight), 420);
   wrapper.style.height = cardHeight + 'px';
   wrapper.style.overflow = 'visible';
   cards.forEach((card, i) => {
@@ -242,8 +244,8 @@ function initLoaderThreeSteps() {
   return tl;
 }
 
-/* --- Hero heading stagger (desktop) --- */
-function initHeroHeadingStagger() {
+/* --- Hero heading stagger (desktop), delayed to start as the loader clears --- */
+function initHeroHeadingStagger(delay = 4.5) {
   if (!document.querySelector('.hero_home-heading')) return;
   document.fonts.ready.then(() => {
     SplitText.create('.hero_home-heading', {
@@ -256,30 +258,68 @@ function initHeroHeadingStagger() {
           duration: 1,
           stagger: 0.12,
           ease: 'power4.out',
-          delay: 4.5,
+          delay,
         });
       },
     });
   });
 }
 
-/* --- Hero section overlap / pin (desktop) --- */
+/* --- Hero content overlap / pin (desktop). Per-page settings ported 1:1 from
+   the Webflow "HERO SECTION OVERLAP" embeds. Only the inner content wrapper is
+   pinned/scaled, never the whole section. The taxonomy hero reuses
+   `.section_hero-projects` but keeps its list inside the wrapper, so its class
+   is deliberately not in this list. --- */
 function initHeroOverlap() {
-  const hero = document.querySelector<HTMLElement>('.section_hero-home');
-  if (!hero) return;
-  gsap
-    .timeline({
-      scrollTrigger: {
-        trigger: hero,
-        start: 'top top',
-        end: '+=80%',
-        scrub: 1,
-        pin: true,
-        pinSpacing: false,
-        anticipatePin: 1,
+  const configs = [
+    { sel: '.section_hero-content-wrapper', start: 'top top', end: '+=80%' }, // home
+    { sel: '.projects_hero-heading-wrapper', start: 'top 100px', end: '+=100%' }, // case studies list
+    { sel: '.events_hero-content-wrapper', start: 'top 100px', end: '+=100%' }, // events list
+    { sel: '.resources_hero-content-wrapper', start: 'top top', end: '+=80%' }, // resources list
+    { sel: '.hero_animation-target', start: '25%', end: '+=80%' }, // case study detail
+  ];
+  configs.forEach(({ sel, start, end }) => {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (!el) return;
+    gsap
+      .timeline({
+        scrollTrigger: { trigger: el, start, end, scrub: 1, pin: true, pinSpacing: false, anticipatePin: 1 },
+      })
+      .to(el, { scale: 0.7, opacity: 0, ease: 'none' });
+  });
+}
+
+/* --- Result counters: numbers in `.result_value` count up from 0 when scrolled
+   into view. Ported from the Webflow case-study embed; skipped under
+   reduced-motion (the stored value just stays put). --- */
+function initResultCounters() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  gsap.utils.toArray<HTMLElement>('.result_value').forEach((el) => {
+    const originalText = (el.textContent ?? '').trim();
+    const match = originalText.match(/[\d.,]+/);
+    if (!match) return;
+    const target = Number(match[0].replace(',', '.'));
+    const start = match.index ?? 0;
+    const prefix = originalText.slice(0, start);
+    const suffix = originalText.slice(start + match[0].length);
+    const counter = { value: 0 };
+    el.textContent = `${prefix}0${suffix}`;
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 80%',
+      once: true,
+      onEnter() {
+        gsap.to(counter, {
+          value: target,
+          duration: 1.8,
+          ease: 'power2.out',
+          onUpdate() {
+            el.textContent = `${prefix}${Math.round(counter.value)}${suffix}`;
+          },
+        });
       },
-    })
-    .to(hero, { scale: 0.7, opacity: 0, ease: 'none' });
+    });
+  });
 }
 
 /* --- Video testimonials (lazy-load + click to play), ported from the
@@ -354,12 +394,95 @@ function initVideoTestimonials() {
   });
 }
 
+/* --- Services: hover-reveal image that drifts toward the cursor (desktop).
+   Rebuilt from the Webflow Interaction; the pointer is over the row, not the
+   image, and the image parallaxes with the pointer's direction of travel. --- */
+function initServicesHover() {
+  const items = gsap.utils.toArray<HTMLElement>('.services_option-item');
+  if (!items.length) return () => {};
+  const cleanups: Array<() => void> = [];
+  items.forEach((item) => {
+    const wrap = item.querySelector<HTMLElement>('.option_item-img-wrapper');
+    if (!wrap) return;
+    const xTo = gsap.quickTo(wrap, 'x', { duration: 0.9, ease: 'power3' });
+    const yTo = gsap.quickTo(wrap, 'y', { duration: 0.9, ease: 'power3' });
+    const rTo = gsap.quickTo(wrap, 'rotation', { duration: 0.9, ease: 'power3' });
+    const onEnter = () => item.classList.add('is-hovering');
+    const onMove = (e: MouseEvent) => {
+      const r = item.getBoundingClientRect();
+      const relX = (e.clientX - r.left) / r.width - 0.5;
+      const relY = (e.clientY - r.top) / r.height - 0.5;
+      xTo(relX * 64);
+      yTo(relY * 40);
+      rTo(relX * 6);
+    };
+    const onLeave = () => {
+      item.classList.remove('is-hovering');
+      xTo(0);
+      yTo(0);
+      rTo(0);
+    };
+    item.addEventListener('mouseenter', onEnter);
+    item.addEventListener('mousemove', onMove);
+    item.addEventListener('mouseleave', onLeave);
+    cleanups.push(() => {
+      item.removeEventListener('mouseenter', onEnter);
+      item.removeEventListener('mousemove', onMove);
+      item.removeEventListener('mouseleave', onLeave);
+      gsap.set(wrap, { clearProps: 'transform' });
+    });
+  });
+  return () => cleanups.forEach((fn) => fn());
+}
+
+/* --- Magnetic round buttons (Webflow "mouse move over element" model). The
+   cursor's offset from the wrapper centre maps linearly to a *bounded* button
+   travel: at `catch` px away the button has moved exactly `travel` px, and it
+   springs back once the cursor leaves that radius. The cap keeps the motion
+   tight instead of letting the button drift far from its slot. The wrapper
+   centre is the anchor because the wrapper is never transformed. --- */
+function initMagneticButton() {
+  const configs = [
+    { wrap: '.footer_btn-wrapper', btn: '.footer_btn', catch: 330, travel: 130, duration: 0.45 },
+    { wrap: '.view_site-btn-wrapper', btn: '.view_site-btn', catch: 200, travel: 26, duration: 0.3 },
+  ];
+  const cleanups: Array<() => void> = [];
+  configs.forEach(({ wrap: wrapSelector, btn: btnSelector, catch: catchR, travel, duration }) => {
+    gsap.utils.toArray<HTMLElement>(wrapSelector).forEach((wrap) => {
+      const btn = wrap.querySelector<HTMLElement>(btnSelector);
+      if (!btn) return;
+      const xTo = gsap.quickTo(btn, 'x', { duration, ease: 'power3' });
+      const yTo = gsap.quickTo(btn, 'y', { duration, ease: 'power3' });
+      const factor = travel / catchR;
+      const onMove = (e: MouseEvent) => {
+        const r = wrap.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2);
+        const dy = e.clientY - (r.top + r.height / 2);
+        if (dx * dx + dy * dy < catchR * catchR) {
+          xTo(dx * factor);
+          yTo(dy * factor);
+        } else {
+          xTo(0);
+          yTo(0);
+        }
+      };
+      window.addEventListener('mousemove', onMove);
+      cleanups.push(() => {
+        window.removeEventListener('mousemove', onMove);
+        gsap.set(btn, { clearProps: 'transform' });
+      });
+    });
+  });
+  return () => cleanups.forEach((fn) => fn());
+}
+
 /* --- boot --- */
 function boot() {
   initCopyrightYear();
   initStagerButtons();
   initBlinkNav();
   initVideoTestimonials();
+  initResultCounters();
 
   const mm = gsap.matchMedia();
 
@@ -402,7 +525,12 @@ function boot() {
     initCardStacking();
     initHeroHeadingStagger();
     initHeroOverlap();
-    return () => {};
+    const cleanServices = initServicesHover();
+    const cleanMagnetic = initMagneticButton();
+    return () => {
+      cleanServices();
+      cleanMagnetic();
+    };
   });
 }
 

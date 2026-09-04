@@ -37,7 +37,7 @@ const { kicker, title, caseStudies = [], resources = [], cta } = Astro.props;
                 <div role="list" class="projects_list w-dyn-items">
                   {caseStudies.map((c) => (
                     <ProjectCard
-                      href={`/case-study/${c.slug}`}
+                      href={`/case-studies/${c.slug}`}
                       title={c.name}
                       text={c.clientDescription}
                       image={c.cardThumbnail}

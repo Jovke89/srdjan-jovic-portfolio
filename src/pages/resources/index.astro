@@ -27,7 +27,7 @@ const jsonld = buildResourcesListLd({
     image: imgSet(r.coverImage, { width: 1200 })?.src,
   })),
 });
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 ---
 
 <BaseLayout
@@ -110,6 +110,8 @@ const PAGE_SIZE = 12;
                 </div>
                 <div class="right_side">
                   <div class="showing_item">
+                    <div class="text-weight-medium text-style-allcaps">loaded</div>
+                    <div data-count="loaded" class="count_value">0</div>
                     <div class="text-weight-medium text-style-allcaps">of</div>
                     <div data-count="total" class="count_value">{resources.length}</div>
                     <div class="text-weight-medium text-style-allcaps">articles</div>

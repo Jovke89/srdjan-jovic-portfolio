@@ -9,13 +9,23 @@ interface Props {
   image?: unknown;
   imageAlt?: string;
   cta: string;
+  /* "related works" variant: shorter image wrapper (Webflow `.is-related-wrapper`,
+     16rem) and a description clamped to 2 lines (`.related_paragraph`). */
+  related?: boolean;
 }
-const { href, title, text, image, imageAlt, cta } = Astro.props;
+const { href, title, text, image, imageAlt, cta, related = false } = Astro.props;
+const imgWrapClass = related
+  ? 'project_item-img-wrapper is-related-wrapper'
+  : 'project_item-img-wrapper';
+const titleClass = related ? 'heading-style-h4' : 'heading-style-h3';
+const textClass = related
+  ? 'related_paragraph text-style-allcaps'
+  : 'text-size-medium text-style-allcaps';
 ---
 
 <div role="listitem" class="projects_item-wrapper w-dyn-item">
   <article class="project_item">
-    <a href={href} class="project_item-img-wrapper w-inline-block">
+    <div class={imgWrapClass}>
       {
         image ? (
           <ResponsiveImg source={image} alt={imageAlt ?? title} class="project_item-img" />
@@ -23,10 +33,10 @@ const { href, title, text, image, imageAlt, cta } = Astro.props;
           <div class="project_item-img"></div>
         )
       }
-    </a>
+    </div>
     <div class="project_item-content-wrapper">
-      <h3 class="heading-style-h3">{title}</h3>
-      {text && <p class="text-size-medium text-style-allcaps">{text}</p>}
+      <h3 class={titleClass}>{title}</h3>
+      {text && <p class={textClass}>{text}</p>}
     </div>
     <a data-stager-btn href={href} class="button w-inline-block">
       <div data-stager-text>{cta}</div>

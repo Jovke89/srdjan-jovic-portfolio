@@ -18,14 +18,15 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
 
 /* --- Home --- */
 export const HOME_QUERY = defineQuery(`{
-  "caseStudies": *[_type == "caseStudy"] | order(order asc, datePublished desc)[0...4]{
-    name, "slug": slug.current, year, clientDescription,
+  "caseStudies": *[_type == "caseStudy"] | order(cardNumber asc)[0...3]{
+    name, "slug": slug.current, year, clientDescription, cardNumber,
     "industry": industry->name,
     "tech": techStack[]->name,
     cardThumbnail${IMG}, coverImage${IMG}
   },
-  "resources": *[_type == "resource"] | order(publishDate desc)[0...6]{
+  "resources": *[_type == "resource"] | order(publishDate desc)[0...2]{
     name, "slug": slug.current, timeToRead,
+    "excerpt": seo.description,
     "category": category->name,
     "author": author->{ name, photo${IMG} },
     coverImage${IMG}

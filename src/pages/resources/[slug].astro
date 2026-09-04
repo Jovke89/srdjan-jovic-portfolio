@@ -34,23 +34,30 @@ const [r, settings] = await Promise.all([
 ]);
 if (!r) return Astro.redirect('/404');
 
-const related = r.category?._ref
+// Fetch every same-category resource (GROQ has no random() sort), then shuffle
+// in JS and take 2 — a different pair of related posts on each page load.
+const relatedPool = r.category?.slug
   ? await sanityClient.fetch(
-      `*[_type == "resource" && slug.current != $slug && category._ref == $cid] | order(publishDate desc)[0...3]{
+      `*[_type == "resource" && slug.current != $slug && category->slug.current == $categorySlug]{
         name, "slug": slug.current, timeToRead,
         "category": category->name,
         "author": author->{ name, photo{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } } },
         coverImage{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } }
       }`,
-      { slug, cid: r.category._ref },
+      { slug, categorySlug: r.category.slug },
     )
   : [];
+const related = [...relatedPool].sort(() => Math.random() - 0.5).slice(0, 2);
 
 const person = toPerson(settings);
 const bodyHtml = portableTextToHtml(r.body);
 const tldrHtml = portableTextToHtml(r.tldr);
 const toc = extractToc(r.body);
-const readTime = r.timeToRead || readingTimeMinutes(r.body);
+/* Source of truth: always computed here from the body, never the CMS field.
+   The `timeToRead` CMS field exists only so the resources-list/related cards
+   (which don't load the body) can show a number — copy this page's value into
+   it by hand after editing an article. */
+const readTime = readingTimeMinutes(r.body);
 const cover = imgSet(r.coverImage, { width: 1600 });
 const ogImage = imgSet(r.seo?.ogImage ?? r.coverImage, { width: 1200 })?.src;
 const description = r.seo?.description || portableTextToPlain(r.body).slice(0, 160);
@@ -159,7 +166,12 @@ const jsonld = buildBlogPostingWithFaqLd({
           <div class="padding-bottom padding-huge"></div>
           <div class="resource_tepmlate-body-wrapper">
             <div class="resource_body-content-wrapper">
-              {tldrHtml && <div class="event_body-text w-richtext" set:html={tldrHtml} />}
+              {tldrHtml && (
+                <div class="tldr-block">
+                  <h2 class="heading-style-h3">TL;DR</h2>
+                  <div class="event_body-text w-richtext" set:html={tldrHtml} />
+                </div>
+              )}
               <div id="article-body" class="event_body-text w-richtext" set:html={bodyHtml} />
             </div>
             <div class="post_modals-wrapper">
@@ -190,9 +202,10 @@ const jsonld = buildBlogPostingWithFaqLd({
                     <button data-share="copy" class="icon_circle w-inline-block" aria-label="Copy link">
                       <div class="svg_icon w-embed">
                         <svg width="20" height="12" viewBox="0 0 14 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3.433 6.87C2.48122 6.87 1.67111 6.53578 1.00267 5.86733C0.334222 5.199 0 4.389 0 3.43733C0 2.48567 0.334222 1.67489 1.00267 1.005C1.67111 0.335 2.48122 0 3.433 0H5.65467C5.815 0 5.94972 0.0554998 6.05883 0.1665C6.16794 0.2775 6.2225 0.413555 6.2225 0.574666C6.2225 0.735777 6.16794 0.870222 6.05883 0.978C5.94972 1.08567 5.815 1.1395 5.65467 1.1395H3.433C2.79278 1.1395 2.24983 1.362 1.80417 1.807C1.35839 2.252 1.1355 2.794 1.1355 3.433C1.1355 4.07211 1.35839 4.6155 1.80417 5.06317C2.24983 5.51072 2.79278 5.7345 3.433 5.7345H5.65467C5.815 5.7345 5.94972 5.78933 6.05883 5.899C6.16794 6.00867 6.2225 6.14405 6.2225 6.30517C6.2225 6.46628 6.16794 6.60067 6.05883 6.70833C5.94972 6.81611 5.815 6.87 5.65467 6.87H3.433ZM7.88183 6.87C7.71894 6.87 7.58295 6.81517 7.47383 6.7055C7.36472 6.59583 7.31017 6.46044 7.31017 6.29933C7.31017 6.13822 7.36472 6.00378 7.47383 5.896C7.58295 5.78833 7.71894 5.7345 7.88183 5.7345H10.0997C10.7399 5.7345 11.2828 5.512 11.7285 5.067C12.1743 4.622 12.3972 4.08 12.3972 3.441C12.3972 2.80189 12.1743 2.2585 11.7285 1.81083C11.2828 1.36328 10.7399 1.1395 10.0997 1.1395H7.88183C7.71894 1.1395 7.58295 1.08467 7.47383 0.975C7.36472 0.865333 7.31017 0.729943 7.31017 0.568832C7.31017 0.407721 7.36472 0.272666 7.47383 0.163666C7.58295 0.0545547 7.71894 0 7.88183 0H10.0997C11.0514 0 11.8622 0.334888 12.532 1.00467C13.2018 1.67433 13.5367 2.485 13.5367 3.43667C13.5367 4.38833 13.2018 5.19844 12.532 5.867C11.8622 6.53567 11.0514 6.87 10.0997 6.87H7.88183Z" fill="currentColor"></path>
+                          <path d="M3.433 6.87C2.48122 6.87 1.67111 6.53578 1.00267 5.86733C0.334222 5.199 0 4.389 0 3.43733C0 2.48567 0.334222 1.67489 1.00267 1.005C1.67111 0.335 2.48122 0 3.433 0H5.65467C5.815 0 5.94972 0.0554998 6.05883 0.1665C6.16794 0.2775 6.2225 0.413555 6.2225 0.574666C6.2225 0.735777 6.16794 0.870222 6.05883 0.978C5.94972 1.08567 5.815 1.1395 5.65467 1.1395H3.433C2.79278 1.1395 2.24983 1.362 1.80417 1.807C1.35839 2.252 1.1355 2.794 1.1355 3.433C1.1355 4.07211 1.35839 4.6155 1.80417 5.06317C2.24983 5.51072 2.79278 5.7345 3.433 5.7345H5.65467C5.815 5.7345 5.94972 5.78933 6.05883 5.899C6.16794 6.00867 6.2225 6.14405 6.2225 6.30517C6.2225 6.46628 6.16794 6.60067 6.05883 6.70833C5.94972 6.81611 5.815 6.87 5.65467 6.87H3.433ZM4.63917 3.96083C4.49117 3.96083 4.36683 3.91094 4.26617 3.81117C4.1655 3.71128 4.11517 3.58555 4.11517 3.434C4.11517 3.28255 4.16483 3.15789 4.26417 3.06C4.3635 2.96211 4.4885 2.91317 4.63917 2.91317H8.8935C9.0415 2.91317 9.16583 2.96305 9.2665 3.06283C9.36717 3.16272 9.4175 3.28844 9.4175 3.44C9.4175 3.59144 9.36783 3.71611 9.2685 3.814C9.16917 3.91189 9.04417 3.96083 8.8935 3.96083H4.63917ZM7.88183 6.87C7.71894 6.87 7.58295 6.81517 7.47383 6.7055C7.36472 6.59583 7.31017 6.46044 7.31017 6.29933C7.31017 6.13822 7.36472 6.00378 7.47383 5.896C7.58295 5.78833 7.71894 5.7345 7.88183 5.7345H10.0997C10.7399 5.7345 11.2828 5.512 11.7285 5.067C12.1743 4.622 12.3972 4.08 12.3972 3.441C12.3972 2.80189 12.1743 2.2585 11.7285 1.81083C11.2828 1.36328 10.7399 1.1395 10.0997 1.1395H7.88183C7.71894 1.1395 7.58295 1.08467 7.47383 0.975C7.36472 0.865333 7.31017 0.729943 7.31017 0.568832C7.31017 0.407721 7.36472 0.272666 7.47383 0.163666C7.58295 0.0545547 7.71894 0 7.88183 0H10.0997C11.0514 0 11.8622 0.334888 12.532 1.00467C13.2018 1.67433 13.5367 2.485 13.5367 3.43667C13.5367 4.38833 13.2018 5.19844 12.532 5.867C11.8622 6.53567 11.0514 6.87 10.0997 6.87H7.88183Z" fill="currentColor"></path>
                         </svg>
                       </div>
+                      <span class="copy_tooltip" role="status" aria-live="polite">Link copied!</span>
                     </button>
                     <a data-share="linkedin" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener" class="icon_circle w-inline-block" aria-label="Share on LinkedIn">
                       <div class="svg_icon w-embed">
@@ -213,22 +226,37 @@ const jsonld = buildBlogPostingWithFaqLd({
                 <div class="ai_btns-share-share-wrapper">
                   <div class="text-size-medium text-style-allcaps">ai summary</div>
                   <div class="ai_btns-wrapper">
-                    <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                    <a data-stager-btn href={`https://chatgpt.com/?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div class="svg_icon w-embed">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18.412 8.1875C18.662 7.5 18.7245 6.8125 18.662 6.125C18.5995 5.4375 18.3495 4.75 18.037 4.125C17.4745 3.1875 16.662 2.4375 15.7245 2C14.7245 1.5625 13.662 1.4375 12.5995 1.6875C12.0995 1.1875 11.537 0.75 10.912 0.4375C10.287 0.125 9.537 0 8.8495 0C7.787 0 6.7245 0.3125 5.8495 0.9375C4.9745 1.5625 4.3495 2.4375 4.037 3.4375C3.287 3.625 2.662 3.9375 2.037 4.3125C1.4745 4.75 1.037 5.3125 0.662004 5.875C0.0995145 6.8125 -0.0879855 7.875 0.0370145 8.9375C0.162014 10 0.599504 11 1.287 11.8125C1.037 12.5 0.974504 13.1875 1.037 13.875C1.0995 14.5625 1.3495 15.25 1.662 15.875C2.2245 16.8125 3.037 17.5625 3.9745 18C4.9745 18.4375 6.037 18.5625 7.0995 18.3125C7.5995 18.8125 8.162 19.25 8.787 19.5625C9.412 19.875 10.162 20 10.8495 20C11.912 20 12.9745 19.6875 13.8495 19.0625C14.7245 18.4375 15.3495 17.5625 15.662 16.5625C16.3495 16.4375 17.037 16.125 17.5995 15.6875C18.162 15.25 18.662 14.75 18.9745 14.125C19.537 13.1875 19.7245 12.125 19.5995 11.0625C19.4745 10 19.0995 9 18.412 8.1875ZM10.912 18.6875C9.912 18.6875 9.162 18.375 8.4745 17.8125C8.4745 17.8125 8.537 17.75 8.5995 17.75L12.5995 15.4375C12.7245 15.375 12.787 15.3125 12.8495 15.1875C12.912 15.0625 12.912 15 12.912 14.875V9.25L14.5995 10.25V14.875C14.662 17.0625 12.912 18.6875 10.912 18.6875ZM2.8495 15.25C2.412 14.5 2.2245 13.625 2.412 12.75C2.412 12.75 2.4745 12.8125 2.537 12.8125L6.537 15.125C6.662 15.1875 6.7245 15.1875 6.8495 15.1875C6.9745 15.1875 7.0995 15.1875 7.162 15.125L12.037 12.3125V14.25L7.9745 16.625C7.0995 17.125 6.0995 17.25 5.162 17C4.162 16.75 3.3495 16.125 2.8495 15.25ZM1.787 6.5625C2.2245 5.8125 2.912 5.25 3.7245 4.9375V5.0625V9.6875C3.7245 9.8125 3.7245 9.9375 3.787 10C3.8495 10.125 3.912 10.1875 4.037 10.25L8.912 13.0625L7.2245 14.0625L3.2245 11.75C2.3495 11.25 1.7245 10.4375 1.4745 9.5C1.2245 8.5625 1.287 7.4375 1.787 6.5625ZM15.5995 9.75L10.7245 6.9375L12.412 5.9375L16.412 8.25C17.037 8.625 17.537 9.125 17.8495 9.75C18.162 10.375 18.3495 11.0625 18.287 11.8125C18.2245 12.5 17.9745 13.1875 17.537 13.75C17.0995 14.3125 16.537 14.75 15.8495 15V10.25C15.8495 10.125 15.8495 10 15.787 9.9375C15.787 9.9375 15.7245 9.8125 15.5995 9.75ZM17.287 7.25C17.287 7.25 17.2245 7.1875 17.162 7.1875L13.162 4.875C13.037 4.8125 12.9745 4.8125 12.8495 4.8125C12.7245 4.8125 12.5995 4.8125 12.537 4.875L7.662 7.6875V5.75L11.7245 3.375C12.3495 3 13.037 2.875 13.787 2.875C14.4745 2.875 15.162 3.125 15.787 3.5625C16.3495 4 16.8495 4.5625 17.0995 5.1875C17.3495 5.8125 17.412 6.5625 17.287 7.25ZM6.787 10.75L5.0995 9.75V5.0625C5.0995 4.375 5.287 3.625 5.662 3.0625C6.037 2.4375 6.5995 2 7.2245 1.6875C7.8495 1.375 8.5995 1.25 9.287 1.375C9.9745 1.4375 10.662 1.75 11.2245 2.1875C11.2245 2.1875 11.162 2.25 11.0995 2.25L7.0995 4.5625C6.9745 4.625 6.912 4.6875 6.8495 4.8125C6.787 4.9375 6.787 5 6.787 5.125V10.75ZM7.662 8.75L9.8495 7.5L12.037 8.75V11.25L9.8495 12.5L7.662 11.25V8.75Z" />
+                        </svg>
+                      </div>
                       <div data-stager-text>chatgpt</div>
                     </a>
-                    <a href={`https://claude.ai/new?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                    <a data-stager-btn href={`https://claude.ai/new?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div class="svg_icon w-embed">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3.92392 13.3L7.86787 11.1L7.92793 10.9L7.86787 10.8H7.66767L7.00701 10.76L4.76476 10.7L2.8028 10.6L0.900901 10.5L0.42042 10.4L0 9.8L0.04004 9.5L0.440441 9.24L1.02102 9.28L2.28228 9.38L4.18418 9.5L5.56557 9.58L7.60761 9.82H7.92793L7.96797 9.68L7.86787 9.6L7.78779 9.52L5.80581 8.2L3.68368 6.8L2.56256 5.98L1.96196 5.58L1.66166 5.18L1.54154 4.34L2.08208 3.74L2.82282 3.8L3.003 3.84L3.74374 4.42L5.34535 5.64L7.40741 7.2L7.70771 7.44L7.82783 7.36L7.84785 7.3L7.70771 7.08L6.60661 5L5.40541 2.92L4.86486 2.06L4.72472 1.54C4.66466 1.34 4.64464 1.14 4.64464 0.94L5.24524 0.0999999L5.60561 0L6.44645 0.12L6.76677 0.4L7.28729 1.6L8.10811 3.46L9.40941 5.98L9.80981 6.74L10.01 7.42L10.0701 7.62H10.2102V7.52L10.3103 6.08L10.5105 4.34L10.7107 2.1L10.7708 1.46L11.0911 0.7L11.6917 0.3L12.2122 0.52L12.6126 1.1L12.5526 1.46L12.3323 3L11.8118 5.42L11.5115 7.06H11.6917L11.8919 6.84L12.7127 5.76L14.0941 4.04L14.6947 3.34L15.4154 2.6L15.8759 2.24H16.7367L17.3574 3.18L17.0771 4.16L16.1962 5.28L15.4555 6.22L14.3944 7.64L13.7538 8.78L13.8138 8.86H13.954L16.3564 8.34L17.6376 8.12L19.1592 7.86L19.8599 8.18L19.9399 8.5L19.6597 9.18L18.018 9.58L16.0961 9.98L13.2332 10.64L13.1932 10.66L13.2332 10.72L14.5145 10.84L15.0751 10.88H16.4364L18.959 11.08L19.6196 11.48L20 12.02L19.9399 12.42L18.9189 12.94L17.5576 12.62L14.3544 11.86L13.2733 11.6H13.1131V11.68L14.034 12.58L15.6957 14.08L17.8178 16.02L17.9179 16.5L17.6577 16.9L17.3774 16.86L15.5355 15.46L14.8148 14.86L13.2132 13.5H13.1131V13.64L13.4735 14.18L15.4354 17.12L15.5355 18.02L15.3954 18.3L14.8749 18.5L14.3343 18.38L13.1732 16.78L11.972 14.98L11.031 13.34L10.9309 13.42L10.3504 19.46L10.0901 19.76L9.48949 20L8.98899 19.6L8.70871 19L8.98899 17.76L9.30931 16.16L9.56957 14.88L9.80981 13.3L9.94995 12.78V12.74H9.80981L8.60861 14.4L6.80681 16.86L5.36537 18.38L5.02502 18.52L4.42442 18.22L4.48448 17.66L4.8048 17.2L6.80681 14.64L8.00801 13.06L8.80881 12.14L8.78879 12.04H8.72873L3.44344 15.48L2.5025 15.6L2.1021 15.2L2.14214 14.6L2.34234 14.4L3.94394 13.3H3.92392Z" />
+                        </svg>
+                      </div>
                       <div data-stager-text>claude</div>
                     </a>
-                    <a href={`https://www.perplexity.ai/search?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                    <a data-stager-btn href={`https://www.perplexity.ai/search?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div class="svg_icon w-embed">
+                        <svg width="17" height="20" viewBox="0 0 17 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.313 0L7.93684 5.24715V5.24595V0.01211H9.03158V5.27063L14.6807 0V5.98253H17V14.6118H14.6878V19.9389L9.03158 14.9066V19.9967H7.93684V14.9896L2.31937 20V14.6118H0V5.98253H2.313V0ZM7.11159 7.0776H1.09474V13.5167H2.31799V11.4856L7.11159 7.0776ZM3.41406 11.9715V17.5565L7.93684 13.5225V7.81146L3.41406 11.9715ZM9.06308 13.4691L13.593 17.4994V14.6118H13.5872V11.9663L9.06308 7.80608V13.4691ZM14.6878 13.5167H15.9053V7.0776H9.93326L14.6878 11.4399V13.5167ZM13.5859 5.98253V2.51888L9.87352 5.98253H13.5859ZM7.12008 5.98253L3.40774 2.51888V5.98253H7.12008Z" />
+                        </svg>
+                      </div>
                       <div data-stager-text>perplexity</div>
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="padding-bottom padding-medium"></div>
-            <Newsletter />
           </div>
+          <div class="padding-bottom padding-medium"></div>
+          <Newsletter />
           <CornerLines />
         </div>
       </div>
@@ -246,7 +274,7 @@ const jsonld = buildBlogPostingWithFaqLd({
                 <div class="related_posts-section-header">
                   <div class="text_in-exprecions">
                     <div class="exprecion">[</div>
-                    <div class="text-color-alternate text-size-regular text-style-allcaps">view more</div>
+                    <div class="text-color-alternate text-size-regular text-style-allcaps">{r.category?.name}</div>
                     <div class="exprecion">]</div>
                   </div>
                   <div class="padding-bottom padding-xsmall" />
@@ -296,11 +324,13 @@ const jsonld = buildBlogPostingWithFaqLd({
                         </div>
                       </button>
                       <div class="faq_dropdown">
-                        <div class="faq_space-block" />
-                        <div class="faq_answer-wrapper">
-                          <p class="text-size-medium text-style-allcaps">{f.answer}</p>
+                        <div class="faq_dropdown-inner">
+                          <div class="faq_space-block" />
+                          <div class="faq_answer-wrapper">
+                            <p class="text-size-medium text-style-allcaps">{f.answer}</p>
+                          </div>
+                          <div class="faq_space-block" />
                         </div>
-                        <div class="faq_space-block" />
                       </div>
                     </div>
                   ))}

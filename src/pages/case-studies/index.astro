@@ -40,7 +40,7 @@ const jsonld = buildCaseStudyListLd({
     title: 'SRDJAN JOVIC · Webflow Case Studies',
     description:
       "Explore real projects and solutions. View case studies of websites I've designed and built in Webflow for healthcare, fitness, and tech clients.",
-    canonical: absUrl('/case-study'),
+    canonical: absUrl('/case-studies'),
     ogImage,
   }}
 >
@@ -68,9 +68,11 @@ const jsonld = buildCaseStudyListLd({
               </div>
               <a href="#projects" class="text-color-alternate text-size-regular text-style-allcaps hide-tablet">scroll down</a>
             </div>
-            <CornerLines />
           </div>
         </div>
+        {/* Outside the content wrapper: the hero-overlap animation sets a
+            transform on it, which would otherwise re-anchor and scale these. */}
+        <CornerLines />
       </div>
     </div>
   </section>
@@ -101,7 +103,7 @@ const jsonld = buildCaseStudyListLd({
                 {
                   (caseStudies ?? []).map((c) => (
                     <ProjectCard
-                      href={`/case-study/${c.slug}`}
+                      href={`/case-studies/${c.slug}`}
                       title={c.name!}
                       text={c.clientDescription ?? undefined}
                       image={c.cardThumbnail ?? c.coverImage}

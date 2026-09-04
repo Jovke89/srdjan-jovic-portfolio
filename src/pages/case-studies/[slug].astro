@@ -18,17 +18,26 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const [cs, settings, related] = await Promise.all([
+const [cs, settings, relatedPool] = await Promise.all([
   sanityClient.fetch(CASE_STUDY_QUERY, { slug }),
   sanityClient.fetch(SITE_SETTINGS_QUERY),
   sanityClient.fetch(
-    `*[_type == "caseStudy" && slug.current != $slug] | order(order asc)[0...3]{
+    `*[_type == "caseStudy" && slug.current != $slug]{
       name, "slug": slug.current, clientDescription, cardThumbnail{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } }
     }`,
     { slug },
   ),
 ]);
 if (!cs) return Astro.redirect('/404');
+
+/* "See other projects": no filtering, just a random pick of up to 3. Shuffled
+   at build time (Fisher-Yates); the site rebuilds on every Sanity publish. */
+const relatedShuffled = [...((relatedPool as unknown[]) ?? [])];
+for (let i = relatedShuffled.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [relatedShuffled[i], relatedShuffled[j]] = [relatedShuffled[j], relatedShuffled[i]];
+}
+const related = relatedShuffled.slice(0, 3);
 
 const person = toPerson(settings);
 const hero = imgSet(cs.coverImage, { width: 1600 });
@@ -60,7 +69,7 @@ const jsonld = buildArticleLd({
   seo={{
     title: cs.seo?.title || cs.name!,
     description,
-    canonical: absUrl(`/case-study/${slug}`),
+    canonical: absUrl(`/case-studies/${slug}`),
     ogImage,
     noindex: cs.seo?.noIndex ?? false,
   }}
@@ -257,6 +266,40 @@ const jsonld = buildArticleLd({
   }
 
   {
+    (cs.stats ?? []).length > 0 && (
+      <section class="section_results">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="results-content-wrapper">
+                <div class="results_heading">
+                  <div class="text_in-exprecions">
+                    <div class="exprecion">[</div>
+                    <div class="text-color-alternate text-size-regular text-style-allcaps">final</div>
+                    <div class="exprecion">]</div>
+                  </div>
+                  <h2 class="heading-style-h2">Results</h2>
+                </div>
+                <div class="results_wrapper">
+                  {(cs.stats ?? []).map((s: { value?: string; label?: string }) => (
+                    <div class="result_item">
+                      <div class="result_animation">
+                        <div class="result_value heading-style-h1">{s.value}%</div>
+                      </div>
+                      <p class="text-size-medium text-style-allcaps">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <CornerLines top={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
     cs.keyTakeaway && (
       <section class="section_key-takeaway">
         <div class="container-large">
@@ -290,7 +333,7 @@ const jsonld = buildArticleLd({
                   <div class="projects_heading">
                     <div class="text_in-exprecions">
                       <div class="exprecion">[</div>
-                      <h2 class="text-color-alternate text-size-regular text-style-allcaps">related works</h2>
+                      <div class="text-color-alternate text-size-regular text-style-allcaps">related works</div>
                       <div class="exprecion">]</div>
                     </div>
                     <h2 class="heading-style-h2">See others projects</h2>
@@ -300,11 +343,12 @@ const jsonld = buildArticleLd({
                   <div role="list" class="related_projects-list w-dyn-items">
                     {(related ?? []).map((r: any) => (
                       <ProjectCard
-                        href={`/case-study/${r.slug}`}
+                        href={`/case-studies/${r.slug}`}
                         title={r.name}
                         text={r.clientDescription}
                         image={r.cardThumbnail}
                         cta="view Case Study"
+                        related
                       />
                     ))}
                   </div>

@@ -11,6 +11,13 @@ const copy =
 const action =
   s?.mailchimpAction ??
   'https://gmail.us12.list-manage.com/subscribe/post?u=b4bc0d2746891d4f56081b70a&id=88b63a715c&f_id=000ec7e1f0';
+
+/* Mailchimp anti-bot honeypot: real visitors never see or fill this field,
+   bots that autofill every input do, and Mailchimp silently drops the
+   submission. Must be named exactly `b_<u>_<id>` from the action URL's own
+   query params. Not in the original Webflow export; added deliberately. */
+const actionUrl = new URL(action);
+const honeypotName = `b_${actionUrl.searchParams.get('u')}_${actionUrl.searchParams.get('id')}`;
 ---
 
 <div class="newsletter_wrapper">
@@ -21,15 +28,32 @@ const action =
     <p class="text-size-medium text-style-allcaps">{copy}</p>
   </div>
   <div class="newsletter_form-modal w-form">
-    <form action={action} method="post" target="_blank" class="newsletter_form-wrapper">
+    <form action={action} method="post" class="newsletter_form-wrapper">
       <div class="mailchimp_tag w-embed">
         <div hidden><input type="hidden" name="tags" value="4664" /></div>
+      </div>
+      <div style="position: absolute; left: -5000px;" aria-hidden="true">
+        <input type="text" name={honeypotName} tabindex="-1" value="" />
       </div>
       <label for="FNAME" class="form_label">Name</label>
       <input class="form_input w-input" maxlength="256" name="FNAME" placeholder="Enter your name" type="text" id="FNAME" required />
       <label for="EMAIL">Email</label>
       <input class="form_input w-input" maxlength="256" name="EMAIL" placeholder="Enter your email address" type="email" id="EMAIL" required />
-      <input type="submit" class="button is-form-button w-button" value="hit & Submit" />
+      <button type="submit" data-stager-btn class="button is-form-button w-button">
+        <div data-stager-text>hit & Submit</div>
+      </button>
     </form>
+    <div class="message_form-success w-form-done">
+      <div class="text-size-medium text-style-allcaps text-color-alternate">Thank you! Your submission has been received!</div>
+    </div>
+    <div class="message_form-error w-form-fail">
+      <div class="text-size-medium text-style-allcaps text_color-red">
+        Oops! Something went wrong while submitting the form. Please try again or contact me for support! Thanks for your patience.
+      </div>
+    </div>
   </div>
 </div>
+
+<script>
+  import '../scripts/newsletter-form.ts';
+</script>

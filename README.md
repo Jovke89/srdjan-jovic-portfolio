@@ -41,7 +41,7 @@ src/
 ├── lib/
 │   ├── sanity/     client, image, portable text, GROQ queries
 │   └── seo/        JSON-LD builders, canonical helpers
-├── pages/          routes (index, case-study, resources, events, ...)
+├── pages/          routes (index, case-studies, resources, events, ...)
 ├── scripts/        client-side TS (GSAP/Lenis, resource filter, ...)
 ├── sanity/         Studio schema + generated types
 └── styles/         webflow/*.css (verbatim) + app.css

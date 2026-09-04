@@ -1,6 +1,6 @@
 import { defineType, defineField } from 'sanity';
 
-/* /case-study/[slug]. JSON-LD: Article + about Organization (the client). */
+/* /case-studies/[slug]. JSON-LD: Article + about Organization (the client). */
 export const caseStudy = defineType({
   name: 'caseStudy',
   title: 'Case study',

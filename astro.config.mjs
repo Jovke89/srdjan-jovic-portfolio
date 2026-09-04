@@ -19,6 +19,11 @@ export default defineConfig({
   site: SITE_URL || 'https://srdjan-jovic.webflow.io',
   output: 'static',
   adapter: vercel({ imageService: false }),
+  // Old /case-study* paths kept working after the rename to /case-studies*.
+  redirects: {
+    '/case-study': '/case-studies',
+    '/case-study/[slug]': '/case-studies/[slug]',
+  },
   build: {
     // Emit /contact/index.html so routes match the original Webflow URL shape.
     format: 'directory',

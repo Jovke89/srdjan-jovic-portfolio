@@ -1,25 +1,150 @@
 /* App-level styles layered on top of the 3 Webflow CSS files.
    Keep this minimal, the Webflow files own the design. */
 
-/* Custom cursor (ported from the Webflow head embed) */
-.cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  width: 1em;
-  height: 1em;
-  pointer-events: none;
-  border-radius: 50%;
-  background-color: rgba(255, 76, 36, 0.3);
-  transition: width 0.3s, height 0.3s, background-color 0.3s;
-  mix-blend-mode: normal;
+/* `.heading-style-h2` is missing font-size in the Webflow export (h1, h3, h4
+   all set theirs; h2 doesn't) — every H2 site-wide rendered at the browser
+   default instead of the fluid h2 type scale. */
+.heading-style-h2 {
+  font-size: var(--_srdjan-variables---h2-type-face);
 }
+
+/* FAQ accordion START */
+/* Webflow drove this with its own runtime JS (webflow.js dropdown widget: sets
+   inline height, centers/rotates the icon bars). This rebuild has none of that,
+   so it's rebuilt in CSS against the `.is-open` class the JS toggles. */
+
+/* Icon: `.faq_plus` (vertical bar) + `.faq_minus` (horizontal bar) overlap to
+   form a "+" in the yellow circle. On open both bars spin onto the horizontal
+   axis and land as one line (a "−"); closing spins them back to "+". */
+.faq_minus,
+.faq_plus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.faq_block.is-open .faq_plus {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.faq_block.is-open .faq_minus {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+/* Dropdown: grid-rows trick (0fr -> 1fr) animates the *real* content height
+   smoothly, instead of transitioning max-height toward an arbitrary large
+   value (which made the open/close feel instant then stall). `.faq_dropdown`
+   is the row that grows, `.faq_dropdown-inner` clips it while collapsed. */
+.faq_dropdown {
+  display: grid;
+  grid-template-rows: 0fr;
+  /* Closed: zero the border itself (not just its color) so the 1px frame
+     can't linger as a stray line once the content has collapsed to 0
+     height — border-width: 0 removes it outright, no color/cascade to
+     fight. */
+  border-width: 0;
+  background-color: transparent;
+  transition: grid-template-rows 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    border-width 0.3s ease, background-color 0.3s ease;
+}
+.faq_block.is-open .faq_dropdown {
+  grid-template-rows: 1fr;
+  border-width: 1px;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+/* The whole block (space blocks + answer) fades together as one unit, in
+   sync with the height grow/shrink above, not just the answer text. */
+.faq_dropdown-inner {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.faq_block.is-open .faq_dropdown-inner {
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+/* Left-align the question/answer text without touching the shared
+   `.heading-style-h5` / `.text-size-medium` classes used elsewhere — buttons
+   default to centred text, which is what was pulling the question text in. */
+.faq_heading-wrap,
+.faq_answer-wrapper {
+  text-align: left;
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq_minus,
+  .faq_plus,
+  .faq_dropdown,
+  .faq_dropdown-inner {
+    transition-duration: 0.01ms !important;
+  }
+}
+/* FAQ accordion END */
+
+/* Resource article: share icons + TL;DR spacing START */
+/* `.icon_circle` is used on both <a> and the copy-link <button>; buttons keep
+   their native white button-face background (normalize.css never resets it),
+   which is why "copy link" looked filled while the LinkedIn/Facebook <a>s
+   didn't. */
+button.icon_circle {
+  appearance: none;
+  background-color: transparent;
+}
+.tldr-block > h2 {
+  margin-bottom: 1.5rem;
+}
+/* Copy-link tooltip: `.is-copied` was already toggled by the click handler but
+   had no visual effect (dead code) — this is the confirmation it was meant to
+   show. */
+button[data-share='copy'] {
+  position: relative;
+}
+.copy_tooltip {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(0.25rem);
+  white-space: nowrap;
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+button[data-share='copy'].is-copied .copy_tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+/* AI-summary buttons sit on the same yellow `.button` fill as their black
+   text; `.svg_icon` normally forces white (for icons on dark cards), which
+   clashed here. Match the button's own (black) text colour instead. */
+.is-ai-button .svg_icon {
+  color: inherit;
+}
+/* Resource article: share icons + TL;DR spacing END */
+
+/* Widen the shared container from 77.5rem to 80rem (matches `.nav_container`). */
+.container-large {
+  max-width: 80rem;
+}
+
+/* Custom cursor START */
+/* The Webflow stylesheet styles `.cursor` as a small solid-yellow dot (yellow
+   border + yellow fill) with a width/height/background transition. On hover over
+   an interactive element it grows and the fill switches to translucent orange
+   while the yellow border stays, matching the original Webflow interaction. */
 body:has(a:hover) .cursor,
 body:has(button:hover) .cursor,
 body:has([data-cursor]:hover) .cursor {
-  width: 3em;
-  height: 3em;
+  width: 3.25em;
+  height: 3.25em;
   background-color: rgba(255, 76, 36, 0.3);
 }
 @media (hover: none) and (pointer: coarse) {
@@ -27,6 +152,7 @@ body:has([data-cursor]:hover) .cursor {
     display: none;
   }
 }
+/* Custom cursor END */
 
 /* Lenis smooth-scroll helper styles (ported from Webflow head embed) */
 html.lenis,
@@ -49,12 +175,47 @@ html.lenis body {
 /* Site background canvas (ported from Webflow footer embed) */
 #heroCanvas {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
   pointer-events: none;
 }
+
+/* Home hero: full viewport height on desktop START */
+/* The Webflow chain bottoms out on .main-wrapper (no height), so the hero's
+   height: 100% and every height: 100% child (incl. .hero_img) never resolve,
+   leaving the hero as tall as the raw portrait image. Give it a real viewport
+   height for the desktop breakpoint only; the Webflow tablet/mobile rules
+   already reset .section_hero-home to height: auto. */
+@media screen and (min-width: 992px) {
+  .section_hero-home {
+    height: 100vh;
+    height: 100dvh;
+  }
+  /* Container runs the full 77.5rem with no side padding inside the hero */
+  .section_hero-home .padding-global {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Portrait: wrapper is 50% x full height, the image is 100% x 200% and
+     object-fit: contain, anchored to the bottom edge so the figure sits on the
+     bottom of the hero and overflows upward behind the copy. */
+  .hero_img-wrapper {
+    width: 50%;
+    height: 100%;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+  .hero_img {
+    width: 100%;
+    height: 200%;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+}
+/* Home hero: full viewport height on desktop END */
 
 /* Nav-link blink (ported from Webflow footer embed) */
 @keyframes blink {
@@ -96,3 +257,229 @@ textarea:focus-visible,
     display: none !important;
   }
 }
+
+/* Nav: links dead-centre, aligned with the logo and the button START */
+/* Webflow keeps the border-bottom on `.padding-global.nav_padding` (full-bleed)
+   and centres the row with `.container-large.nav_container` — that structure is
+   left intact. On desktop the inner row becomes a 3-column grid so the links sit
+   exactly in the middle regardless of the logo / button widths. The Webflow
+   base `ul` rule leaves `margin-bottom: 10px` on `.nav_links-list`, which pushed
+   the links a few px above centre; it is zeroed here. */
+@media screen and (min-width: 992px) {
+  .nav_container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-column-gap: 1.5rem;
+    align-items: center;
+  }
+  .nav_container > .brand_logo-wrapper {
+    justify-self: start;
+  }
+  .nav_container > .nav_links-wrapper {
+    justify-self: center;
+  }
+  .nav_container > .button_desctiop {
+    justify-self: end;
+  }
+  .nav_links-wrapper.w-nav-menu {
+    display: flex;
+    align-items: center;
+  }
+  .nav_links-list {
+    margin: 0;
+  }
+  .nav_links-list,
+  .nav_list-link {
+    display: flex;
+    align-items: center;
+  }
+  .nav_link.blink-btn,
+  .nav_link.blink-btn .exprecion,
+  .nav_link.blink-btn .button_text-blink {
+    line-height: 1;
+  }
+}
+/* Nav END */
+
+/* Portfolio (case-study) cards: size to content, image column fills height START */
+/* No fixed card height: longer copy must never be clipped. The card is a flex
+   row, the content column drives the height, and the image wrapper stretches to
+   match it with the image covering that box. */
+@media screen and (min-width: 992px) {
+  .case_study-card-wrapper {
+    height: auto;
+  }
+  .case_study-card {
+    align-items: stretch;
+  }
+  .case_card-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 0;
+  }
+  /* `height: auto` (not the Webflow `height: 100%`) so `align-self: stretch`
+     is what sizes the wrapper — it fills the card height set by the content
+     column. With an explicit `height: 100%` the stretch is cancelled and the
+     wrapper collapses to 0 because the image below is taken out of flow. */
+  .case_card-img-wrapper {
+    align-self: stretch;
+    height: auto;
+    position: relative;
+  }
+  /* Absolute so the image never dictates the card height. */
+  .case_study-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+/* Portfolio (case-study) cards END */
+
+/* Services: hover-reveal image + cursor parallax START */
+/* Webflow used an Interaction (webflow.js) for this; rebuilt in site.ts.
+   The image wrapper was display:none, which cannot transition, so swap to an
+   opacity toggle and let the JS translate it toward the cursor. */
+@media (hover: hover) and (min-width: 992px) {
+  .option_item-img-wrapper {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.625, 0.05, 0, 1);
+    will-change: transform;
+  }
+  .services_option-item.is-hovering .option_item-img-wrapper {
+    opacity: 1;
+  }
+  .option_item-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+/* Services: hover-reveal image + cursor parallax END */
+
+/* Services: hovered row turns white, its title turns black START */
+@media (hover: hover) {
+  .services_option-item {
+    transition: background-color 0.4s cubic-bezier(0.625, 0.05, 0, 1),
+      border-color 0.4s cubic-bezier(0.625, 0.05, 0, 1);
+  }
+  .services_option-item .heading-style-h3 {
+    transition: color 0.4s cubic-bezier(0.625, 0.05, 0, 1);
+  }
+  .services_option-item:hover {
+    background-color: #fff;
+    border-color: #fff;
+  }
+  .services_option-item:hover .heading-style-h3 {
+    color: #000;
+  }
+}
+/* Services: hovered row turns white, its title turns black END */
+
+/* Resources: keep the articles heading clear of the sticky nav when pagination
+   jumps back to the top. */
+#all-articles {
+  scroll-margin-top: 6rem;
+}
+
+/* Resources: active category filter reads as an outline START */
+/* Webflow shipped no `.is-active` style (it was a Designer variant). Active
+   filter = transparent fill, yellow border + text; inactive keeps the default
+   solid-yellow `.filter_btn`. */
+.filter_btn.is-active,
+.filter_btn.is-active:hover {
+  background-color: transparent;
+  border-color: #ffc000;
+  color: #ffc000;
+  box-shadow: none;
+}
+.filter_btn.is-active .w-form-label {
+  color: #ffc000;
+}
+/* Resources: active category filter END */
+
+/* Resource grid cards ("Tips and tricks"): 2rem breathing room under the CTA START */
+/* The Webflow class sets padding-bottom: 0, which glued the read/time row to the
+   bottom edge of the card. */
+.resource_grid-item {
+  padding-bottom: 2rem;
+}
+/* Resource grid cards END */
+
+/* Magnetic round buttons START */
+.footer_btn,
+.view_site-btn {
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer_btn,
+  .view_site-btn {
+    transform: none !important;
+  }
+}
+/* Magnetic round buttons END */
+
+/* Case study "Overview" marquee START */
+/* The Webflow export ships `.marquee` / `.marquee-content` layout but not the
+   keyframes. Each `.marquee` holds two `.marquee-content` copies; one row runs
+   left, the next runs right. */
+@keyframes overview-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+}
+.marquee-content.scroll {
+  animation: overview-marquee 50s linear infinite;
+}
+.marquee-content.scroll-reverse {
+  animation: overview-marquee 50s linear infinite reverse;
+}
+/* Case study "Overview" marquee END */
+
+/* Case study template: hero + Key Takeaway START */
+@media screen and (min-width: 992px) {
+  /* The hero-overlap animation pins `.hero_animation-target` with pinSpacing
+     off; without a floor the section (and its `.side_lines` box, which the
+     corner marks anchor to) collapses while pinned and the marks jump. Other
+     hero sections already carry height: 100vh. */
+  .section_hero-case-template {
+    min-height: 100vh;
+  }
+  .hero_img-wrapper-template {
+    max-width: 35rem;
+  }
+  .key_takeaway-content-wrapper {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+/* Tablet / mobile: the hero image frame runs full width. */
+@media screen and (max-width: 991px) {
+  .hero_img-wrapper-template {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+.case_template-hero-img {
+  width: 100%;
+}
+/* Case study template END */
+
+/* Related case-study cards: clamp the description to 2 lines START */
+/* Webflow's `.related_paragraph` only carries `overflow: hidden`; the line-clamp
+   lived in a custom-code block that was not exported. */
+.related_paragraph {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+/* Related case-study cards END */

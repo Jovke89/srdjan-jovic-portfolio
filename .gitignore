@@ -30,3 +30,6 @@ pnpm-debug.log*
 # ShipStudio metadata
 .shipstudio/
 sanity/migrations/lib/asset-cache.json
+
+.vercel
+.env*

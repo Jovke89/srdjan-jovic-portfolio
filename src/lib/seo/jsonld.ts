@@ -152,7 +152,7 @@ export function buildCaseStudyListLd(opts: {
     name: 'A closer look at my work',
     description:
       'Explore selected projects I’ve designed and built, from the initial concept and visual direction to the final Webflow development.',
-    url: '/case-study',
+    url: '/case-studies',
     inLanguage: 'en',
     about: personShort(opts.person),
     mainEntity: {
@@ -162,7 +162,7 @@ export function buildCaseStudyListLd(opts: {
         position: i + 1,
         name: it.name,
         description: it.description,
-        url: `/case-study/${it.slug}`,
+        url: `/case-studies/${it.slug}`,
         ...(it.image ? { image: it.image } : {}),
       })),
     },
@@ -240,7 +240,7 @@ export function buildArticleLd(opts: {
     '@type': 'Article',
     headline: opts.headline,
     description: opts.description,
-    url: `/case-study/${opts.slug}`,
+    url: `/case-studies/${opts.slug}`,
     datePublished: opts.datePublished || '',
     dateModified: opts.dateModified || opts.datePublished || '',
     inLanguage: 'en',
