@@ -1,15 +1,304 @@
 ---
-// Placeholder — replaced in the Home page migration step.
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CornerLines from '../components/CornerLines.astro';
+import ResponsiveImg from '../components/ResponsiveImg.astro';
+import HeroMarquee from '../components/HeroMarquee.astro';
+import ServicesSection from '../components/ServicesSection.astro';
+import TestimonialsSection from '../components/TestimonialsSection.astro';
+import ResourceCard from '../components/ResourceCard.astro';
+import { HOME_QUERY, SITE_SETTINGS_QUERY } from '../lib/sanity/queries';
+import { buildProfilePageLd } from '../lib/seo/jsonld';
+import { toPerson } from '../lib/seo/person';
+import { imgSet } from '../lib/sanity/image';
+
+const [home, settings] = await Promise.all([
+  sanityClient.fetch(HOME_QUERY),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+]);
+const person = toPerson(settings);
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+const description =
+  "For more than four years I've been building clean, high-performance websites for health, fitness and B2B companies. From Figma to Webflow, custom code, API and third-party integrations.";
+
+const caseStudies = home?.caseStudies ?? [];
+const resources = home?.resources ?? [];
+const testimonials = [...(home?.videoTestimonials ?? []), ...(home?.textTestimonials ?? [])];
+
+const jsonld = buildProfilePageLd({
+  title: 'SRDJAN JOVIC · Webflow Developer',
+  description,
+  person,
+  reviews: settings?.homeReviews ?? [],
+});
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SRDJAN JOVIC · Webflow Developer</title>
-  </head>
-  <body>
-    <p>Migration in progress.</p>
-  </body>
-</html>
+<BaseLayout
+  seo={{ title: 'SRDJAN JOVIC · Webflow Developer', description, canonical: undefined, ogImage }}
+  renderHeroCanvas
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <header class="section_hero-home">
+    <div class="padding-global padding-section-large is-hero">
+      <div class="container-large">
+        <div class="section_hero-content-wrapper">
+          <div class="home_hero-left-content">
+            <div class="hero_header-wrapper">
+              <div class="hero_heading-wrapper">
+                <h1 class="hero_home-heading heading-style-h1">
+                  Build <span class="text-color-alternate">Better.</span> Grow
+                  <span class="text-color-alternate">Faster.</span>
+                </h1>
+              </div>
+              <div class="hero_paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Instead of complicated and slow solutions, you get a modern and fast Webflow website
+                  that not only looks professional but also actively helps your business grow.
+                </p>
+              </div>
+            </div>
+            <div class="padding-bottom padding-medium"></div>
+            <div class="hero_btns-wrapper">
+              <a data-stager-btn href="/case-study" class="button w-inline-block">
+                <div data-stager-text>Case studies</div>
+              </a>
+              <a data-stager-btn href="/contact" class="button w-variant-c4441771-e5aa-24d5-e705-584be2a2fea7 w-inline-block">
+                <div data-stager-text>let's work together</div>
+              </a>
+            </div>
+          </div>
+          <div class="hero_img-wrapper">
+            <img
+              class="hero_img"
+              src="/images/sdadasd.avif"
+              srcset="/images/sdadasd-p-500.avif 500w, /images/sdadasd-p-800.avif 800w, /images/sdadasd.avif 1048w"
+              sizes="(max-width: 1048px) 100vw, 1048px"
+              alt="Man with beard and glasses wearing a black Jack & Jones t-shirt with arms crossed."
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <HeroMarquee />
+
+  <section id="intro" class="section_intro">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-medium">
+          <div class="section_intro-content-wrapper">
+            <div class="section_intro-header">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <h2 class="intro_heading">intro</h2>
+                <div class="exprecion">]</div>
+              </div>
+            </div>
+            <p class="big_text-animation">
+              I am a Webflow developer with a strong eye for detail, building pixel-perfect sites with
+              client-first architecture.I work with health, fitness and B2B clients, building fast,
+              scalable websites that look great and convert. CMS architecture, technical SEO, Core web
+              vitals, Make automation, crm integrations. When Webflow hits its limits, I give it a
+              hand with some JavaScript.
+            </p>
+            <div class="lines_absoulute-position is-left-top">
+              <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical is-short"></div></div>
+            </div>
+            <div class="lines_absoulute-position is-right-top">
+              <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical is-short"></div></div>
+            </div>
+            <div class="lines_absoulute-position is-right-tbottom">
+              <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+            </div>
+            <div class="lines_absoulute-position is-left-bottom">
+              <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section_case-study">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-medium">
+          <div class="case_study-content-wrapper">
+            <div class="case_study-section-header">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">CASE STUDIES</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="padding-bottom padding-xsmall"></div>
+              <div class="case_study-heading-wrapper"><h2 class="heading-style-h2">Portfolio</h2></div>
+              <div class="section_divider"></div>
+              <div class="section_case-study-btn-wrapper">
+                <div class="section_case-study-paragraph">
+                  <p class="text-size-medium text-style-allcaps">
+                    Every project here solved a real problem. Real projects. Real solutions. Take a
+                    look at what I built.
+                  </p>
+                </div>
+                <a data-stager-btn href="/case-study" class="button w-inline-block">
+                  <div data-stager-text>see more works</div>
+                </a>
+              </div>
+            </div>
+            <div class="case_study-cards-collection w-dyn-list">
+              <div role="list" class="case_study-cards-list w-dyn-items">
+                {
+                  caseStudies.map((c, i) => (
+                    <div role="listitem" class="case_study-card-wrapper w-dyn-item">
+                      <article class="case_study-card">
+                        <div class="case_card-content-wrapper">
+                          <div class="case_card-header">
+                            <div class="text_in-exprecions is-number">
+                              <div class="exprecion">[</div>
+                              <div class="card_num-wrapper">
+                                <div class="text-color-alternate text-size-regular text-style-allcaps">0</div>
+                                <div class="text-color-alternate text-size-regular text-style-allcaps">{i + 1}</div>
+                              </div>
+                              <div class="exprecion">]</div>
+                            </div>
+                            {c.industry && (
+                              <div class="case_card-industru-wrapper">
+                                <div class="text-size-medium text-style-allcaps">Industry:</div>
+                                <div class="tag">
+                                  <div class="text-size-regular text-style-allcaps">{c.industry}</div>
+                                </div>
+                              </div>
+                            )}
+                            <h3 class="heading-style-h3">{c.name}</h3>
+                            {c.clientDescription && (
+                              <div class="card_paragraph-wrapper">
+                                <p class="text-size-regular text-style-allcaps">{c.clientDescription}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div class="padding-bottom padding-medium" />
+                          {c.tech?.length > 0 && (
+                            <div class="tech_stack-wrapper">
+                              <div class="text-size-regular text-style-allcaps">tech stack:</div>
+                              <div class="tags-collection w-dyn-list">
+                                <div role="list" class="collection-list w-dyn-items">
+                                  {c.tech.map((t: string) => (
+                                    <div role="listitem" class="w-dyn-item">
+                                      <div class="tag">
+                                        <div class="text-size-regular text-style-allcaps">{t}</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div class="padding-bottom padding-medium" />
+                          <div class="card_btn-wrapper">
+                            <a data-stager-btn href={`/case-study/${c.slug}`} class="button w-inline-block">
+                              <div data-stager-text>Read Case study</div>
+                            </a>
+                          </div>
+                        </div>
+                        <a href={`/case-study/${c.slug}`} class="case_card-img-wrapper w-inline-block">
+                          {(c.cardThumbnail || c.coverImage) && (
+                            <ResponsiveImg
+                              source={c.cardThumbnail ?? c.coverImage}
+                              alt={c.name}
+                              class="case_study-card-img"
+                            />
+                          )}
+                        </a>
+                      </article>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ServicesSection />
+
+  <TestimonialsSection testimonials={testimonials} />
+
+  <section class="section_cta">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-medium">
+          <div class="container-large">
+            <div class="mx--width">
+              <div class="cta_baner-heading-wrapper">
+                <h2 class="heading-style-h2">Need a website that works?</h2>
+              </div>
+              <div class="cta_baner-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Reach out to me today and let's discuss how I can help you achieve your goals.
+                </p>
+              </div>
+              <a data-stager-btn href="/contact" class="button w-inline-block">
+                <div data-stager-text>Let’s work together</div>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="lines_absoulute-position is-right-tbottom">
+          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+        </div>
+        <div class="lines_absoulute-position is-left-bottom">
+          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section_resources">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="lines_absoulute-position is-right-tbottom">
+          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+        </div>
+        <div class="lines_absoulute-position is-left-bottom">
+          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+        </div>
+        <div class="padding-global padding-section-medium">
+          <div class="resource_content-wrapper">
+            <div class="resource-section-header">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">from the resources</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="padding-bottom padding-xsmall"></div>
+              <div class="services_section--heading-wrapper"><h2 class="heading-style-h2">Tips and tricks</h2></div>
+              <div class="section_divider"></div>
+              <div class="section_services-btn-wrapper">
+                <div class="section_resource-paragraph">
+                  <p class="text-size-medium text-style-allcaps">
+                    evrything I learned working on real projects. Webflow, CMS, custom code and
+                    everything in between.
+                  </p>
+                </div>
+                <a data-stager-btn href="/resources" class="button w-inline-block">
+                  <div data-stager-text>all resources</div>
+                </a>
+              </div>
+            </div>
+            <div class="resources_grid w-dyn-list">
+              <div role="list" class="collection-list-2 w-dyn-items">
+                {resources.map((r) => <ResourceCard resource={r} variant="grid" />)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

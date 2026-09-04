@@ -1,0 +1,58 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ResponsiveImg from '../../components/ResponsiveImg.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
+import { TESTIMONIAL_SLUGS_QUERY, TESTIMONIAL_PAGE_QUERY } from '../../lib/sanity/queries';
+
+export async function getStaticPaths() {
+  const slugs = await sanityClient.fetch(TESTIMONIAL_SLUGS_QUERY);
+  return (slugs ?? []).map((s: { slug: string }) => ({ params: { slug: s.slug } }));
+}
+const { slug } = Astro.params;
+const t = await sanityClient.fetch(TESTIMONIAL_PAGE_QUERY, { slug });
+if (!t) return Astro.redirect('/404');
+---
+<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+  <section class="section_event">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="event_hero-content-wrapper">
+            <div class="event_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">what others say</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="video_testimonial-header">
+                {t.photo && (
+                  <div class="testimonial_icon">
+                    <ResponsiveImg source={t.photo} alt={t.name} width={200} sizes="80px" class="testemonial_img" />
+                  </div>
+                )}
+                <div class="testimonial_content">
+                  <h1 class="heading-style-h2">{t.name}</h1>
+                  {t.company && (
+                    <div class="card_badge-wrapper">
+                      <div>CEO:</div>
+                      <div class="tag"><div class="text-size-regular text-style-allcaps">{t.company}</div></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {t.quote && <p class="text-size-medium text-style-allcaps">{t.quote}</p>}
+              {t.videoUrl && (
+                <div class="video_palyer-wrapper">
+                  <VideoPlayer src={t.videoUrl} poster={t.videoPoster} />
+                </div>
+              )}
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

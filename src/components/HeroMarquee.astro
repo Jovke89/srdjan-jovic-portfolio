@@ -1,0 +1,53 @@
+---
+/* Hero tech marquee — static content, driven by initMarquee() in site.ts
+   via the data-marquee-* attributes (ported from Webflow). */
+const items = [
+  'JavaScript',
+  'Webflow',
+  'make automation',
+  'figma',
+  'aPI integration',
+  'Vibe Coding',
+  'Astro',
+  'Next.JS',
+  'Git Hub',
+  'Vercel',
+];
+const rows = [
+  { dir: 'left', extra: 'is-front', items },
+  { dir: 'right', extra: '', items },
+  { dir: 'right', extra: 'hide', items: items.slice(0, 5) },
+];
+---
+
+<figure class="marquee_wrapper">
+  {
+    rows.map((row) => (
+      <div
+        data-marquee-duplicate="10"
+        data-marquee-scroll-direction-target
+        data-marquee-direction={row.dir}
+        data-marquee-speed="50"
+        data-marquee-scroll-speed="2"
+        class:list={['marquee_row', row.extra]}
+      >
+        <div data-marquee-scroll-target class="marquee_scroll">
+          <div data-marquee-collection-target class="marquee_collection">
+            {row.items.map((label) => (
+              <div class="marque_banner-text-wrapper">
+                <div class="svg_code-icon w-embed">
+                  <svg width="10" height="10" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="3" cy="3" r="3" fill="#FFC000" />
+                  </svg>
+                </div>
+                <div class="scroll_baner-text">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ))
+  }
+  <div class="overlay"></div>
+  <div class="overlay is-right"></div>
+</figure>

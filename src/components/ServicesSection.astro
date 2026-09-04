@@ -1,0 +1,115 @@
+---
+/* Home "Services" section — static content. Ported from the Webflow export.
+   The Vibe Coding image was replaced per the client. */
+const services = [
+  {
+    title: 'Webflow Development ',
+    img: '/images/Screenshot-2026-08-25-141334.avif',
+    srcset:
+      '/images/Screenshot-2026-08-25-141334-p-500.avif 500w, /images/Screenshot-2026-08-25-141334-p-800.avif 800w, /images/Screenshot-2026-08-25-141334-p-1080.avif 1080w, /images/Screenshot-2026-08-25-141334-p-1600.avif 1600w, /images/Screenshot-2026-08-25-141334.avif 1914w',
+    alt: 'Webflow editor interface showing WordPress to Webflow migration agency homepage content with navigation and buttons.',
+  },
+  {
+    title: 'Figma Design',
+    img: '/images/figma.avif',
+    srcset:
+      '/images/figma-p-500.avif 500w, /images/figma-p-800.avif 800w, /images/figma-p-1080.avif 1080w, /images/figma-p-1600.avif 1600w, /images/figma.avif 1909w',
+    alt: 'Figma design project showing multiple webpage layout frames for a law firm website.',
+  },
+  {
+    title: 'Custom Code',
+    img: '/images/image-22.avif',
+    srcset:
+      '/images/image-22-p-500.avif 500w, /images/image-22-p-800.avif 800w, /images/image-22.avif 1110w',
+    alt: 'JavaScript code snippet for GSAP card stacking animation using ScrollTrigger plugin and conditional window width check.',
+  },
+  {
+    title: 'API integration',
+    img: '/images/image-24.avif',
+    srcset:
+      '/images/image-24-p-500.avif 500w, /images/image-24-p-800.avif 800w, /images/image-24.avif 1110w',
+    alt: 'GitHub code page showing checkout.js file with Stripe API integration for payment session handling.',
+  },
+  {
+    title: 'Make Automation ',
+    img: '/images/Screenshot-2026-08-25-141049.avif',
+    srcset:
+      '/images/Screenshot-2026-08-25-141049-p-500.avif 500w, /images/Screenshot-2026-08-25-141049-p-800.avif 800w, /images/Screenshot-2026-08-25-141049-p-1080.avif 1080w, /images/Screenshot-2026-08-25-141049-p-1600.avif 1600w, /images/Screenshot-2026-08-25-141049.avif 1912w',
+    alt: 'Complex automation workflow diagram with interconnected colored nodes and icons for HTTP, data stores, emails, and actions.',
+  },
+  {
+    title: 'Vibe Coding',
+    img: '/images/vibe-coding.avif',
+    srcset: '',
+    alt: 'AI coding assistant generating a website from a natural-language prompt.',
+  },
+];
+---
+
+<section class="section_services">
+  <div class="container-large">
+    <div class="side_lines">
+      <div class="padding-global padding-section-medium">
+        <div class="services_content-wrapper">
+          <div class="services-section-header">
+            <div class="text_in-exprecions">
+              <div class="exprecion">[</div>
+              <div class="text-color-alternate text-size-regular text-style-allcaps">what i can do</div>
+              <div class="exprecion">]</div>
+            </div>
+            <div class="padding-bottom padding-xsmall"></div>
+            <div class="services_section--heading-wrapper">
+              <h2 class="heading-style-h2">Services</h2>
+            </div>
+            <div class="section_divider"></div>
+            <div class="section_services-btn-wrapper">
+              <div class="section_services-paragraph">
+                <p class="text-size-medium text-style-allcaps">
+                  Everything your website needs, in one place. From design to automation, I’ve got
+                  you covered.
+                </p>
+              </div>
+              <a data-stager-btn href="/contact" class="button w-inline-block">
+                <div data-stager-text>Let’s work together</div>
+              </a>
+            </div>
+          </div>
+          <div class="services_option-modal-wrapper">
+            {
+              services.map((s) => (
+                <div class="services_option-item">
+                  <div class="services_option-item-container">
+                    <h3 class="heading-style-h3">{s.title}</h3>
+                    <div class="option_item-img-wrapper">
+                      <img
+                        src={s.img}
+                        srcset={s.srcset || undefined}
+                        sizes="(max-width: 1110px) 100vw, 1110px"
+                        loading="lazy"
+                        decoding="async"
+                        alt={s.alt}
+                        class="option_item-img"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+      <div class="lines_absoulute-position is-left-top">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+      <div class="lines_absoulute-position is-right-top">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+      <div class="lines_absoulute-position is-right-tbottom">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+      <div class="lines_absoulute-position is-left-bottom">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,116 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CornerLines from '../components/CornerLines.astro';
+import { SITE_SETTINGS_QUERY } from '../lib/sanity/queries';
+import { buildContactPageLd } from '../lib/seo/jsonld';
+import { toPerson } from '../lib/seo/person';
+import { imgSet } from '../lib/sanity/image';
+import { absUrl } from '../lib/seo/site';
+
+const settings = await sanityClient.fetch(SITE_SETTINGS_QUERY);
+const person = toPerson(settings);
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+const description =
+  'Get in touch about a Webflow project, a migration or a custom build. I work with health, fitness and B2B companies from Figma handoff to launch.';
+
+const jsonld = buildContactPageLd({
+  title: 'SRDJAN JOVIC · Contact',
+  description,
+  person,
+});
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Contact',
+    description,
+    canonical: absUrl('/contact'),
+    ogImage,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_contact">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="contact_hero-content-wrapper">
+            <div class="contact_hero-heading-wrappery">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">say hello</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="contact_heading">
+                <h1 class="heading-style-h1 is-contact-heading">let's work together</h1>
+              </div>
+              <div class="contact_hero-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Have a question or interested in working together? Book a short online call so we
+                  can get to know each other, discuss your goals, and see how i can help.
+                  <span class="text-color-alternate">Please schedule your call at least 1 day in advance.</span>
+                </p>
+              </div>
+              <div class="padding-bottom padding-large"></div>
+            </div>
+          </div>
+          <div class="booking_app-wrapper">
+            <div class="w-embed">
+              <div style="width:100%;height:100%;overflow:scroll" id="my-cal-inline-online-meeting"></div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (function (C, A, L) {
+    let p = function (a, ar) {
+      a.q.push(ar);
+    };
+    let d = C.document;
+    C.Cal =
+      C.Cal ||
+      function () {
+        let cal = C.Cal;
+        let ar = arguments;
+        if (!cal.loaded) {
+          cal.ns = {};
+          cal.q = cal.q || [];
+          d.head.appendChild(d.createElement('script')).src = A;
+          cal.loaded = true;
+        }
+        if (ar[0] === L) {
+          const api = function () {
+            p(api, arguments);
+          };
+          const namespace = ar[1];
+          api.q = api.q || [];
+          if (typeof namespace === 'string') {
+            cal.ns[namespace] = cal.ns[namespace] || api;
+            p(cal.ns[namespace], ar);
+            p(cal, ['initNamespace', namespace]);
+          } else p(cal, ar);
+          return;
+        }
+        p(cal, ar);
+      };
+  })(window, 'https://app.cal.com/embed/embed.js', 'init');
+  Cal('init', 'online-meeting', { origin: 'https://app.cal.com' });
+  Cal.config = Cal.config || {};
+  Cal.config.forwardQueryParams = true;
+  Cal.ns['online-meeting']('inline', {
+    elementOrSelector: '#my-cal-inline-online-meeting',
+    config: { layout: 'month_view', useSlotsViewOnSmallScreen: 'true' },
+    calLink: 'srdjan-jovic/online-meeting',
+  });
+  Cal.ns['online-meeting']('ui', {
+    cssVarsPerTheme: { light: { 'cal-brand': '#FFC000' }, dark: { 'cal-brand': '#FFC000' } },
+    hideEventTypeDetails: false,
+    layout: 'month_view',
+  });
+</script>

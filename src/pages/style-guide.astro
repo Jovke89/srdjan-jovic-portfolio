@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+// Finsweet Client-First style guide, body preserved verbatim from the Webflow export.
+import body from '../generated/style-guide-body.html?raw';
+---
+
+<BaseLayout seo={{ title: 'Style Guide', noindex: true }} chrome={false} mainWrapper={false}>
+  <div class="page-wrapper" set:html={body} />
+</BaseLayout>

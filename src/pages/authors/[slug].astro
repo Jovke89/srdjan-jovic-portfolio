@@ -1,0 +1,17 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TaxonomyList from '../../components/TaxonomyList.astro';
+import { AUTHOR_SLUGS_QUERY, AUTHOR_PAGE_QUERY } from '../../lib/sanity/queries';
+
+export async function getStaticPaths() {
+  const slugs = await sanityClient.fetch(AUTHOR_SLUGS_QUERY);
+  return (slugs ?? []).map((s: { slug: string }) => ({ params: { slug: s.slug } }));
+}
+const { slug } = Astro.params;
+const data = await sanityClient.fetch(AUTHOR_PAGE_QUERY, { slug });
+if (!data) return Astro.redirect('/404');
+---
+<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+  <TaxonomyList kicker="author" title={data.name} resources={data.resources ?? []} cta="read article" />
+</BaseLayout>
