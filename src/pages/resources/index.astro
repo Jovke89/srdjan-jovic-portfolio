@@ -84,18 +84,22 @@ const PAGE_SIZE = 10;
                 </div>
                 <h2 class="heading-style-h2">All articles</h2>
               </div>
-              <div class="filters_modal">
-                <div class="filters_wrapper" role="group" aria-label="Filter by category">
-                  <button class="filter_btn is-active" data-filter="" aria-pressed="true">
-                    <span class="w-form-label">all</span>
-                  </button>
-                  {
-                    categories.map((c) => (
-                      <button class="filter_btn" data-filter={c.name} aria-pressed="false">
-                        <span class="w-form-label">{c.name}</span>
-                      </button>
-                    ))
-                  }
+              <div class="filters_modal" role="group" aria-label="Filter by category">
+                {/* "all" sits outside the scroll area, on purpose, so it stays put
+                    on mobile while the category buttons drag/swipe beside it. */}
+                <button class="filter_btn is-active" data-filter="" aria-pressed="true">
+                  <span class="w-form-label">all</span>
+                </button>
+                <div class="filters_list-wrapper">
+                  <div class="filters_wrapper">
+                    {
+                      categories.map((c) => (
+                        <button class="filter_btn" data-filter={c.name} aria-pressed="false">
+                          <span class="w-form-label">{c.name}</span>
+                        </button>
+                      ))
+                    }
+                  </div>
                 </div>
               </div>
             </div>

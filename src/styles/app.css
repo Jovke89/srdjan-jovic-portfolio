@@ -1,6 +1,88 @@
 /* App-level styles layered on top of the 3 Webflow CSS files.
    Keep this minimal, the Webflow files own the design. */
 
+/* Mobile nav: keep it pinned to the viewport, not the page START */
+/* Webflow's own `[data-nav-menu-open]` rule (webflow.css) positions the panel
+   `absolute`, relative to `.navbar_component`. Through the `.sticky_nav-
+   component` (position: sticky) ancestor, that resolved inconsistently the
+   further down the page you'd scrolled — the panel could open anchored near
+   the document's top instead of the current viewport, landing off-screen.
+   `fixed` is always relative to the viewport itself, regardless of scroll
+   position or the sticky ancestor. */
+@media screen and (max-width: 991px) {
+  .navbar_component .nav_links-wrapper[data-nav-menu-open] {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: auto;
+    height: 100vh;
+  }
+
+  /* Nav.astro already toggles `.w--open` on the hamburger button when the
+     menu opens/closes — `:has()` reacts to that directly instead of Nav.astro
+     also managing a class on <body>. Keeps the page from scrolling behind the
+     full-screen mobile menu while it's open. */
+  body:has(.menu_hamburger.w--open) {
+    overflow: hidden;
+  }
+}
+/* Mobile nav position END */
+
+/* Hamburger button: same box open or closed, only the icon animates START */
+/* Webflow's generic `.w-nav-button.w--open` (webflow.css) swaps in a solid
+   gray background, and the site CSS adds its own background/border/padding
+   diff on `.w--open` at another breakpoint — both made the button's box look
+   different the moment it opened. One box style for both states, at every
+   breakpoint the hamburger shows at. */
+@media screen and (max-width: 991px) {
+  .menu_hamburger,
+  .menu_hamburger.w--open {
+    background-color: transparent;
+    border: 1px solid #ffc00026;
+    padding: 0.7rem;
+  }
+}
+
+/* The 3 bars morph into an X: top/bottom bars meet at center and rotate,
+   the middle bar fades out. */
+.hamburger_icon {
+  position: relative;
+  width: 1.25rem;
+  height: 0.875rem;
+}
+.hamburger_bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 1px;
+  transition: top 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+}
+.hamburger_bar:nth-child(1) {
+  top: 0;
+}
+.hamburger_bar:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.hamburger_bar:nth-child(3) {
+  top: 100%;
+  transform: translateY(-100%);
+}
+.menu_hamburger.w--open .hamburger_bar:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.menu_hamburger.w--open .hamburger_bar:nth-child(2) {
+  opacity: 0;
+}
+.menu_hamburger.w--open .hamburger_bar:nth-child(3) {
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
+}
+/* Hamburger button END */
+
 /* `.heading-style-h2` is missing font-size in the Webflow export (h1, h3, h4
    all set theirs; h2 doesn't) — every H2 site-wide rendered at the browser
    default instead of the fluid h2 type scale. */
@@ -402,6 +484,24 @@ textarea:focus-visible,
 }
 /* Resources: active category filter END */
 
+/* Resources: filter buttons keep their natural width in the drag/swipe strip START */
+/* `.filters_wrapper` is a flex row with no explicit sizing on `.filter_btn`, so
+   the default flex-shrink: 1 let buttons like "Make Automations" get squeezed
+   below their text's width and wrap to 2 lines. They should stay full-size and
+   let `.filters_list-wrapper` scroll instead. */
+.filter_btn {
+  flex-shrink: 0;
+  flex-grow: 0;
+  white-space: nowrap;
+}
+
+/* Trailing space so the last chip ("Blog") gets breathing room instead of
+   hugging the scroll strip's clipped edge when dragged all the way over. */
+.filters_wrapper {
+  padding-right: 1rem;
+}
+/* Resources: filter buttons END */
+
 /* Resource grid cards ("Tips and tricks"): 2rem breathing room under the CTA START */
 /* The Webflow class sets padding-bottom: 0, which glued the read/time row to the
    bottom edge of the card. */
@@ -409,6 +509,16 @@ textarea:focus-visible,
   padding-bottom: 2rem;
 }
 /* Resource grid cards END */
+
+/* Related Posts cards: same hover as the resources list cards START */
+/* .resource_grid-item (Related Posts, on the resource detail page) already has
+   `transition: all .35s` from the Webflow export but no hover state, unlike
+   .project_item (the resources list card), which darkens on hover. Matching it
+   here so both card types feel consistent. */
+.resource_grid-item:hover {
+  background-color: var(--_srdjan-variables---border-color);
+}
+/* Related Posts cards END */
 
 /* Magnetic round buttons START */
 .footer_btn,

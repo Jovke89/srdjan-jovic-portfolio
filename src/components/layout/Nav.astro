@@ -68,7 +68,13 @@ function isCurrent(href: string) {
           </a>
         </div>
         <button class="menu_hamburger w-nav-button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
-          <div class="icon w-icon-nav-menu"></div>
+          {/* 3 plain bars instead of the Webflow icon-font glyph, so they can
+              morph into an X on open (a font glyph can't be animated like this). */}
+          <div class="icon hamburger_icon">
+            <span class="hamburger_bar"></span>
+            <span class="hamburger_bar"></span>
+            <span class="hamburger_bar"></span>
+          </div>
         </button>
       </div>
     </div>
@@ -81,18 +87,56 @@ function isCurrent(href: string) {
   const menu = document.querySelector<HTMLElement>('.w-nav-menu');
   const button = document.querySelector<HTMLButtonElement>('.menu_hamburger');
   const BP = 991;
+  // Reuse the duration/easing already authored on the navbar (Webflow's own
+  // data-duration/data-easing attributes) instead of a second hardcoded value.
+  const DURATION = Number(nav?.dataset.duration) || 400;
+  const EASING = nav?.dataset.easing || 'ease';
+  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let closeTimer: ReturnType<typeof setTimeout> | undefined;
 
   function isOpen() {
     return button?.classList.contains('w--open');
   }
   function setOpen(open: boolean) {
     if (!menu || !button) return;
+    clearTimeout(closeTimer);
     button.classList.toggle('w--open', open);
+    // Webflow's own CSS shows/hides `.w-nav-menu` off the `data-nav-menu-open`
+    // attribute (see `[data-nav-menu-open]` in webflow.css) with `display:
+    // block !important` and no transition. The panel is anchored to the right
+    // edge (`data-animation="over-right"`, and `position: fixed; right: 0` in
+    // app.css) — slide it in from there manually via inline transform, and
+    // only for the open/closing window: keeping it laid out at all times (an
+    // earlier attempt, via a permanent CSS transform) broke touch scrolling
+    // on mobile, so the attribute goes on right before sliding in and comes
+    // off only once the slide-out has actually finished.
+    if (open) {
+      menu.setAttribute('data-nav-menu-open', '');
+      if (!reducedMotion()) {
+        menu.style.transition = 'none';
+        menu.style.transform = 'translateX(100%)';
+        void menu.offsetWidth; // force layout so the line above paints before animating
+        menu.style.transition = `transform ${DURATION}ms ${EASING}`;
+      }
+      menu.style.transform = 'translateX(0)';
+    } else if (!reducedMotion()) {
+      menu.style.transition = `transform ${DURATION}ms ${EASING}`;
+      menu.style.transform = 'translateX(100%)';
+      closeTimer = setTimeout(() => {
+        menu.removeAttribute('data-nav-menu-open');
+        menu.style.transition = '';
+        menu.style.transform = '';
+      }, DURATION);
+    } else {
+      menu.removeAttribute('data-nav-menu-open');
+    }
     menu.classList.toggle('w--nav-menu-open', open);
     menu.classList.toggle('w--open', open);
     nav?.classList.toggle('w--open', open);
     button.setAttribute('aria-expanded', String(open));
-    document.body.style.overflow = open && window.innerWidth <= BP ? 'hidden' : '';
+    // No separate body class to manage from here — app.css locks scroll via
+    // `body:has(.menu_hamburger.w--open)`, off the class already toggled
+    // 3 lines up.
     if (open && (window as any).lenis) (window as any).lenis.stop();
     else if ((window as any).lenis) (window as any).lenis.start();
   }

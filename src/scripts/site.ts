@@ -487,6 +487,24 @@ function boot() {
   const mm = gsap.matchMedia();
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const cleanCanvas = initHeroCanvas();
+    const cleanCursor = initCustomCursor();
+
+    initMarquee();
+    initSplitHighlight();
+
+    setTimeout(() => ScrollTrigger.refresh(), 100);
+
+    return () => {
+      cleanCanvas();
+      cleanCursor();
+    };
+  });
+
+  // Desktop/tablet only (matches Nav.astro's 991px collapse breakpoint) — on
+  // mobile, Lenis kept fighting the hamburger menu's own scroll lock (native
+  // touch scroll is fine without it there anyway).
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px)', () => {
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
@@ -501,11 +519,12 @@ function boot() {
     gsap.ticker.add(rafCb);
     gsap.ticker.lagSmoothing(0);
 
-    const cleanCanvas = initHeroCanvas();
-    const cleanCursor = initCustomCursor();
-
-    initMarquee();
-    initSplitHighlight();
+    initLoaderThreeSteps();
+    initCardStacking();
+    initHeroHeadingStagger();
+    initHeroOverlap();
+    const cleanServices = initServicesHover();
+    const cleanMagnetic = initMagneticButton();
 
     setTimeout(() => {
       lenis.resize();
@@ -513,23 +532,10 @@ function boot() {
     }, 100);
 
     return () => {
-      cleanCanvas();
-      cleanCursor();
-      gsap.ticker.remove(rafCb);
-      lenis.destroy();
-    };
-  });
-
-  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px)', () => {
-    initLoaderThreeSteps();
-    initCardStacking();
-    initHeroHeadingStagger();
-    initHeroOverlap();
-    const cleanServices = initServicesHover();
-    const cleanMagnetic = initMagneticButton();
-    return () => {
       cleanServices();
       cleanMagnetic();
+      gsap.ticker.remove(rafCb);
+      lenis.destroy();
     };
   });
 }
