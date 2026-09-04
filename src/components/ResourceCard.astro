@@ -1,0 +1,118 @@
+---
+import ResponsiveImg from './ResponsiveImg.astro';
+
+interface Props {
+  resource: {
+    name?: string;
+    slug?: string;
+    timeToRead?: number;
+    category?: { name?: string } | string | null;
+    author?: { name?: string; photo?: unknown } | null;
+    coverImage?: unknown;
+    excerpt?: string;
+  };
+  variant?: 'list' | 'grid';
+}
+const { resource: r, variant = 'list' } = Astro.props;
+const categoryName = typeof r.category === 'string' ? r.category : r.category?.name;
+const href = `/resources/${r.slug}`;
+---
+
+{
+  variant === 'list' ? (
+    <div role="listitem" class="resources-articles_item-wrapper w-dyn-item" data-category={categoryName}>
+      <article class="project_item">
+        <div class="article_item-content-wrapper">
+          <a href={href} class="project_item-img-wrapper w-inline-block">
+            {r.coverImage && <ResponsiveImg source={r.coverImage} alt={r.name ?? ''} class="project_item-img" />}
+          </a>
+          <div class="project_item-content-wrapper">
+            <div class="article_info">
+              <div class="blog_author-wrapper">
+                <div class="author_img-wrapper">
+                  {r.author?.photo && (
+                    <ResponsiveImg source={r.author.photo} alt={r.author.name ?? ''} width={100} sizes="40px" />
+                  )}
+                </div>
+                <div class="text-size-medium text-style-allcaps">{r.author?.name}</div>
+              </div>
+              <div class="category-wrapper">
+                <div class="card_badge-wrapper">
+                  <div>CATEGORY:</div>
+                  <div class="tag">
+                    <div class="text-size-regular text-style-allcaps">{categoryName}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3 class="heading-style-h4">
+              <a href={href}>{r.name}</a>
+            </h3>
+          </div>
+        </div>
+        <div class="article_cta-wrapper">
+          <a data-stager-btn href={href} class="button w-inline-block">
+            <div data-stager-text>read article</div>
+          </a>
+          <div class="card_badge-wrapper is-mobile-change">
+            <div>TIME TO READ:</div>
+            <div class="tag">
+              <div class="is-time-to-read">{r.timeToRead}</div>
+              <div class="text-size-regular text-style-allcaps">min</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  ) : (
+    <div role="listitem" class="w-dyn-item">
+      <div class="resource_grid-item">
+        <div class="div-block-7">
+          <a href={href} class="resources_img-wrapper w-inline-block">
+            {r.coverImage && <ResponsiveImg source={r.coverImage} alt={r.name ?? ''} class="image" />}
+          </a>
+          <div class="resources_content is-static-item">
+            <div class="article_info">
+              <div class="blog_author-wrapper">
+                <div class="author_img-wrapper">
+                  {r.author?.photo && (
+                    <ResponsiveImg source={r.author.photo} alt={r.author.name ?? ''} width={100} sizes="40px" />
+                  )}
+                </div>
+                <div class="text-size-medium text-style-allcaps">{r.author?.name}</div>
+              </div>
+              <div class="category-wrapper">
+                <div class="card_badge-wrapper">
+                  <div>CATEGORY:</div>
+                  <div class="tag">
+                    <div class="text-size-regular text-style-allcaps">{categoryName}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3 class="heading-style-h5">
+              <a href={href}>{r.name}</a>
+            </h3>
+          </div>
+          {r.excerpt && (
+            <div class="resources_paragraph-wrapper">
+              <p class="text-style-allcaps">{r.excerpt}</p>
+            </div>
+          )}
+        </div>
+        <div class="card_button-wrapper">
+          <a data-stager-btn href={href} class="button w-inline-block">
+            <div data-stager-text>read article</div>
+          </a>
+          <div class="card_badge-wrapper">
+            <div>TIME TO READ:</div>
+            <div class="tag">
+              <div class="is-time-to-read">{r.timeToRead}</div>
+              <div class="text-size-regular text-style-allcaps">min</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,321 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ResponsiveImg from '../../components/ResponsiveImg.astro';
+import ResourceCard from '../../components/ResourceCard.astro';
+import Newsletter from '../../components/Newsletter.astro';
+import {
+  RESOURCE_QUERY,
+  RESOURCE_SLUGS_QUERY,
+  SITE_SETTINGS_QUERY,
+} from '../../lib/sanity/queries';
+import { buildBlogPostingWithFaqLd } from '../../lib/seo/jsonld';
+import { toPerson } from '../../lib/seo/person';
+import {
+  portableTextToHtml,
+  portableTextToPlain,
+  extractToc,
+  readingTimeMinutes,
+} from '../../lib/sanity/portableText';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+import '../../styles/resource-article.css';
+
+export async function getStaticPaths() {
+  const slugs = await sanityClient.fetch(RESOURCE_SLUGS_QUERY);
+  return (slugs ?? []).map((s: { slug: string }) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const [r, settings] = await Promise.all([
+  sanityClient.fetch(RESOURCE_QUERY, { slug }),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+]);
+if (!r) return Astro.redirect('/404');
+
+const related = r.category?._ref
+  ? await sanityClient.fetch(
+      `*[_type == "resource" && slug.current != $slug && category._ref == $cid] | order(publishDate desc)[0...3]{
+        name, "slug": slug.current, timeToRead,
+        "category": category->name,
+        "author": author->{ name, photo{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } } },
+        coverImage{ ..., asset->{ _id, url, metadata{ lqip, dimensions } } }
+      }`,
+      { slug, cid: r.category._ref },
+    )
+  : [];
+
+const person = toPerson(settings);
+const bodyHtml = portableTextToHtml(r.body);
+const tldrHtml = portableTextToHtml(r.tldr);
+const toc = extractToc(r.body);
+const readTime = r.timeToRead || readingTimeMinutes(r.body);
+const cover = imgSet(r.coverImage, { width: 1600 });
+const ogImage = imgSet(r.seo?.ogImage ?? r.coverImage, { width: 1200 })?.src;
+const description = r.seo?.description || portableTextToPlain(r.body).slice(0, 160);
+const publishedOn = r.publishDate
+  ? new Date(r.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  : undefined;
+const pageUrl = absUrl(`/resources/${slug}`);
+
+const jsonld = buildBlogPostingWithFaqLd({
+  slug: slug!,
+  headline: r.name!,
+  description,
+  imageUrl: cover?.src,
+  articleSection: r.category?.name ?? undefined,
+  datePublished: r.publishDate ?? undefined,
+  dateModified: r.dateModified ?? undefined,
+  person,
+  faqs: (r.faqs ?? []).map((f: { question: string; answer: string }) => ({
+    question: f.question,
+    answer: f.answer,
+  })),
+});
+---
+
+<BaseLayout
+  seo={{
+    title: r.seo?.title || r.name!,
+    description,
+    canonical: pageUrl,
+    ogImage,
+    ogType: 'article',
+    noindex: r.seo?.noIndex ?? false,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_resources-template-hero">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="resources_template-section-content-wrapper">
+            <div class="resource_template-heading-wrapper">
+              <a href="/resources" class="bak_to-all-posts">&lt; all articles</a>
+              <div class="resource_template-heading">
+                <h1 class="heading-style-h2">{r.name}</h1>
+              </div>
+            </div>
+            <div class="resource_template-info">
+              {
+                r.category?.name && (
+                  <div class="category-wrapper">
+                    <div class="card_badge-wrapper">
+                      <div>CATEGORY:</div>
+                      <div class="tag">
+                        <div class="text-size-regular text-style-allcaps">{r.category.name}</div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+              <div class="card_badge-wrapper">
+                <div>TIME TO READ:</div>
+                <div class="tag">
+                  <div class="is-time-to-read">{readTime}</div>
+                  <div class="text-size-regular text-style-allcaps">min</div>
+                </div>
+              </div>
+              {
+                publishedOn && (
+                  <div class="card_badge-wrapper">
+                    <div class="text-style-allcaps">Published on:</div>
+                    <div class="tag">
+                      <div class="text-size-regular text-style-allcaps">{publishedOn}</div>
+                    </div>
+                  </div>
+                )
+              }
+              {
+                r.author?.name && (
+                  <div class="card_badge-wrapper">
+                    <div class="text-style-allcaps">written by:</div>
+                    <div class="tag">
+                      <div class="text-size-regular text-style-allcaps">{r.author.name}</div>
+                    </div>
+                  </div>
+                )
+              }
+            </div>
+            {
+              cover && (
+                <div class="resource_template-img-mask">
+                  <div class="resource_template-img-wrapper">
+                    <ResponsiveImg
+                      source={r.coverImage}
+                      alt={r.name!}
+                      width={1600}
+                      sizes="(max-width: 991px) 100vw, 1100px"
+                      class="resource_template-img"
+                      loading="eager"
+                      fetchpriority="high"
+                    />
+                  </div>
+                </div>
+              )
+            }
+          </div>
+          <div class="padding-bottom padding-huge"></div>
+          <div class="resource_tepmlate-body-wrapper">
+            <div class="resource_body-content-wrapper">
+              {tldrHtml && <div class="event_body-text w-richtext" set:html={tldrHtml} />}
+              <div id="article-body" class="event_body-text w-richtext" set:html={bodyHtml} />
+            </div>
+            <div class="post_modals-wrapper">
+              {
+                toc.length > 0 && (
+                  <div class="table_of-content-modal">
+                    <div class="toc_heading-wrapper">
+                      <div class="text-size-medium text-style-allcaps">table of content</div>
+                    </div>
+                    <nav aria-label="Table of contents" class="blog-post_toc">
+                      <ol role="list" class="blog-post_toc-list">
+                        {toc.map((h) => (
+                          <li class="blog-post_toc-list-item" data-level={h.level}>
+                            <a href={`#${h.id}`} class="toc_h3">
+                              {h.text}
+                            </a>
+                          </li>
+                        ))}
+                      </ol>
+                    </nav>
+                  </div>
+                )
+              }
+              <div class="share_modal">
+                <div class="share_social-wrapper">
+                  <div class="text-size-medium text-style-allcaps">Share article:</div>
+                  <div class="share_icons-wrapper">
+                    <button data-share="copy" class="icon_circle w-inline-block" aria-label="Copy link">
+                      <div class="svg_icon w-embed">
+                        <svg width="20" height="12" viewBox="0 0 14 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3.433 6.87C2.48122 6.87 1.67111 6.53578 1.00267 5.86733C0.334222 5.199 0 4.389 0 3.43733C0 2.48567 0.334222 1.67489 1.00267 1.005C1.67111 0.335 2.48122 0 3.433 0H5.65467C5.815 0 5.94972 0.0554998 6.05883 0.1665C6.16794 0.2775 6.2225 0.413555 6.2225 0.574666C6.2225 0.735777 6.16794 0.870222 6.05883 0.978C5.94972 1.08567 5.815 1.1395 5.65467 1.1395H3.433C2.79278 1.1395 2.24983 1.362 1.80417 1.807C1.35839 2.252 1.1355 2.794 1.1355 3.433C1.1355 4.07211 1.35839 4.6155 1.80417 5.06317C2.24983 5.51072 2.79278 5.7345 3.433 5.7345H5.65467C5.815 5.7345 5.94972 5.78933 6.05883 5.899C6.16794 6.00867 6.2225 6.14405 6.2225 6.30517C6.2225 6.46628 6.16794 6.60067 6.05883 6.70833C5.94972 6.81611 5.815 6.87 5.65467 6.87H3.433ZM7.88183 6.87C7.71894 6.87 7.58295 6.81517 7.47383 6.7055C7.36472 6.59583 7.31017 6.46044 7.31017 6.29933C7.31017 6.13822 7.36472 6.00378 7.47383 5.896C7.58295 5.78833 7.71894 5.7345 7.88183 5.7345H10.0997C10.7399 5.7345 11.2828 5.512 11.7285 5.067C12.1743 4.622 12.3972 4.08 12.3972 3.441C12.3972 2.80189 12.1743 2.2585 11.7285 1.81083C11.2828 1.36328 10.7399 1.1395 10.0997 1.1395H7.88183C7.71894 1.1395 7.58295 1.08467 7.47383 0.975C7.36472 0.865333 7.31017 0.729943 7.31017 0.568832C7.31017 0.407721 7.36472 0.272666 7.47383 0.163666C7.58295 0.0545547 7.71894 0 7.88183 0H10.0997C11.0514 0 11.8622 0.334888 12.532 1.00467C13.2018 1.67433 13.5367 2.485 13.5367 3.43667C13.5367 4.38833 13.2018 5.19844 12.532 5.867C11.8622 6.53567 11.0514 6.87 10.0997 6.87H7.88183Z" fill="currentColor"></path>
+                        </svg>
+                      </div>
+                    </button>
+                    <a data-share="linkedin" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener" class="icon_circle w-inline-block" aria-label="Share on LinkedIn">
+                      <div class="svg_icon w-embed">
+                        <svg width="16" height="16" viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M1 0C0.447713 0 0 0.447713 0 1V11C0 11.5523 0.447713 12 1 12H11C11.5523 12 12 11.5523 12 11V1C12 0.447713 11.5523 0 11 0H1ZM3.68051 2.66848C3.68426 3.30598 3.20707 3.69879 2.64082 3.69598C2.10738 3.69317 1.64238 3.26848 1.64519 2.66942C1.64801 2.10598 2.09332 1.65317 2.67176 1.66629C3.25863 1.67942 3.68426 2.10973 3.68051 2.66848ZM6.18647 4.50784H4.50553V10.2144H6.28113C6.28113 8.6454 6.2796 7.9688 6.28307 7.29313C6.284 7.12907 6.29147 6.95847 6.33367 6.80187C6.49207 6.21687 7.01807 5.83907 7.60493 5.93193C7.9818 5.99093 8.23113 6.2094 8.33613 6.56473C8.40087 6.78687 8.42993 7.02593 8.43273 7.25753C8.44033 7.95593 8.4382 9.846 8.4374 10.0925V10.2135H10.2187C10.218 8.41973 10.2196 6.91347 10.2196 6.91347C10.2205 6.57313 10.184 6.23753 10.1005 5.90847C9.97587 5.41907 9.71807 5.01407 9.299 4.7216C9.0018 4.51346 8.67553 4.3794 8.31087 4.3644C7.99893 4.34806 7.8094 4.33782 7.63113 4.37377C7.12113 4.47596 6.67307 4.7094 6.3346 5.12093C6.29527 5.16813 6.2568 5.21607 6.1994 5.2876L6.18647 5.3038V4.50784ZM1.78776 10.2163H3.55495V4.51155H1.78776V10.2163Z"></path>
+                        </svg>
+                      </div>
+                    </a>
+                    <a data-share="facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`} target="_blank" rel="noopener" class="icon_circle w-inline-block" aria-label="Share on Facebook">
+                      <div class="svg_icon w-embed">
+                        <svg width="20" height="20" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M13.3333 6.7074C13.3333 3.00301 10.3486 0 6.66667 0C2.98477 0 0 3.00301 0 6.7074C0 10.0552 2.43789 12.8301 5.625 13.3333V8.64627H3.93229V6.7074H5.625V5.22968C5.625 3.54864 6.62033 2.62008 8.14307 2.62008C8.87253 2.62008 9.6354 2.75109 9.6354 2.75109V4.40174H8.7948C7.96667 4.40174 7.70833 4.91881 7.70833 5.44927V6.7074H9.55727L9.26173 8.64627H7.70833V13.3333C10.8955 12.8301 13.3333 10.0553 13.3333 6.7074Z"></path>
+                        </svg>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+                <div class="ai_btns-share-share-wrapper">
+                  <div class="text-size-medium text-style-allcaps">ai summary</div>
+                  <div class="ai_btns-wrapper">
+                    <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div data-stager-text>chatgpt</div>
+                    </a>
+                    <a href={`https://claude.ai/new?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div data-stager-text>claude</div>
+                    </a>
+                    <a href={`https://www.perplexity.ai/search?q=${encodeURIComponent(`Summarize this article: ${pageUrl}`)}`} target="_blank" rel="noopener" class="button is-ai-button w-inline-block">
+                      <div data-stager-text>perplexity</div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="padding-bottom padding-medium"></div>
+            <Newsletter />
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    (related ?? []).length > 0 && (
+      <section class="section_related-posts">
+        <div class="container-large">
+          <div class="side_lines">
+            <CornerLines top={false} />
+            <div class="padding-global padding-section-medium">
+              <div class="related_posts-content-wrapper">
+                <div class="related_posts-section-header">
+                  <div class="text_in-exprecions">
+                    <div class="exprecion">[</div>
+                    <div class="text-color-alternate text-size-regular text-style-allcaps">view more</div>
+                    <div class="exprecion">]</div>
+                  </div>
+                  <div class="padding-bottom padding-xsmall" />
+                  <div class="services_section--heading-wrapper is-related-posts">
+                    <h2 class="heading-style-h2">Related Posts</h2>
+                    <a data-stager-btn href="/resources" class="button w-inline-block">
+                      <div data-stager-text>all resources</div>
+                    </a>
+                  </div>
+                </div>
+                <div class="resources_grid w-dyn-list">
+                  <div role="list" class="collection-list-2 w-dyn-items">
+                    {(related ?? []).map((rr: any) => (
+                      <ResourceCard resource={rr} variant="grid" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    (r.faqs ?? []).length > 0 && (
+      <section class="section_faq">
+        <div class="container-large">
+          <div class="side_lines">
+            <div class="padding-global padding-section-large">
+              <div class="faq_content">
+                <div class="faq_heading-wrapper">
+                  <div class="heading-style-h2">Frequently asked questions about:</div>
+                  <h2 class="heading-style-h2">{r.name}</h2>
+                </div>
+                <div class="faq_wrapper">
+                  {(r.faqs ?? []).map((f: { question: string; answer: string }, i: number) => (
+                    <div id={`faq-blok-${i + 1}`} class="faq_block">
+                      <button class="faq_toggle" aria-expanded="false">
+                        <div class="faq_heading-wrap">
+                          <h3 class="heading-style-h5">{f.question}</h3>
+                        </div>
+                        <div class="faq_icon">
+                          <div class="faq_minus" />
+                          <div class="faq_plus" />
+                        </div>
+                      </button>
+                      <div class="faq_dropdown">
+                        <div class="faq_space-block" />
+                        <div class="faq_answer-wrapper">
+                          <p class="text-size-medium text-style-allcaps">{f.answer}</p>
+                        </div>
+                        <div class="faq_space-block" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <CornerLines />
+          </div>
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<script>
+  import '../../scripts/resource-article.ts';
+</script>

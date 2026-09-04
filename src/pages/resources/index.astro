@@ -1,0 +1,155 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import ResourceCard from '../../components/ResourceCard.astro';
+import { RESOURCES_LIST_QUERY, SITE_SETTINGS_QUERY } from '../../lib/sanity/queries';
+import { buildResourcesListLd } from '../../lib/seo/jsonld';
+import { toPerson } from '../../lib/seo/person';
+import { imgSet } from '../../lib/sanity/image';
+import { absUrl } from '../../lib/seo/site';
+
+const [data, settings] = await Promise.all([
+  sanityClient.fetch(RESOURCES_LIST_QUERY),
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+]);
+const resources = data?.resources ?? [];
+const categories = data?.categories ?? [];
+const person = toPerson(settings);
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+
+const jsonld = buildResourcesListLd({
+  person,
+  articles: resources.map((r) => ({
+    headline: r.name!,
+    slug: r.slug!,
+    articleSection: typeof r.category === 'object' ? r.category?.name : undefined,
+    image: imgSet(r.coverImage, { width: 1200 })?.src,
+  })),
+});
+const PAGE_SIZE = 12;
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Webflow Resources',
+    description:
+      'Practical guides, tutorials and comparisons on Webflow, SEO, AEO, integrations and automation, based on real client work.',
+    canonical: absUrl('/resources'),
+    ogImage,
+  }}
+>
+  <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
+
+  <section class="section_hero-resources">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="resources_hero-content-wrapper">
+            <div class="resources_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">resource centar</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="resources_heading">
+                <h1 class="resource-h1-heading heading-style-h1">Webflow Resources &amp; Insights</h1>
+              </div>
+              <div class="resources_hero-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Practical guides, tutorials, comparisons, and insights on Webflow, SEO, AEO,
+                  integrations, and automation, based on real-world development experience.
+                </p>
+              </div>
+              <a href="#all-articles" class="text-color-alternate text-size-regular text-style-allcaps hide-tablet">scroll down</a>
+            </div>
+          </div>
+        </div>
+        <CornerLines />
+      </div>
+    </div>
+  </section>
+
+  <div id="all-articles" class="section_resources-articles">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="resources-articles_content-wrapper">
+            <div class="resources-articles_heading-wrapper">
+              <div class="resources-articles_heading">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">articles</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">All articles</h2>
+              </div>
+              <div class="filters_modal">
+                <div class="filters_wrapper" role="group" aria-label="Filter by category">
+                  <button class="filter_btn is-active" data-filter="" aria-pressed="true">
+                    <span class="w-form-label">all</span>
+                  </button>
+                  {
+                    categories.map((c) => (
+                      <button class="filter_btn" data-filter={c.name} aria-pressed="false">
+                        <span class="w-form-label">{c.name}</span>
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="resources_articles-wrapper">
+              <div class="showing_wrapper">
+                <div class="left_side">
+                  <div class="showing_item">
+                    <div class="text-weight-medium text-style-allcaps">SHOWING</div>
+                    <div data-count="visible" class="count_value">0</div>
+                    <div class="text-weight-medium text-style-allcaps">articles on this page</div>
+                  </div>
+                </div>
+                <div class="right_side">
+                  <div class="showing_item">
+                    <div class="text-weight-medium text-style-allcaps">of</div>
+                    <div data-count="total" class="count_value">{resources.length}</div>
+                    <div class="text-weight-medium text-style-allcaps">articles</div>
+                  </div>
+                </div>
+              </div>
+              <div class="resources-articles_list-wrapper w-dyn-list">
+                <div
+                  role="list"
+                  class="resources-articles_list w-dyn-items"
+                  data-page-size={PAGE_SIZE}
+                >
+                  {resources.map((r) => <ResourceCard resource={r} variant="list" />)}
+                </div>
+                <div role="navigation" aria-label="List" class="w-pagination-wrapper pagination_modal" data-pager hidden>
+                  <button class="w-pagination-previous button is-pagination" data-page-prev>
+                    <svg class="w-pagination-previous-icon pagination_icon" height="12px" width="12px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+                      <path fill="none" stroke="currentColor" fill-rule="evenodd" d="M8 10L4 6l4-4"></path>
+                    </svg>
+                    <div class="w-inline-block">Previous</div>
+                  </button>
+                  <div role="heading" class="w-page-count page_count" data-page-count></div>
+                  <div class="paginatin_buton-divider"></div>
+                  <button class="w-pagination-next button is-pagination" data-page-next>
+                    <div class="w-inline-block">Next</div>
+                    <svg class="w-pagination-next-icon pagination_icon" height="12px" width="12px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12">
+                      <path fill="none" stroke="currentColor" fill-rule="evenodd" d="M4 2l4 4-4 4"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import '../../scripts/resource-filter.ts';
+</script>

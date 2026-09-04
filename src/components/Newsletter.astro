@@ -1,0 +1,35 @@
+---
+import { sanityClient } from 'sanity:client';
+
+const s = await sanityClient.fetch(
+  `*[_id == "siteSettings"][0]{ newsletterHeading, newsletterCopy, mailchimpAction, mailchimpHiddenField }`,
+);
+const heading = s?.newsletterHeading ?? 'Stay in the loop';
+const copy =
+  s?.newsletterCopy ??
+  'Subscribe to get new articles on Webflow development, SEO/aeo and Make automations straight to your inbox. No spam, just useful content.';
+const action =
+  s?.mailchimpAction ??
+  'https://gmail.us12.list-manage.com/subscribe/post?u=b4bc0d2746891d4f56081b70a&id=88b63a715c&f_id=000ec7e1f0';
+---
+
+<div class="newsletter_wrapper">
+  <div class="cta_baner-heading-wrapper">
+    <h3 class="heading-style-h2">{heading}</h3>
+  </div>
+  <div class="newsletter-paragraph-wrapper">
+    <p class="text-size-medium text-style-allcaps">{copy}</p>
+  </div>
+  <div class="newsletter_form-modal w-form">
+    <form action={action} method="post" target="_blank" class="newsletter_form-wrapper">
+      <div class="mailchimp_tag w-embed">
+        <div hidden><input type="hidden" name="tags" value="4664" /></div>
+      </div>
+      <label for="FNAME" class="form_label">Name</label>
+      <input class="form_input w-input" maxlength="256" name="FNAME" placeholder="Enter your name" type="text" id="FNAME" required />
+      <label for="EMAIL">Email</label>
+      <input class="form_input w-input" maxlength="256" name="EMAIL" placeholder="Enter your email address" type="email" id="EMAIL" required />
+      <input type="submit" class="button is-form-button w-button" value="hit & Submit" />
+    </form>
+  </div>
+</div>
