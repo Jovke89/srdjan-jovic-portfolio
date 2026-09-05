@@ -107,8 +107,8 @@ const jsonld = buildArticleLd({
                     <ResponsiveImg
                       source={cs.coverImage}
                       alt={cs.name!}
-                      width={1600}
-                      sizes="(max-width: 991px) 100vw, 1100px"
+                      width={1200}
+                      sizes="(max-width: 991px) 100vw, 560px"
                       class="case_template-hero-img"
                       loading="eager"
                       fetchpriority="high"
@@ -157,7 +157,12 @@ const jsonld = buildArticleLd({
                         {[0, 1].map(() => (
                           <div class={`marquee-content ${i % 2 === 0 ? 'scroll' : 'scroll-reverse'}`}>
                             {row.map((img: unknown) => (
-                              <ResponsiveImg source={img} width={800} sizes="40vw" class="marque_img" />
+                              <ResponsiveImg
+                                source={img}
+                                width={600}
+                                sizes="(max-width: 767px) 340px, 560px"
+                                class="marque_img"
+                              />
                             ))}
                           </div>
                         ))}
@@ -191,7 +196,12 @@ const jsonld = buildArticleLd({
                   </div>
                   {cs.challengeImage && (
                     <div class="challenge_img-wrapper">
-                      <ResponsiveImg source={cs.challengeImage} alt={`${cs.name} — the challenge`} width={900} />
+                      <ResponsiveImg
+                        source={cs.challengeImage}
+                        alt={`${cs.name} — the challenge`}
+                        width={900}
+                        sizes="(max-width: 991px) 100vw, min(50vw, 650px)"
+                      />
                     </div>
                   )}
                 </div>
@@ -217,7 +227,12 @@ const jsonld = buildArticleLd({
                 <div class="role_content">
                   {cs.roleImage && (
                     <div class="role_img-wrapper">
-                      <ResponsiveImg source={cs.roleImage} alt={`${cs.name} — my role`} width={900} />
+                      <ResponsiveImg
+                        source={cs.roleImage}
+                        alt={`${cs.name} — my role`}
+                        width={900}
+                        sizes="(max-width: 991px) 100vw, min(50vw, 650px)"
+                      />
                     </div>
                   )}
                   <div class="role_paragraph-wrapper">
@@ -252,7 +267,12 @@ const jsonld = buildArticleLd({
                   )}
                   {cs.approachImage && (
                     <div class="approach_img-wrapper">
-                      <ResponsiveImg source={cs.approachImage} alt={`${cs.name} — technical approach`} width={900} />
+                      <ResponsiveImg
+                        source={cs.approachImage}
+                        alt={`${cs.name} — technical approach`}
+                        width={900}
+                        sizes="(max-width: 991px) 100vw, min(50vw, 650px)"
+                      />
                     </div>
                   )}
                 </div>
