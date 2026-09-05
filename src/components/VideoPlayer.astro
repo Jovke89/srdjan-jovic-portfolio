@@ -4,9 +4,14 @@ import { imgSet } from '../lib/sanity/image';
 interface Props {
   src?: string | null;
   poster?: unknown;
+  /* Displayed width varies by caller: the featured testimonial video runs
+     full-width (~1240px, container-large), the grid ones are ~345-380px.
+     The <video poster> attribute is a single flat URL (no srcset), so each
+     call site should pass the width that matches its own display size. */
+  posterWidth?: number;
 }
-const { src, poster } = Astro.props;
-const posterUrl = imgSet(poster, { width: 1200 })?.src;
+const { src, poster, posterWidth = 700 } = Astro.props;
+const posterUrl = imgSet(poster, { width: posterWidth })?.src;
 ---
 
 <div class="video_palyer w-embed">

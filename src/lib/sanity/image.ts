@@ -16,7 +16,7 @@ type ImgSet = {
   lqip?: string;
 };
 
-const DEFAULT_WIDTHS = [500, 800, 1080, 1600, 2000];
+const DEFAULT_WIDTHS = [350, 500, 800, 1080, 1600, 2000];
 
 /* Build an <img>-ready set from a Sanity image. Mirrors the Webflow
    responsive-variant approach (-p-500/800/1080/1600). */

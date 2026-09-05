@@ -1,6 +1,23 @@
 /* App-level styles layered on top of the 3 Webflow CSS files.
    Keep this minimal, the Webflow files own the design. */
 
+/* Screen-reader-only utility START */
+/* Standard visually-hidden pattern. Used to give SplitText-animated text
+   (see .big_text-animation handling in site.ts) a real accessible-name
+   element instead of an aria-label on a tag whose implicit role forbids one. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* Screen-reader-only utility END */
+
 /* Mobile nav: keep it pinned to the viewport, not the page START */
 /* Webflow's own `[data-nav-menu-open]` rule (webflow.css) positions the panel
    `absolute`, relative to `.navbar_component`. Through the `.sticky_nav-
@@ -264,6 +281,17 @@ html.lenis body {
   z-index: -1;
   pointer-events: none;
 }
+
+/* Featured testimonial: full width fix START */
+/* `.video_testimonial-list.is-flex` switches the list to `display: flex`,
+   but the single `.video_testimonial-item` child it wraps (the featured
+   video testimonial, e.g. Milan Petrović) has no width/flex-basis rule in
+   the Webflow export, so as a flex item it shrinks to its own content width
+   instead of filling the row. */
+.video_testimonial-list.is-flex > .video_testimonial-item {
+  width: 100%;
+}
+/* Featured testimonial: full width fix END */
 
 /* Home hero: full viewport height on desktop START */
 /* The Webflow chain bottoms out on .main-wrapper (no height), so the hero's

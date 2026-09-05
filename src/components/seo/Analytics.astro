@@ -11,17 +11,43 @@ const enabled = import.meta.env.PROD && GA_ID;
 {
   enabled && (
     <>
-      {/* Google Analytics START */}
-      <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+      {/* Google Analytics (deferred) START
+          gtag.js costs ~600-900ms of main-thread CPU on load, which was
+          landing squarely inside the initial-load TBT window. It isn't
+          needed for anything the visitor sees, so it's deferred to whichever
+          comes first: a real interaction (scroll/pointer/key), or a short
+          idle fallback so it still fires on pages nobody interacts with. */}
       <script define:vars={{ GA_ID }}>
         window.dataLayer = window.dataLayer || [];
         function gtag() {
           dataLayer.push(arguments);
         }
-        gtag('js', new Date());
-        gtag('config', GA_ID);
+        window.gtag = gtag;
+
+        let gaLoaded = false;
+        function loadGA() {
+          if (gaLoaded) return;
+          gaLoaded = true;
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+          document.head.appendChild(script);
+          gtag('js', new Date());
+          gtag('config', GA_ID);
+        }
+
+        const triggerEvents = ['pointerdown', 'scroll', 'keydown', 'touchstart'];
+        triggerEvents.forEach((evt) =>
+          window.addEventListener(evt, loadGA, { once: true, passive: true }),
+        );
+        const idleFallback = () => loadGA();
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(idleFallback, { timeout: 4000 });
+        } else {
+          setTimeout(idleFallback, 4000);
+        }
       </script>
-      {/* Google Analytics END */}
+      {/* Google Analytics (deferred) END */}
     </>
   )
 }

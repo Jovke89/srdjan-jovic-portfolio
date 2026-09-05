@@ -85,7 +85,11 @@ const [featured, ...rest] = withVideo;
                             </div>
                           </div>
                           <div class="video_palyer-wrapper">
-                            <VideoPlayer src={featured.videoUrl} poster={featured.videoPoster} />
+                            <VideoPlayer
+                              src={featured.videoUrl}
+                              poster={featured.videoPoster}
+                              posterWidth={1300}
+                            />
                           </div>
                         </div>
                       </div>

@@ -70,7 +70,9 @@ const jsonld = buildProfilePageLd({
               class="hero_img"
               src="/images/sdadasd.avif"
               srcset="/images/sdadasd-p-500.avif 500w, /images/sdadasd-p-800.avif 800w, /images/sdadasd.avif 1048w"
-              sizes="(max-width: 1048px) 100vw, 1048px"
+              sizes="(max-width: 991px) 100vw, min(50vw, 620px)"
+              width="1048"
+              height="1442"
               alt="Man with beard and glasses wearing a black Jack & Jones t-shirt with arms crossed."
               loading="eager"
               fetchpriority="high"
@@ -196,7 +198,12 @@ const jsonld = buildProfilePageLd({
                           )}
                           <div class="padding-bottom padding-medium" />
                           <div class="card_btn-wrapper">
-                            <a data-stager-btn href={`/case-studies/${c.slug}`} class="button w-inline-block">
+                            <a
+                              data-stager-btn
+                              href={`/case-studies/${c.slug}`}
+                              class="button w-inline-block"
+                              aria-label={`Read case study: ${c.name}`}
+                            >
                               <div data-stager-text>Read Case study</div>
                             </a>
                           </div>
@@ -207,6 +214,7 @@ const jsonld = buildProfilePageLd({
                               source={c.cardThumbnail ?? c.coverImage}
                               alt={c.name}
                               class="case_study-card-img"
+                              sizes="(max-width: 991px) calc(100vw - 5rem), min(50vw, 748px)"
                             />
                           )}
                         </div>

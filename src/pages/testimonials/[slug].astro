@@ -45,7 +45,7 @@ if (!t) return Astro.redirect('/404');
               {t.quote && <p class="text-size-medium text-style-allcaps">{t.quote}</p>}
               {t.videoUrl && (
                 <div class="video_palyer-wrapper">
-                  <VideoPlayer src={t.videoUrl} poster={t.videoPoster} />
+                  <VideoPlayer src={t.videoUrl} poster={t.videoPoster} posterWidth={1300} />
                 </div>
               )}
             </div>

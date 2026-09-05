@@ -161,7 +161,19 @@ function initMarquee() {
 /* --- Text highlight on scroll (was split-type, now GSAP SplitText) --- */
 function initSplitHighlight() {
   document.querySelectorAll<HTMLElement>('.big_text-animation').forEach((el) => {
-    const split = SplitText.create(el, { type: 'chars,words' });
+    /* SplitText's default `aria: 'auto'` adds an aria-label to the split
+       element — but this target is a <p>, whose implicit "paragraph" role
+       doesn't permit aria-label (Lighthouse: "prohibited ARIA attributes").
+       `aria: 'none'` opts out of that, and a genuine visually-hidden
+       duplicate carries the accessible name instead; the split original
+       (now just decorative chars) is hidden from assistive tech. */
+    const srCopy = document.createElement('span');
+    srCopy.className = 'sr-only';
+    srCopy.textContent = el.textContent ?? '';
+    el.insertAdjacentElement('beforebegin', srCopy);
+    el.setAttribute('aria-hidden', 'true');
+
+    const split = SplitText.create(el, { type: 'chars,words', aria: 'none' });
     gsap.from(split.chars, {
       scrollTrigger: { trigger: el, start: 'top 90%', end: 'top -30%', scrub: 5 },
       opacity: 0.2,
@@ -179,6 +191,10 @@ function initCardStacking() {
   /* Cards size to their own content now, so measure the tallest one (while they
      are still in normal flow) instead of assuming a fixed height. */
   const cardHeight = Math.max(...cards.map((card) => card.offsetHeight), 420);
+  /* Read once, before any card gets `position: fixed` below — reading
+     offsetWidth again inside the loop would force a synchronous reflow on
+     every iteration, since each prior card's style write invalidates layout. */
+  const wrapperWidth = wrapper.offsetWidth;
   wrapper.style.height = cardHeight + 'px';
   wrapper.style.overflow = 'visible';
   cards.forEach((card, i) => {
@@ -189,7 +205,7 @@ function initCardStacking() {
       left: '50%',
       xPercent: -50,
       yPercent: -50,
-      width: wrapper.offsetWidth + 'px',
+      width: wrapperWidth + 'px',
     });
     if (i !== 0) gsap.set(card, { y: window.innerHeight, opacity: 0 });
   });

@@ -59,6 +59,10 @@ const {
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Syne-ExtraBold.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/SplineSansMono-Regular.woff2" />
 
+    {/* Case-study cards, testimonial avatars and video posters all load from
+        Sanity's CDN above the fold on multiple pages. */}
+    <link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
+
     <slot name="head" />
 
     <script is:inline>

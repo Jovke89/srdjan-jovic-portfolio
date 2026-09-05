@@ -9,9 +9,14 @@ export function initHeroCanvas(): () => void {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
+  /* `document.body.scrollHeight` forces a layout read; caching it and only
+     recomputing on resize (instead of every animation frame) avoids doing
+     that read 60x/sec for the lifetime of the page. */
+  let maxScroll = document.body.scrollHeight - window.innerHeight;
   const onResize = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    maxScroll = document.body.scrollHeight - window.innerHeight;
   };
   window.addEventListener('resize', onResize);
 
@@ -45,7 +50,6 @@ export function initHeroCanvas(): () => void {
   ];
   function getCurrentColors(): string[] {
     const scrolled = window.scrollY;
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
     const progress = Math.min(scrolled / maxScroll, 1);
     if (progress < 0.33) {
       const t = progress / 0.33;

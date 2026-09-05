@@ -5452,18 +5452,5 @@ figcaption {
   justify-self: start;
 }
 
-
-@font-face {
-  font-family: 'Splinesansmono';
-  src: url('/fonts/SplineSansMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Syne';
-  src: url('/fonts/Syne-ExtraBold.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
+/* Splinesansmono/Syne @font-face already declared near the top of this file —
+   this was a duplicate left over from the Webflow export. */
