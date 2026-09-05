@@ -642,6 +642,24 @@ textarea:focus-visible,
 }
 /* Case study template END */
 
+/* Contact page: reserve height for the Cal.com booking widget START */
+/* `.booking_app-wrapper` (contact.astro) has no size of its own — it's an
+   empty div until Cal.com's embed script (now deferred to load+idle, see
+   contact.astro) injects the real calendar iframe into it. Without a floor,
+   the container starts at ~0 height and everything below it (.side_lines,
+   CornerLines) jumps down once the calendar renders — a real CLS hit
+   PageSpeed measured at 0.118 on mobile. These are approximate month_view
+   heights; nudge if Cal.com's actual rendered height drifts from this. */
+.booking_app-wrapper {
+  min-height: 32rem;
+}
+@media screen and (min-width: 992px) {
+  .booking_app-wrapper {
+    min-height: 40rem;
+  }
+}
+/* Contact page: reserve height for the Cal.com booking widget END */
+
 /* Related case-study cards: clamp the description to 2 lines START */
 /* Webflow's `.related_paragraph` only carries `overflow: hidden`; the line-clamp
    lived in a custom-code block that was not exported. */

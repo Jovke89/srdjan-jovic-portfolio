@@ -31,6 +31,9 @@ const jsonld = buildContactPageLd({
 >
   <script type="application/ld+json" slot="jsonld" set:html={JSON.stringify(jsonld)} />
 
+  {/* The booking widget below is the only thing on this page that needs app.cal.com. */}
+  <link rel="preconnect" href="https://app.cal.com" crossorigin slot="head" />
+
   <section class="section_contact">
     <div class="container-large">
       <div class="side_lines">
@@ -100,17 +103,40 @@ const jsonld = buildContactPageLd({
         p(cal, ar);
       };
   })(window, 'https://app.cal.com/embed/embed.js', 'init');
-  Cal('init', 'online-meeting', { origin: 'https://app.cal.com' });
-  Cal.config = Cal.config || {};
-  Cal.config.forwardQueryParams = true;
-  Cal.ns['online-meeting']('inline', {
-    elementOrSelector: '#my-cal-inline-online-meeting',
-    config: { layout: 'month_view', useSlotsViewOnSmallScreen: 'true' },
-    calLink: 'srdjan-jovic/online-meeting',
-  });
-  Cal.ns['online-meeting']('ui', {
-    cssVarsPerTheme: { light: { 'cal-brand': '#FFC000' }, dark: { 'cal-brand': '#FFC000' } },
-    hideEventTypeDetails: false,
-    layout: 'month_view',
-  });
+
+  /* The calls above only define window.Cal (cheap, no network cost). The
+     calls below are what actually injects embed.js and renders the
+     calendar — ~2MB / up to 6s of CPU on this page per PageSpeed. The
+     calendar still appears automatically with no extra click, just not
+     competing with the page's own first paint: deferred to the first of
+     "window load" or (once idle) a short timeout fallback. */
+  function initCalBooking() {
+    Cal('init', 'online-meeting', { origin: 'https://app.cal.com' });
+    Cal.config = Cal.config || {};
+    Cal.config.forwardQueryParams = true;
+    Cal.ns['online-meeting']('inline', {
+      elementOrSelector: '#my-cal-inline-online-meeting',
+      config: { layout: 'month_view', useSlotsViewOnSmallScreen: 'true' },
+      calLink: 'srdjan-jovic/online-meeting',
+    });
+    Cal.ns['online-meeting']('ui', {
+      cssVarsPerTheme: { light: { 'cal-brand': '#FFC000' }, dark: { 'cal-brand': '#FFC000' } },
+      hideEventTypeDetails: false,
+      layout: 'month_view',
+    });
+  }
+
+  function scheduleCalBooking() {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initCalBooking, { timeout: 2000 });
+    } else {
+      setTimeout(initCalBooking, 200);
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    scheduleCalBooking();
+  } else {
+    window.addEventListener('load', scheduleCalBooking);
+  }
 </script>
