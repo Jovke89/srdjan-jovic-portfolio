@@ -294,7 +294,7 @@ export function buildEventLd(opts: {
 
 // detail_resources.html — BlogPosting + FAQPage in one @graph
 export function buildBlogPostingWithFaqLd(opts: {
-  slug: string;
+  pageUrl: string;
   headline: string;
   description: string;
   imageUrl?: string;
@@ -304,49 +304,61 @@ export function buildBlogPostingWithFaqLd(opts: {
   person: PersonSettings;
   faqs: { question: string; answer: string }[];
 }) {
-  const pageUrl = `${SITE_URL}/resources/${opts.slug}/`;
-  return {
-    '@context': CTX,
-    '@graph': [
-      {
-        '@type': 'BlogPosting',
-        '@id': `${pageUrl}#article`,
-        mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
-        url: pageUrl,
-        headline: opts.headline,
-        description: opts.description,
-        image: opts.imageUrl || '',
-        articleSection: opts.articleSection || '',
-        datePublished: opts.datePublished || '',
-        dateModified: opts.dateModified || opts.datePublished || '',
-        inLanguage: 'en',
-        isPartOf: {
-          '@type': 'Blog',
-          '@id': `${SITE_URL}/resources#blog`,
-          name: 'Srdjan Jovic Resources',
-        },
-        author: {
-          '@type': 'Person',
-          name: opts.person.name,
-          url: `${SITE_URL}/`,
-          sameAs: opts.person.sameAs,
-        },
-        publisher: {
-          '@type': 'Person',
-          name: opts.person.name,
-          url: `${SITE_URL}/`,
-        },
+  // Must match the page's own <link rel="canonical"> exactly (absUrl(), no
+  // trailing slash) — this used to build its own URL with a trailing slash,
+  // so the JSON-LD's url/@id silently disagreed with the canonical tag.
+  const pageUrl = opts.pageUrl;
+  const graph: Record<string, unknown>[] = [
+    {
+      '@type': 'BlogPosting',
+      '@id': `${pageUrl}#article`,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
+      url: pageUrl,
+      headline: opts.headline,
+      description: opts.description,
+      image: opts.imageUrl || '',
+      articleSection: opts.articleSection || '',
+      // Never emit an empty string here — Google's Rich Results validator
+      // rejects a present-but-empty datePublished. Callers pass a fallback
+      // (e.g. Sanity's _createdAt) so this only happens if that's also missing.
+      ...(opts.datePublished ? { datePublished: opts.datePublished } : {}),
+      ...(opts.dateModified || opts.datePublished
+        ? { dateModified: opts.dateModified || opts.datePublished }
+        : {}),
+      inLanguage: 'en',
+      isPartOf: {
+        '@type': 'Blog',
+        '@id': `${SITE_URL}/resources#blog`,
+        name: 'Srdjan Jovic Resources',
       },
-      {
-        '@type': 'FAQPage',
-        '@id': `${pageUrl}#faq`,
-        inLanguage: 'en',
-        mainEntity: opts.faqs.map((f) => ({
-          '@type': 'Question',
-          name: f.question,
-          acceptedAnswer: { '@type': 'Answer', text: f.answer },
-        })),
+      author: {
+        '@type': 'Person',
+        name: opts.person.name,
+        url: `${SITE_URL}/`,
+        sameAs: opts.person.sameAs,
       },
-    ],
-  };
+      publisher: {
+        '@type': 'Person',
+        name: opts.person.name,
+        url: `${SITE_URL}/`,
+      },
+    },
+  ];
+
+  // An FAQPage with zero questions validates but earns no rich result —
+  // only emit it when there's actually FAQ content.
+  if (opts.faqs.length > 0) {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `${pageUrl}#faq`,
+      inLanguage: 'en',
+      mainEntity: opts.faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
+    });
+  }
+
+  return { '@context': CTX, '@graph': graph };
 }

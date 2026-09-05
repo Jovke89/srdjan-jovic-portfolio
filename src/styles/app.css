@@ -510,15 +510,47 @@ textarea:focus-visible,
 }
 /* Resource grid cards END */
 
-/* Related Posts cards: same hover as the resources list cards START */
-/* .resource_grid-item (Related Posts, on the resource detail page) already has
-   `transition: all .35s` from the Webflow export but no hover state, unlike
-   .project_item (the resources list card), which darkens on hover. Matching it
-   here so both card types feel consistent. */
+/* Related Posts / Tips and tricks cards: visible hover START */
+/* .resource_grid-item (Related Posts on the resource detail page, and the
+   "Tips and tricks" grid on the home page) already has `transition: all .35s`
+   from the Webflow export. It previously hovered to `--border-color`
+   (10%-opacity white) as a flat background-color, which replaces the card's
+   own dark fill rather than lightening it, compositing against the page
+   background behind the card instead. Since the card color and the page
+   color are both near-black, the result read as barely different from the
+   resting state, i.e. no visible hover at all. Mixing white directly into the
+   card's own color lightens it for real. */
 .resource_grid-item:hover {
-  background-color: var(--_srdjan-variables---border-color);
+  background-color: #0b0b0b;
 }
-/* Related Posts cards END */
+/* Related Posts / Tips and tricks cards END */
+
+/* Card image zoom on hover START */
+/* The image, not its wrapper, scales up on hover. Both wrapper classes
+   already carry `overflow: hidden` in the Webflow export, so the zoomed image
+   stays clipped to the card's rounded corners instead of spilling out. */
+.project_item-img-wrapper img,
+.resources_img-wrapper img {
+  transition: transform 0.35s;
+}
+
+.project_item:hover .project_item-img-wrapper img,
+.resource_grid-item:hover .resources_img-wrapper img {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project_item-img-wrapper img,
+  .resources_img-wrapper img {
+    transition: none;
+  }
+
+  .project_item:hover .project_item-img-wrapper img,
+  .resource_grid-item:hover .resources_img-wrapper img {
+    transform: none;
+  }
+}
+/* Card image zoom on hover END */
 
 /* Magnetic round buttons START */
 .footer_btn,

@@ -758,6 +758,9 @@ figcaption {
   font-size: var(--_srdjan-variables---h1-type-face);
   font-weight: 700;
   line-height: 100%;
+  /* Long single words (e.g. "Conferences") at small mobile widths were
+     overflowing past the viewport instead of wrapping, breaking the layout. */
+  overflow-wrap: break-word;
 }
 
 .padding-global {
@@ -3054,7 +3057,7 @@ figcaption {
 }
 
 .project_item:hover {
-  background-color: var(--_srdjan-variables---border-color);
+  background-color: #0b0b0b;
 }
 
 .project_item-img-wrapper {
@@ -4912,12 +4915,18 @@ figcaption {
     max-width: none;
   }
 
+  /* Every page-title H1 (not the home hero) matches the resources-page H1 size
+     on mobile. Previously this reverted to the full desktop clamp here, which
+     is what broke the events template layout on small screens. */
   .heading-style-h1 {
-    font-size: var(--_srdjan-variables---h1-type-face);
+    font-size: clamp(2.5rem, .214rem + 7.143vw, 6.25rem);
   }
 
-  .heading-style-h1.is-events-mobile-heading {
-    font-size: 2rem;
+  /* Case study title: client names run longer than other page titles (e.g.
+     "Marko Miladinovic") and were still crowding the edges on mobile at the
+     shared size above, so this template gets a slightly smaller floor. */
+  .is-case-template-heading.heading-style-h1 {
+    font-size: clamp(2rem, .214rem + 7.143vw, 6.25rem);
   }
 
   .padding-global.footer-padding {

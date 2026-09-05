@@ -67,13 +67,16 @@ const publishedOn = r.publishDate
 const pageUrl = absUrl(`/resources/${slug}`);
 
 const jsonld = buildBlogPostingWithFaqLd({
-  slug: slug!,
+  pageUrl,
   headline: r.name!,
   description,
   imageUrl: cover?.src,
   articleSection: r.category?.name ?? undefined,
-  datePublished: r.publishDate ?? undefined,
-  dateModified: r.dateModified ?? undefined,
+  // Falls back to Sanity's own creation timestamp so an article published
+  // without a manually-set publishDate still gets a valid datePublished
+  // instead of an empty string (invalid per Google's Rich Results check).
+  datePublished: r.publishDate ?? r._createdAt ?? undefined,
+  dateModified: r.dateModified ?? r.publishDate ?? r._createdAt ?? undefined,
   person,
   faqs: (r.faqs ?? []).map((f: { question: string; answer: string }) => ({
     question: f.question,
