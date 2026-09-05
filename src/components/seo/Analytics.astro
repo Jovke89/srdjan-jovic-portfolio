@@ -1,0 +1,27 @@
+---
+/* Google tag (gtag.js) — GA4. Measurement ID is public (it's visible to every
+   visitor in the page source), so a hardcoded fallback is fine here, same
+   pattern as the Sanity project/dataset IDs elsewhere in this codebase.
+   Only loads in production builds, so local `astro dev` traffic never
+   pollutes the real Analytics data. */
+const GA_ID = import.meta.env.PUBLIC_GA_ID || 'G-MB8QXHTP4P';
+const enabled = import.meta.env.PROD && GA_ID;
+---
+
+{
+  enabled && (
+    <>
+      {/* Google Analytics START */}
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+      <script define:vars={{ GA_ID }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', GA_ID);
+      </script>
+      {/* Google Analytics END */}
+    </>
+  )
+}
