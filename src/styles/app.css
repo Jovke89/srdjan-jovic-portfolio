@@ -304,11 +304,6 @@ html.lenis body {
     height: 100vh;
     height: 100dvh;
   }
-  /* Container runs the full 77.5rem with no side padding inside the hero */
-  .section_hero-home .padding-global {
-    padding-left: 0;
-    padding-right: 0;
-  }
   /* Portrait: wrapper is 50% x full height, the image is 100% x 200% and
      object-fit: contain, anchored to the bottom edge so the figure sits on the
      bottom of the hero and overflows upward behind the copy. */
