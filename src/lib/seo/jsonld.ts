@@ -15,13 +15,6 @@ export type PersonSettings = {
   occupationSkills?: string;
 };
 
-export type HomeReview = {
-  authorName: string;
-  authorJobTitle?: string;
-  authorCompany?: string;
-  reviewBody: string;
-};
-
 const CTX = 'https://schema.org';
 
 /* --- Person variants (matching each page's exact shape) --- */
@@ -87,29 +80,17 @@ function personAuthor(p: PersonSettings) {
   };
 }
 
-function reviews(list: HomeReview[]) {
-  return list.map((r) => ({
-    '@type': 'Review',
-    author: {
-      '@type': 'Person',
-      name: r.authorName,
-      ...(r.authorJobTitle ? { jobTitle: r.authorJobTitle } : {}),
-      ...(r.authorCompany
-        ? { worksFor: { '@type': 'Organization', name: r.authorCompany } }
-        : {}),
-    },
-    reviewBody: r.reviewBody,
-  }));
-}
-
 /* --- Page builders --- */
 
 // index.html
+// No `review` array here: Google's Review-snippet validator rejects it because
+// (a) ProfilePage is not a valid parent type for review snippets and (b) the
+// testimonials carry no star rating / aggregateRating. Reviews without ratings
+// earn no rich result anyway, so the quotes live on-page as plain content.
 export function buildProfilePageLd(opts: {
   title: string;
   description: string;
   person: PersonSettings;
-  reviews: HomeReview[];
 }) {
   return {
     '@context': CTX,
@@ -119,7 +100,6 @@ export function buildProfilePageLd(opts: {
     url: absUrl('/'),
     inLanguage: 'en',
     mainEntity: personFull(opts.person),
-    review: reviews(opts.reviews),
   };
 }
 
@@ -143,7 +123,6 @@ export function buildContactPageLd(opts: {
 // case-study.html (list)
 export function buildCaseStudyListLd(opts: {
   person: PersonSettings;
-  reviews: HomeReview[];
   items: { name: string; description: string; slug: string; image?: string }[];
 }) {
   return {
@@ -166,7 +145,6 @@ export function buildCaseStudyListLd(opts: {
         ...(it.image ? { image: it.image } : {}),
       })),
     },
-    review: reviews(opts.reviews),
   };
 }
 

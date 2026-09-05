@@ -43,13 +43,6 @@ export type SiteSettings = {
   knowsAbout?: Array<string>;
   occupationCountry?: string;
   occupationSkills?: string;
-  homeReviews?: Array<{
-    authorName?: string;
-    authorJobTitle?: string;
-    authorCompany?: string;
-    reviewBody?: string;
-    _key: string;
-  }>;
   linkedinUrl?: string;
   instagramUrl?: string;
   defaultOgImage?: {

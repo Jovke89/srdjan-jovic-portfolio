@@ -1,15 +1,14 @@
 import { defineType, defineField } from 'sanity';
 
 /* Single document (id "siteSettings"). Global values lifted out of the Webflow
-   custom code: the Person identity for JSON-LD, the hard-coded home-page
-   reviews, the default OG image, newsletter copy + Mailchimp params, HubSpot id. */
+   custom code: the Person identity for JSON-LD, the default OG image, newsletter
+   copy + Mailchimp params, HubSpot id. */
 export const siteSettings = defineType({
   name: 'siteSettings',
   title: 'Site settings',
   type: 'document',
   groups: [
     { name: 'person', title: 'Person (JSON-LD)', default: true },
-    { name: 'reviews', title: 'Home reviews' },
     { name: 'social', title: 'Social & sharing' },
     { name: 'newsletter', title: 'Newsletter' },
     { name: 'integrations', title: 'Integrations' },
@@ -31,26 +30,6 @@ export const siteSettings = defineType({
     defineField({ name: 'knowsAbout', title: 'Knows about', type: 'array', of: [{ type: 'string' }], group: 'person' }),
     defineField({ name: 'occupationCountry', title: 'Occupation country', type: 'string', group: 'person', initialValue: 'Serbia' }),
     defineField({ name: 'occupationSkills', title: 'Occupation skills', type: 'string', group: 'person' }),
-
-    // Home reviews (hard-coded in the Webflow JSON-LD, not the testimonials collection)
-    defineField({
-      name: 'homeReviews',
-      title: 'Home / case-study list reviews',
-      type: 'array',
-      group: 'reviews',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            defineField({ name: 'authorName', type: 'string' }),
-            defineField({ name: 'authorJobTitle', type: 'string' }),
-            defineField({ name: 'authorCompany', type: 'string' }),
-            defineField({ name: 'reviewBody', type: 'text', rows: 3 }),
-          ],
-          preview: { select: { title: 'authorName', subtitle: 'authorCompany' } },
-        },
-      ],
-    }),
 
     // Social & sharing
     defineField({ name: 'linkedinUrl', title: 'LinkedIn URL', type: 'url', group: 'social' }),

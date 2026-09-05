@@ -12,6 +12,6 @@ const { slug } = Astro.params;
 const data = await sanityClient.fetch(AUTHOR_PAGE_QUERY, { slug });
 if (!data) return Astro.redirect('/404');
 ---
-<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+<BaseLayout seo={{ title: `${data.name} — author | Srdjan Jovic`, noindex: true }}>
   <TaxonomyList kicker="author" title={data.name} resources={data.resources ?? []} cta="read article" />
 </BaseLayout>

@@ -9,7 +9,6 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
   personName, jobTitle, personDescription, personImageCaption,
   personImage${IMG},
   knowsAbout, occupationCountry, occupationSkills,
-  homeReviews[]{ authorName, authorJobTitle, authorCompany, reviewBody },
   linkedinUrl, instagramUrl,
   defaultOgImage${IMG},
   newsletterHeading, newsletterCopy, mailchimpAction, mailchimpHiddenField

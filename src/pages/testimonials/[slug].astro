@@ -14,7 +14,7 @@ const { slug } = Astro.params;
 const t = await sanityClient.fetch(TESTIMONIAL_PAGE_QUERY, { slug });
 if (!t) return Astro.redirect('/404');
 ---
-<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+<BaseLayout seo={{ title: `${t.name}${t.company ? `, ${t.company}` : ''} — testimonial | Srdjan Jovic`, noindex: true }}>
   <section class="section_event">
     <div class="container-large">
       <div class="side_lines">

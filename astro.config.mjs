@@ -64,10 +64,18 @@ export default defineConfig({
     }),
     react(),
     sitemap({
+      // Thin, near-duplicate taxonomy stubs (one list, no unique copy) are set to
+      // noindex in their page templates, so they must also stay out of the sitemap
+      // to avoid sending Google conflicting signals. /resource-category/* is kept:
+      // those are real topic hubs for the resource center.
       filter: (page) =>
         !page.includes('/studio') &&
         !page.endsWith('/401/') &&
-        !page.endsWith('/404/'),
+        !page.endsWith('/404/') &&
+        !page.includes('/industry/') &&
+        !page.includes('/tech-stack/') &&
+        !page.includes('/authors/') &&
+        !page.includes('/testimonials/'),
     }),
   ],
 });

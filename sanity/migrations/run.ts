@@ -92,32 +92,6 @@ async function main() {
     occupationCountry: 'Serbia',
     occupationSkills:
       'Webflow, JavaScript, Figma, API Integration, Make Automation, CMS, Technical SEO',
-    homeReviews: [
-      {
-        _key: 'r1',
-        authorName: 'Silvia Nol',
-        authorJobTitle: 'CEO',
-        authorCompany: 'Nol Book-keeping',
-        reviewBody:
-          'Collaborating with Srdjan was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project.',
-      },
-      {
-        _key: 'r2',
-        authorName: 'Arnes Kevric',
-        authorJobTitle: 'CEO',
-        authorCompany: 'arni fitness zone',
-        reviewBody:
-          'Srđan quickly understood my vision and translated it into a fast, modern Webflow website that truly represents my brand. Every suggestion he made was focused on improving user experience and conversion, not just design.',
-      },
-      {
-        _key: 'r3',
-        authorName: 'Stefan Ivic',
-        authorJobTitle: 'CEO',
-        authorCompany: 'broworks',
-        reviewBody:
-          'Collaborating with Srdjan was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project.',
-      },
-    ],
     linkedinUrl: 'https://www.linkedin.com/in/srdjanjovic',
     instagramUrl: 'https://www.instagram.com/flowmagiaa/',
     defaultOgImage: await uploadImage(

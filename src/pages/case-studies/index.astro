@@ -25,7 +25,6 @@ const videoTestimonials = [...(home?.videoTestimonials ?? []), ...(home?.textTes
 
 const jsonld = buildCaseStudyListLd({
   person,
-  reviews: settings?.homeReviews ?? [],
   items: (caseStudies ?? []).map((c) => ({
     name: c.name!,
     description: c.clientDescription ?? '',

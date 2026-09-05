@@ -12,6 +12,6 @@ const { slug } = Astro.params;
 const data = await sanityClient.fetch(TECH_PAGE_QUERY, { slug });
 if (!data) return Astro.redirect('/404');
 ---
-<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+<BaseLayout seo={{ title: `${data.name} — Webflow case studies | Srdjan Jovic`, noindex: true }}>
   <TaxonomyList kicker="tech stack" title={data.name} caseStudies={data.caseStudies ?? []} cta="view Case Study" />
 </BaseLayout>

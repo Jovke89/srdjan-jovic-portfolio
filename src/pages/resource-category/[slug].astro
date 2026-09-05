@@ -11,7 +11,12 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const data = await sanityClient.fetch(CATEGORY_PAGE_QUERY, { slug });
 if (!data) return Astro.redirect('/404');
+
+const seo = {
+  title: `${data.name} — Webflow & automation resources | Srdjan Jovic`,
+  description: `${data.name} articles and guides from Srdjan Jovic, a Webflow developer and Make automation specialist.`,
+};
 ---
-<BaseLayout seo={{ title: 'Srdjan Jovic Portfolio' }}>
+<BaseLayout seo={seo}>
   <TaxonomyList kicker="category" title={data.name} resources={data.resources ?? []} cta="read article" />
 </BaseLayout>
