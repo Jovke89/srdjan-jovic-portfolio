@@ -1,7 +1,7 @@
 /* JSON-LD builders that reproduce, 1:1, the schema blocks from the Webflow export.
    Every static literal (types, inLanguage, @id anchors, sameAs order, knowsAbout,
    occupation) is preserved. Dynamic values come from Sanity + siteSettings. */
-import { SITE_URL } from './site';
+import { SITE_URL, absUrl } from './site';
 
 export type PersonSettings = {
   name: string;
@@ -72,7 +72,7 @@ function personAuthorWithTitle(p: PersonSettings) {
     '@type': 'Person',
     name: p.name,
     jobTitle: p.jobTitle,
-    url: '/',
+    url: absUrl('/'),
     sameAs: p.sameAs,
   };
 }
@@ -82,7 +82,7 @@ function personAuthor(p: PersonSettings) {
   return {
     '@type': 'Person',
     name: p.name,
-    url: '/',
+    url: absUrl('/'),
     sameAs: p.sameAs,
   };
 }
@@ -116,7 +116,7 @@ export function buildProfilePageLd(opts: {
     '@type': 'ProfilePage',
     name: opts.title,
     description: opts.description,
-    url: '/',
+    url: absUrl('/'),
     inLanguage: 'en',
     mainEntity: personFull(opts.person),
     review: reviews(opts.reviews),
@@ -134,7 +134,7 @@ export function buildContactPageLd(opts: {
     '@type': 'ContactPage',
     name: opts.title,
     description: opts.description,
-    url: '/contact',
+    url: absUrl('/contact'),
     inLanguage: 'en',
     about: personShort(opts.person),
   };
@@ -152,7 +152,7 @@ export function buildCaseStudyListLd(opts: {
     name: 'A closer look at my work',
     description:
       'Explore selected projects I’ve designed and built, from the initial concept and visual direction to the final Webflow development.',
-    url: '/case-studies',
+    url: absUrl('/case-studies'),
     inLanguage: 'en',
     about: personShort(opts.person),
     mainEntity: {
@@ -162,7 +162,7 @@ export function buildCaseStudyListLd(opts: {
         position: i + 1,
         name: it.name,
         description: it.description,
-        url: `/case-studies/${it.slug}`,
+        url: absUrl(`/case-studies/${it.slug}`),
         ...(it.image ? { image: it.image } : {}),
       })),
     },
@@ -181,14 +181,14 @@ export function buildEventsListLd(opts: {
     name: 'Events & Conferences',
     description:
       'A collection of events, conferences, and experiences that have shaped the way I think about design, development, and the web.',
-    url: '/events',
+    url: absUrl('/events'),
     inLanguage: 'en',
     about: personShort(opts.person),
     hasPart: opts.events.map((e) => ({
       '@type': 'Event',
       name: e.name,
       description: e.description,
-      url: `/events/${e.slug}`,
+      url: absUrl(`/events/${e.slug}`),
       ...(e.image ? { image: { '@type': 'ImageObject', url: e.image } } : {}),
     })),
   };
@@ -210,12 +210,12 @@ export function buildResourcesListLd(opts: {
     name: 'Webflow Resources & Insights',
     description:
       'Practical guides, tutorials, comparisons, and insights on Webflow, SEO, AEO, integrations, and automation, based on real-world development experience.',
-    url: '/resources',
+    url: absUrl('/resources'),
     inLanguage: 'en',
     author: personAuthorWithTitle(opts.person),
     hasPart: opts.articles.map((a) => ({
       '@type': 'Article',
-      '@id': `/resources/${a.slug}`,
+      '@id': absUrl(`/resources/${a.slug}`),
       headline: a.headline,
       author: { '@type': 'Person', name: opts.person.name },
       ...(a.image ? { image: a.image } : {}),
@@ -240,7 +240,7 @@ export function buildArticleLd(opts: {
     '@type': 'Article',
     headline: opts.headline,
     description: opts.description,
-    url: `/case-studies/${opts.slug}`,
+    url: absUrl(`/case-studies/${opts.slug}`),
     datePublished: opts.datePublished || '',
     dateModified: opts.dateModified || opts.datePublished || '',
     inLanguage: 'en',
@@ -271,7 +271,7 @@ export function buildEventLd(opts: {
     '@type': 'Event',
     name: opts.name,
     description: opts.description,
-    url: `/events/${opts.slug}`,
+    url: absUrl(`/events/${opts.slug}`),
     startDate: opts.startDate || '',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
