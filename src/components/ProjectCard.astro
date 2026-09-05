@@ -28,7 +28,12 @@ const textClass = related
     <div class={imgWrapClass}>
       {
         image ? (
-          <ResponsiveImg source={image} alt={imageAlt ?? title} class="project_item-img" />
+          <ResponsiveImg
+            source={image}
+            alt={imageAlt ?? title}
+            class="project_item-img"
+            sizes="(max-width: 767px) 100vw, 50vw"
+          />
         ) : (
           <div class="project_item-img"></div>
         )

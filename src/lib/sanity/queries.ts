@@ -12,8 +12,7 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
   homeReviews[]{ authorName, authorJobTitle, authorCompany, reviewBody },
   linkedinUrl, instagramUrl,
   defaultOgImage${IMG},
-  newsletterHeading, newsletterCopy, mailchimpAction, mailchimpHiddenField,
-  hubspotPortalId
+  newsletterHeading, newsletterCopy, mailchimpAction, mailchimpHiddenField
 }`);
 
 /* --- Home --- */

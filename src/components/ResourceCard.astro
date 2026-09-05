@@ -25,7 +25,14 @@ const href = `/resources/${r.slug}`;
         <div class="article_item-content-wrapper">
           {/* Card is not a link block: only the "read article" button below navigates. */}
           <div class="project_item-img-wrapper">
-            {r.coverImage && <ResponsiveImg source={r.coverImage} alt={r.name ?? ''} class="project_item-img" />}
+            {r.coverImage && (
+              <ResponsiveImg
+                source={r.coverImage}
+                alt={r.name ?? ''}
+                class="project_item-img"
+                sizes="(max-width: 767px) 100vw, 50vw"
+              />
+            )}
           </div>
           <div class="project_item-content-wrapper">
             <div class="article_info">
