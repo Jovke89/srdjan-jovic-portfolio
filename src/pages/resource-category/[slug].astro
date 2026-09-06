@@ -15,6 +15,11 @@ if (!data) return Astro.redirect('/404');
 const seo = {
   title: `${data.name} — Webflow & automation resources | Srdjan Jovic`,
   description: `${data.name} articles and guides from Srdjan Jovic, a Webflow developer and Make automation specialist.`,
+  // Thin taxonomy archive (one card list, no unique copy) — noindex like the
+  // other taxonomy stubs (/industry/, /tech-stack/, /authors/, /testimonials/).
+  // Google should only see the site's real pages; this stays live for on-site
+  // navigation/internal linking, just out of the index.
+  noindex: true,
 };
 ---
 <BaseLayout seo={seo}>

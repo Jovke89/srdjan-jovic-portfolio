@@ -16,7 +16,7 @@ const videos = [
 ];
 ---
 
-<BaseLayout seo={{ title: 'video', description: undefined }} chrome={false} mainWrapper={false}>
+<BaseLayout seo={{ title: 'video', description: undefined, noindex: true }} chrome={false} mainWrapper={false}>
   <div class="div-block-4">
     {
       videos.map((v) => (

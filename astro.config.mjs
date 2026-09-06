@@ -66,8 +66,9 @@ export default defineConfig({
     sitemap({
       // Thin, near-duplicate taxonomy stubs (one list, no unique copy) are set to
       // noindex in their page templates, so they must also stay out of the sitemap
-      // to avoid sending Google conflicting signals. /resource-category/* is kept:
-      // those are real topic hubs for the resource center.
+      // to avoid sending Google conflicting signals: Google should only see the
+      // site's real pages, not archive/utility scaffolding. /style-guide and
+      // /video are the same story (bare utility pages, not real content).
       filter: (page) =>
         !page.includes('/studio') &&
         !page.endsWith('/401/') &&
@@ -75,7 +76,10 @@ export default defineConfig({
         !page.includes('/industry/') &&
         !page.includes('/tech-stack/') &&
         !page.includes('/authors/') &&
-        !page.includes('/testimonials/'),
+        !page.includes('/testimonials/') &&
+        !page.includes('/resource-category/') &&
+        !page.includes('/style-guide') &&
+        !page.includes('/video'),
     }),
   ],
 });
