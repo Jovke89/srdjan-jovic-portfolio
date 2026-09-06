@@ -12,6 +12,7 @@ type SiteSettings = {
   occupationSkills?: string;
   linkedinUrl?: string;
   instagramUrl?: string;
+  githubUrl?: string;
 } | null;
 
 /** siteSettings document -> the Person shape the JSON-LD builders expect. */
@@ -22,7 +23,9 @@ export function toPerson(settings: SiteSettings): PersonSettings {
     description: settings?.personDescription,
     imageUrl: imgSet(settings?.personImage, { width: 1200 })?.src,
     imageCaption: settings?.personImageCaption,
-    sameAs: [settings?.linkedinUrl, settings?.instagramUrl].filter(Boolean) as string[],
+    sameAs: [settings?.linkedinUrl, settings?.instagramUrl, settings?.githubUrl].filter(
+      Boolean,
+    ) as string[],
     knowsAbout: settings?.knowsAbout,
     occupationCountry: settings?.occupationCountry,
     occupationSkills: settings?.occupationSkills,

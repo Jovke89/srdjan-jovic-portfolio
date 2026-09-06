@@ -288,6 +288,47 @@ blockquote {
   line-height: 1.5;
 }
 
+/* Rich-text table (portableText.ts `table` block) START — the Webflow export
+   never shipped a real <table> anywhere, so this had no styling at all until
+   the first article to actually use the `table` object type needed one. */
+.w-richtext-figure-type-table {
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.w-richtext-figure-type-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--_srdjan-variables---card-bg-color);
+  border: .0625rem solid var(--_srdjan-variables---border-color);
+  border-radius: .1875rem;
+  overflow: hidden;
+}
+
+.w-richtext-figure-type-table th,
+.w-richtext-figure-type-table td {
+  padding: .75rem 1rem;
+  text-align: left;
+  font-size: .9rem;
+  line-height: 1.4;
+  border-bottom: .0625rem solid var(--_srdjan-variables---border-color);
+}
+
+.w-richtext-figure-type-table th {
+  color: var(--_srdjan-variables---brand-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.w-richtext-figure-type-table td {
+  color: var(--_srdjan-variables---body-text-color);
+}
+
+.w-richtext-figure-type-table tr:last-child td {
+  border-bottom: none;
+}
+/* Rich-text table END */
+
 figure {
   margin-top: 2rem;
   margin-bottom: 2rem;
@@ -1028,7 +1069,12 @@ figcaption {
 }
 
 .form_input::placeholder {
-  color: var(--_srdjan-variables---border-color);
+  /* Was --border-color (#ffffff1a, ~10% white) — a border tint, not text,
+     reused here by mistake. Against --card-bg-color that's a 1.47:1
+     contrast ratio (SEO audit color-contrast finding). --body-text-color
+     is the variable this site already uses for muted body copy on this
+     same dark background (~10:1), so it's the correct value here too. */
+  color: var(--_srdjan-variables---body-text-color);
 }
 
 .form_input.is-select-input {

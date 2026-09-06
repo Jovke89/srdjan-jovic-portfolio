@@ -61,6 +61,9 @@ const jsonld = buildArticleLd({
     name: cs.name ?? undefined,
     description: cs.clientDescription ?? undefined,
     url: cs.currentWebsite ?? undefined,
+    // Marko Miladinović is an individual freelance designer, not a company —
+    // every other case study client here is a real Organization.
+    type: slug === 'marko-miladinovic' ? 'Person' : 'Organization',
   },
 });
 ---

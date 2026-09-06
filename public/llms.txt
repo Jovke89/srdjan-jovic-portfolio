@@ -2,7 +2,7 @@
 
 > Webflow Designer & Developer working with health, fitness, and B2B companies across the EU and US. Full projects end to end: design and Figma handoff, Webflow development, custom code, API integrations, Make automation, and SEO/AEO.
 
-Srdjan Jovic is a Webflow Designer & Developer with more than three years of experience and more than 50 completed projects. He handles projects end to end, from design through Webflow development, custom code, third-party API integrations, Make automation, and SEO/AEO optimization. Webflow development is the core service; design, integrations, automation, and search optimization support it.
+Srdjan Jovic is a Webflow Designer & Developer with more than four years of experience and more than 50 completed projects. He handles projects end to end, from design through Webflow development, custom code, third-party API integrations, Make automation, and SEO/AEO optimization. Webflow development is the core service; design, integrations, automation, and search optimization support it.
 
 This site is a portfolio of client case studies plus a resource center of practical, first-person articles written from real project work. All services are described on the home page. Client work is conducted in English.
 
@@ -21,6 +21,8 @@ Content notes for AI usage: all articles and case studies are first-party and ba
 - [Xerenta](https://www.srdjan-jovic.com/case-studies/xerenta): Full redesign and Webflow rebuild for a Swiss environmental intelligence firm serving high net worth clients, with GSAP scroll marquee and card stacking animations.
 - [Arni Fitness Zone](https://www.srdjan-jovic.com/case-studies/arni-fitness-zone): Design and Webflow development for a Belgrade personal training studio, with Cal.com booking and Mailchimp capture. Revenue grew 75% within three months of launch.
 - [4Tress Partners](https://www.srdjan-jovic.com/case-studies/four-tress-partners): Website built from scratch in Webflow for a veteran owned healthcare staffing company, with conditional contact form logic guiding both facilities and providers.
+- [AnswerLabs](https://www.srdjan-jovic.com/case-studies/answerlabs): Webflow site built from scratch for a B2B AI visibility research company, with scroll and parallax animations and a HubSpot form integration.
+- [Marko Miladinović](https://www.srdjan-jovic.com/case-studies/marko-miladinovic): Webflow site for a graphic designer specializing in branding and logo design, with Mailchimp integration for newsletters and dedicated pages for each project.
 
 ## Optional
 - [LinkedIn](https://www.linkedin.com/in/srdjanjovic): Professional profile.

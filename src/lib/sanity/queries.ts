@@ -9,7 +9,7 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
   personName, jobTitle, personDescription, personImageCaption,
   personImage${IMG},
   knowsAbout, occupationCountry, occupationSkills,
-  linkedinUrl, instagramUrl,
+  linkedinUrl, instagramUrl, githubUrl,
   defaultOgImage${IMG},
   newsletterHeading, newsletterCopy, mailchimpAction, mailchimpHiddenField
 }`);

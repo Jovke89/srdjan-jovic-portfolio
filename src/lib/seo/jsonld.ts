@@ -194,6 +194,7 @@ export function buildResourcesListLd(opts: {
     hasPart: opts.articles.map((a) => ({
       '@type': 'Article',
       '@id': absUrl(`/resources/${a.slug}`),
+      url: absUrl(`/resources/${a.slug}`),
       headline: a.headline,
       author: { '@type': 'Person', name: opts.person.name },
       ...(a.image ? { image: a.image } : {}),
@@ -211,7 +212,11 @@ export function buildArticleLd(opts: {
   dateModified?: string;
   imageUrl?: string;
   person: PersonSettings;
-  clientOrg?: { name?: string; description?: string; url?: string };
+  // Most case-study clients are companies, but one (Marko Miladinović) is an
+  // individual freelancer — schema.org calls for Person there, not
+  // Organization. Defaults to 'Organization' so existing callers don't need
+  // to change.
+  clientOrg?: { name?: string; description?: string; url?: string; type?: 'Organization' | 'Person' };
 }) {
   return {
     '@context': CTX,
@@ -219,13 +224,16 @@ export function buildArticleLd(opts: {
     headline: opts.headline,
     description: opts.description,
     url: absUrl(`/case-studies/${opts.slug}`),
-    datePublished: opts.datePublished || '',
-    dateModified: opts.dateModified || opts.datePublished || '',
+    // Same empty-string trap as Event.startDate — omit rather than emit "".
+    ...(opts.datePublished ? { datePublished: opts.datePublished } : {}),
+    ...(opts.dateModified || opts.datePublished
+      ? { dateModified: opts.dateModified || opts.datePublished }
+      : {}),
     inLanguage: 'en',
     author: personAuthor(opts.person),
     image: { '@type': 'ImageObject', url: opts.imageUrl || '' },
     about: {
-      '@type': 'Organization',
+      '@type': opts.clientOrg?.type || 'Organization',
       name: opts.clientOrg?.name || '',
       description: opts.clientOrg?.description || '',
       url: opts.clientOrg?.url || '',
@@ -250,7 +258,9 @@ export function buildEventLd(opts: {
     name: opts.name,
     description: opts.description,
     url: absUrl(`/events/${opts.slug}`),
-    startDate: opts.startDate || '',
+    // Never emit an empty string here — Google's Event rich-result validator
+    // rejects a present-but-empty startDate as a missing required property.
+    ...(opts.startDate ? { startDate: opts.startDate } : {}),
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
     location: {
@@ -265,7 +275,7 @@ export function buildEventLd(opts: {
       '@type': 'Organization',
       name: opts.organizerName || '',
     },
-    image: opts.imageUrl || '',
+    ...(opts.imageUrl ? { image: opts.imageUrl } : {}),
     inLanguage: 'en',
   };
 }

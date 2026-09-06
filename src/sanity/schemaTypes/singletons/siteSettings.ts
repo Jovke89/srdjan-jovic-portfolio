@@ -34,6 +34,7 @@ export const siteSettings = defineType({
     // Social & sharing
     defineField({ name: 'linkedinUrl', title: 'LinkedIn URL', type: 'url', group: 'social' }),
     defineField({ name: 'instagramUrl', title: 'Instagram URL', type: 'url', group: 'social' }),
+    defineField({ name: 'githubUrl', title: 'GitHub URL', type: 'url', group: 'social' }),
     defineField({
       name: 'defaultOgImage',
       title: 'Default social share image',
