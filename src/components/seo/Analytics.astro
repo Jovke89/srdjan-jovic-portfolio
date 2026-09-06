@@ -11,12 +11,17 @@ const enabled = import.meta.env.PROD && GA_ID;
 {
   enabled && (
     <>
-      {/* Google Analytics (deferred) START
+      {/* Google Analytics (deferred, consent-gated) START
           gtag.js costs ~600-900ms of main-thread CPU on load, which was
           landing squarely inside the initial-load TBT window. It isn't
           needed for anything the visitor sees, so it's deferred to whichever
           comes first: a real interaction (scroll/pointer/key), or a short
-          idle fallback so it still fires on pages nobody interacts with. */}
+          idle fallback so it still fires on pages nobody interacts with.
+
+          It's also gated behind the cookie consent banner (see
+          CookieConsent.astro): with no stored choice yet, or an explicit
+          decline, none of this runs and GA4 never loads. Accepting fires a
+          `cookieconsent:accepted` event that arms the same deferred load. */}
       <script define:vars={{ GA_ID }}>
         window.dataLayer = window.dataLayer || [];
         function gtag() {
@@ -36,18 +41,33 @@ const enabled = import.meta.env.PROD && GA_ID;
           gtag('config', GA_ID);
         }
 
-        const triggerEvents = ['pointerdown', 'scroll', 'keydown', 'touchstart'];
-        triggerEvents.forEach((evt) =>
-          window.addEventListener(evt, loadGA, { once: true, passive: true }),
-        );
-        const idleFallback = () => loadGA();
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(idleFallback, { timeout: 4000 });
-        } else {
-          setTimeout(idleFallback, 4000);
+        function armDeferredLoad() {
+          const triggerEvents = ['pointerdown', 'scroll', 'keydown', 'touchstart'];
+          triggerEvents.forEach((evt) =>
+            window.addEventListener(evt, loadGA, { once: true, passive: true }),
+          );
+          const idleFallback = () => loadGA();
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(idleFallback, { timeout: 4000 });
+          } else {
+            setTimeout(idleFallback, 4000);
+          }
+        }
+
+        let consent = null;
+        try {
+          consent = localStorage.getItem('cookie-consent');
+        } catch {
+          // Storage blocked — treat as "no decision yet".
+        }
+
+        if (consent === 'accepted') {
+          armDeferredLoad();
+        } else if (consent !== 'declined') {
+          window.addEventListener('cookieconsent:accepted', armDeferredLoad, { once: true });
         }
       </script>
-      {/* Google Analytics (deferred) END */}
+      {/* Google Analytics (deferred, consent-gated) END */}
     </>
   )
 }
