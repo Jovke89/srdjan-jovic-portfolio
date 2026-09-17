@@ -22,7 +22,7 @@ export const HOME_QUERY = defineQuery(`{
     "tech": techStack[]->name,
     cardThumbnail${IMG}, coverImage${IMG}
   },
-  "resources": *[_type == "resource"] | order(publishDate desc)[0...2]{
+  "resources": *[_type == "resource"] | order(featured desc, publishDate desc)[0...2]{
     name, "slug": slug.current, timeToRead,
     "excerpt": seo.description,
     "category": category->name,

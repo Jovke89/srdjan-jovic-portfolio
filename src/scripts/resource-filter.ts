@@ -20,8 +20,19 @@ if (list) {
     return !currentFilter || (el.dataset.category || '') === currentFilter;
   }
 
+  /* Featured articles only jump to the front within the Blog category filter
+     (used to surface the outreach-facing pair there and on the homepage) —
+     "all" and every other category tab stay purely chronological. */
+  function order(a: HTMLElement, b: HTMLElement) {
+    if (currentFilter !== 'Blog') return 0;
+    const aFeatured = a.dataset.featured === 'true';
+    const bFeatured = b.dataset.featured === 'true';
+    if (aFeatured === bFeatured) return 0;
+    return aFeatured ? -1 : 1;
+  }
+
   function render() {
-    const filtered = items.filter(matches);
+    const filtered = items.filter(matches).sort(order);
     const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
     if (currentPage > pages) currentPage = pages;
     const start = (currentPage - 1) * pageSize;

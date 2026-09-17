@@ -10,6 +10,7 @@ interface Props {
     author?: { name?: string; photo?: unknown } | null;
     coverImage?: unknown;
     excerpt?: string;
+    featured?: boolean;
   };
   variant?: 'list' | 'grid';
 }
@@ -20,7 +21,12 @@ const href = `/resources/${r.slug}/`;
 
 {
   variant === 'list' ? (
-    <div role="listitem" class="resources-articles_item-wrapper w-dyn-item" data-category={categoryName}>
+    <div
+      role="listitem"
+      class="resources-articles_item-wrapper w-dyn-item"
+      data-category={categoryName}
+      data-featured={r.featured ? 'true' : 'false'}
+    >
       <article class="project_item">
         <div class="article_item-content-wrapper">
           {/* Card is not a link block: only the "read article" button below navigates. */}
