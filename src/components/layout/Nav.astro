@@ -7,14 +7,15 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const links = [
   { label: 'HOme', href: '/' },
-  { label: 'CASE STUDIES', href: '/case-studies' },
-  { label: 'resources', href: '/resources' },
-  { label: 'Events', href: '/events' },
+  { label: 'CASE STUDIES', href: '/case-studies/' },
+  { label: 'resources', href: '/resources/' },
+  { label: 'Events', href: '/events/' },
 ];
 
 function isCurrent(href: string) {
-  if (href === '/') return path === '/';
-  return path === href || path.startsWith(href + '/');
+  const h = href.replace(/\/$/, '') || '/';
+  if (h === '/') return path === '/';
+  return path === h || path.startsWith(h + '/');
 }
 ---
 
@@ -57,13 +58,13 @@ function isCurrent(href: string) {
             }
           </ul>
           <div class="button_mobile">
-            <a data-stager-btn data-wf--button--variant="base" href="/contact" class="button w-inline-block">
+            <a data-stager-btn data-wf--button--variant="base" href="/contact/" class="button w-inline-block">
               <div data-stager-text>Contact me</div>
             </a>
           </div>
         </nav>
         <div class="button_desctiop">
-          <a data-stager-btn data-wf--button--variant="base" href="/contact" class="button w-inline-block">
+          <a data-stager-btn data-wf--button--variant="base" href="/contact/" class="button w-inline-block">
             <div data-stager-text>Contact me</div>
           </a>
         </div>

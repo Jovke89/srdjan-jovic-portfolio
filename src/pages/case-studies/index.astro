@@ -102,7 +102,7 @@ const jsonld = buildCaseStudyListLd({
                 {
                   (caseStudies ?? []).map((c) => (
                     <ProjectCard
-                      href={`/case-studies/${c.slug}`}
+                      href={`/case-studies/${c.slug}/`}
                       title={c.name!}
                       text={c.clientDescription ?? undefined}
                       image={c.cardThumbnail ?? c.coverImage}

@@ -93,7 +93,7 @@ const jsonld = buildEventsListLd({
                 {
                   (events ?? []).map((e) => (
                     <ProjectCard
-                      href={`/events/${e.slug}`}
+                      href={`/events/${e.slug}/`}
                       title={e.name!}
                       text={e.overview ?? undefined}
                       image={e.thumbnail ?? e.coverImage}

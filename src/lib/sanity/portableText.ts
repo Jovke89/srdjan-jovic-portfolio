@@ -98,6 +98,20 @@ const components: Partial<PortableTextHtmlComponents> = {
           /* malformed URL: leave as authored */
         }
       }
+      // Internal page links get a trailing slash, matching the canonical URL
+      // shape every page actually uses (absUrl in lib/seo/site.ts) — otherwise
+      // a link typed without one inside article body content quietly points at
+      // a non-canonical duplicate URL that Google won't index (see GSC "Discovered
+      // - currently not indexed"). Skipped for files (has a dot extension) and
+      // same-page anchors.
+      if (href.startsWith('/') && href !== '/') {
+        const [pathAndQuery, hash] = href.split('#');
+        const [pathOnly, query] = pathAndQuery.split('?');
+        const isFile = /\.[a-zA-Z0-9]+$/.test(pathOnly);
+        if (pathOnly && !pathOnly.endsWith('/') && !isFile) {
+          href = `${pathOnly}/${query ? `?${query}` : ''}${hash ? `#${hash}` : ''}`;
+        }
+      }
       const external = /^https?:\/\//i.test(href);
       const attrs = value?.blank || external ? ' target="_blank" rel="noopener noreferrer"' : '';
       return `<a href="${esc(href)}"${attrs}>${children}</a>`;

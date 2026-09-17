@@ -366,7 +366,7 @@ const jsonld = buildArticleLd({
                   <div role="list" class="related_projects-list w-dyn-items">
                     {(related ?? []).map((r: any) => (
                       <ProjectCard
-                        href={`/case-studies/${r.slug}`}
+                        href={`/case-studies/${r.slug}/`}
                         title={r.name}
                         text={r.clientDescription}
                         image={r.cardThumbnail}

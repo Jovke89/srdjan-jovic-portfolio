@@ -15,7 +15,7 @@ interface Props {
 }
 const { resource: r, variant = 'list' } = Astro.props;
 const categoryName = typeof r.category === 'string' ? r.category : r.category?.name;
-const href = `/resources/${r.slug}`;
+const href = `/resources/${r.slug}/`;
 ---
 
 {
