@@ -14,6 +14,7 @@ type ImgSet = {
   width: number;
   height?: number;
   lqip?: string;
+  objectPosition?: string;
 };
 
 const DEFAULT_WIDTHS = [350, 500, 800, 1080, 1600, 2000];
@@ -42,6 +43,19 @@ export function imgSet(
 
   const ratio = dims ? dims.height / dims.width : undefined;
 
+  /* CSS cards crop with `object-fit: cover`, which always centers unless told
+     otherwise. Sanity's hotspot (schema: `options: { hotspot: true }`) records
+     where the actual subject is, but nothing consumed it until now, so every
+     crop defaulted to dead-center regardless of what the editor picked. */
+  const hotspot =
+    typeof source === 'object' && source && 'hotspot' in source
+      ? (source as { hotspot?: { x?: number; y?: number } }).hotspot
+      : undefined;
+  const objectPosition =
+    hotspot && typeof hotspot.x === 'number' && typeof hotspot.y === 'number'
+      ? `${Math.round(hotspot.x * 100)}% ${Math.round(hotspot.y * 100)}%`
+      : undefined;
+
   return {
     src: urlFor(source).width(width).auto('format').url(),
     srcset: widths
@@ -50,5 +64,6 @@ export function imgSet(
     width,
     height: ratio ? Math.round(width * ratio) : undefined,
     lqip,
+    objectPosition,
   };
 }

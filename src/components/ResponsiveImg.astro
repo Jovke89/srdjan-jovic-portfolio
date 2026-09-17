@@ -22,10 +22,14 @@ const {
   class: className,
   loading = 'lazy',
   fetchpriority,
+  style,
   ...rest
 } = Astro.props;
 
 const set = imgSet(source, { width, widths });
+const mergedStyle = [set?.objectPosition && `object-position: ${set.objectPosition}`, style]
+  .filter(Boolean)
+  .join('; ');
 const resolvedAlt =
   alt ??
   (typeof source === 'object' && source && 'alt' in source
@@ -46,6 +50,7 @@ const resolvedAlt =
       fetchpriority={fetchpriority}
       decoding="async"
       class={className}
+      style={mergedStyle || undefined}
       {...rest}
     />
   )
