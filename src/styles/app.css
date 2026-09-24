@@ -533,6 +533,15 @@ textarea:focus-visible,
 }
 /* Resource grid cards END */
 
+/* Resource card headings: balanced line wrap START */
+/* Spreads the title evenly across lines so a single word never ends up
+   alone on the last line. Covers both ResourceCard variants (list + grid). */
+.resources-articles_item-wrapper h3,
+.resource_grid-item h3 {
+  text-wrap: balance;
+}
+/* Resource card headings: balanced line wrap END */
+
 /* Related Posts / Tips and tricks cards: visible hover START */
 /* .resource_grid-item (Related Posts on the resource detail page, and the
    "Tips and tricks" grid on the home page) already has `transition: all .35s`
