@@ -676,6 +676,14 @@ textarea:focus-visible,
 }
 /* Related case-study cards END */
 
+/* Scrollbar gutter START */
+/* Always reserve the scrollbar's space, so the page doesn't shift sideways when
+   the scrollbar appears (for example when the intro loader unlocks scrolling). */
+html {
+  scrollbar-gutter: stable;
+}
+/* Scrollbar gutter END */
+
 /* Page transition START */
 /* Page transitions built on native cross-document View Transitions: pure CSS,
    no JavaScript, and pages still load normally (own <head>, scripts,

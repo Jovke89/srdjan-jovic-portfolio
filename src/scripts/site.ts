@@ -167,14 +167,21 @@ function initCardStacking() {
       pinSpacing: true,
     },
   });
+  /* Short holds at both ends of the pin: with scrub smoothing the cards trail the
+     scroll, so without them the first card starts moving the instant the pin
+     engages and the last card is still travelling when the pin releases (a
+     visible jump). The total scroll distance stays the same. */
+  const LEAD_IN = 0.1;
   cards.forEach((card, i) => {
     if (i < cards.length - 1) {
       const nextCard = cards[i + 1];
-      tl.set(nextCard, { opacity: 1 }, i * 0.5);
-      tl.to(card, { scale: 0.9, y: -20, duration: 0.5, ease: 'none' }, i * 0.5);
-      tl.to(nextCard, { y: 0, duration: 0.5, ease: 'none' }, i * 0.5);
+      const at = LEAD_IN + i * 0.5;
+      tl.set(nextCard, { opacity: 1 }, at);
+      tl.to(card, { scale: 0.9, y: -20, duration: 0.5, ease: 'none' }, at);
+      tl.to(nextCard, { y: 0, duration: 0.5, ease: 'none' }, at);
     }
   });
+  tl.to({}, { duration: 0.3 });
 }
 
 /* --- Page loader (3 steps, desktop) --- */
