@@ -1,0 +1,584 @@
+<!doctype html>
+<title>Srdjan Jovic SEO Audit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #F3F6F5;
+    --surface: #FFFFFF;
+    --surface-2: #EAF0EF;
+    --border: #D7E0DE;
+    --ink: #16211F;
+    --ink-muted: #526461;
+    --ink-faint: #7C8B88;
+    --accent: #1D6F72;
+    --accent-strong: #124F51;
+    --accent-soft: #DCEEEC;
+    --track: #DDE6E4;
+
+    --critical: #B7343A;
+    --critical-soft: #F7E2E1;
+    --high: #B06A1F;
+    --high-soft: #F4E6D3;
+    --medium: #93781A;
+    --medium-soft: #F2ECC9;
+    --low: #3E5E93;
+    --low-soft: #DEE7F3;
+    --good: #2F7A54;
+    --good-soft: #DCEEE2;
+
+    --shadow: 0 1px 2px rgba(22,33,31,0.06), 0 8px 24px -12px rgba(22,33,31,0.15);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1614;
+      --surface: #142120;
+      --surface-2: #1B2C2A;
+      --border: #294038;
+      --ink: #E7F0EE;
+      --ink-muted: #9AB0AC;
+      --ink-faint: #708280;
+      --accent: #52C2BC;
+      --accent-strong: #8AD8D3;
+      --accent-soft: #1B3736;
+      --track: #24403C;
+
+      --critical: #E8767A;
+      --critical-soft: #3A2223;
+      --high: #E4A768;
+      --high-soft: #392D1E;
+      --medium: #D8C567;
+      --medium-soft: #362F1A;
+      --low: #8FB4E0;
+      --low-soft: #1E2C3C;
+      --good: #79C79A;
+      --good-soft: #1C3327;
+
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0E1614;
+    --surface: #142120;
+    --surface-2: #1B2C2A;
+    --border: #294038;
+    --ink: #E7F0EE;
+    --ink-muted: #9AB0AC;
+    --ink-faint: #708280;
+    --accent: #52C2BC;
+    --accent-strong: #8AD8D3;
+    --accent-soft: #1B3736;
+    --track: #24403C;
+
+    --critical: #E8767A;
+    --critical-soft: #3A2223;
+    --high: #E4A768;
+    --high-soft: #392D1E;
+    --medium: #D8C567;
+    --medium-soft: #362F1A;
+    --low: #8FB4E0;
+    --low-soft: #1E2C3C;
+    --good: #79C79A;
+    --good-soft: #1C3327;
+
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    line-height: 1.55;
+    font-size: 15.5px;
+  }
+
+  a { color: var(--accent); }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 6rem;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Spectral', Georgia, serif;
+    text-wrap: balance;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  code, .mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  .kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.25rem;
+  }
+  .masthead h1 { font-size: 1.9rem; font-weight: 600; margin-top: 0.35rem; }
+  .masthead .meta { text-align: right; font-size: 0.82rem; color: var(--ink-muted); line-height: 1.7; }
+  .masthead .meta .mono { color: var(--ink); }
+
+  /* ---- Sticky nav ---- */
+  .catnav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.15rem;
+    overflow-x: auto;
+    padding: 0.6rem 1.5rem;
+    margin: 0 -1.5rem 2.5rem;
+  }
+  .catnav a {
+    flex: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    text-decoration: none;
+    color: var(--ink-muted);
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .catnav a:hover { border-color: var(--border); color: var(--ink); }
+  .catnav a strong { color: var(--accent); font-weight: 600; }
+
+  /* ---- Score band ---- */
+  .scoreband {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 620px) {
+    .scoreband { grid-template-columns: 1fr; }
+    .gauge-wrap { justify-self: center; }
+  }
+  .gauge-wrap { text-align: center; }
+  .gauge-num {
+    font-family: 'Spectral', serif;
+    font-weight: 700;
+    font-size: 2.6rem;
+    fill: var(--ink);
+  }
+  .gauge-label { font-size: 0.68rem; fill: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em; }
+  .gauge-caption { margin-top: 0.4rem; font-size: 0.78rem; color: var(--ink-muted); }
+
+  .catbars { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1.5rem; }
+  @media (max-width: 460px) { .catbars { grid-template-columns: 1fr; } }
+  .catbar-row { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.6rem; font-size: 0.8rem; }
+  .catbar-row .name { color: var(--ink-muted); }
+  .catbar-row .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .catbar-track { grid-column: 1 / -1; height: 6px; border-radius: 4px; background: var(--track); overflow: hidden; }
+  .catbar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+
+  /* ---- Top issues grid ---- */
+  .top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+  }
+  @media (max-width: 680px) { .top-grid { grid-template-columns: 1fr; } }
+  .top-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.5rem;
+  }
+  .top-card h2 { font-size: 1rem; margin-bottom: 0.9rem; }
+  .top-card.wins h2 { color: var(--good); }
+  .top-card.risks h2 { color: var(--critical); }
+  .top-card ol { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.65rem; }
+  .top-card li { font-size: 0.87rem; }
+  .top-card li b { font-weight: 600; }
+
+  /* ---- Sections ---- */
+  section.category { margin-bottom: 3rem; scroll-margin-top: 4rem; }
+  .cat-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0.55rem;
+    margin-bottom: 1.1rem;
+  }
+  .cat-head h2 { font-size: 1.4rem; font-weight: 600; }
+  .cat-score { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.95rem; color: var(--accent); white-space: nowrap; }
+  .cat-weight { font-size: 0.7rem; color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; }
+
+  .works-box {
+    background: var(--good-soft);
+    border: 1px solid color-mix(in srgb, var(--good) 35%, var(--border));
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+  .works-box .kicker { color: var(--good); margin-bottom: 0.35rem; display: block; }
+
+  .findings { display: flex; flex-direction: column; }
+  .finding {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 560px) { .finding { grid-template-columns: 1fr; gap: 0.5rem; } }
+  .finding:last-child { border-bottom: 1px solid var(--border); }
+
+  .chip {
+    align-self: start;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.55rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    width: fit-content;
+  }
+  .chip.critical { background: var(--critical-soft); color: var(--critical); }
+  .chip.high     { background: var(--high-soft); color: var(--high); }
+  .chip.medium   { background: var(--medium-soft); color: var(--medium); }
+  .chip.low      { background: var(--low-soft); color: var(--low); }
+  .chip.info     { background: var(--good-soft); color: var(--good); }
+
+  .finding-body h3 { font-family: 'IBM Plex Sans'; font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .finding-body p { margin: 0 0 0.4rem; font-size: 0.87rem; color: var(--ink-muted); }
+  .finding-body p:last-child { margin-bottom: 0; }
+  .finding-body .rec { color: var(--ink); }
+  .finding-body .rec b { color: var(--accent-strong); font-weight: 600; }
+
+  /* ---- table ---- */
+  .tablewrap { overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface); }
+  th, td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  th { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); background: var(--surface-2); }
+  tr:last-child td { border-bottom: none; }
+  td.bad { color: var(--critical); font-weight: 600; }
+  td.mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---- Action plan ---- */
+  .phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  @media (max-width: 860px) { .phases { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .phases { grid-template-columns: 1fr; } }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .phase .num { font-family: 'IBM Plex Mono', monospace; color: var(--accent); font-size: 0.72rem; letter-spacing: 0.05em; }
+  .phase h3 { font-size: 0.95rem; margin: 0.25rem 0 0.15rem; font-family: 'IBM Plex Sans'; font-weight: 600; }
+  .phase .when { font-size: 0.72rem; color: var(--ink-faint); margin-bottom: 0.7rem; }
+  .phase ol { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem; color: var(--ink-muted); }
+  .phase ol li::marker { color: var(--accent); font-family: 'IBM Plex Mono', monospace; }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  footer ul { padding-left: 1.2rem; }
+  footer li { margin-bottom: 0.35rem; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+  html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <span class="kicker">SEO Audit Report</span>
+      <h1>srdjan-jovic.com</h1>
+    </div>
+    <div class="meta">
+      <div>Audited <span class="mono">2026-09-06</span></div>
+      <div>Personal brand · freelance Webflow developer</div>
+      <div>Astro + Sanity CMS on Vercel · 58 indexed URLs</div>
+    </div>
+  </div>
+
+  <nav class="catnav" aria-label="Jump to category">
+    <a href="#technical">Technical <strong>74</strong></a>
+    <a href="#content">Content <strong>74</strong></a>
+    <a href="#onpage">On-Page <strong>76</strong></a>
+    <a href="#schema">Schema <strong>80</strong></a>
+    <a href="#performance">Performance <strong>83</strong></a>
+    <a href="#geo">AI Search <strong>77</strong></a>
+    <a href="#cluster">Content Architecture <strong>68</strong></a>
+    <a href="#plan">Action Plan</a>
+  </nav>
+
+  <div class="scoreband">
+    <div class="gauge-wrap">
+      <svg width="176" height="118" viewBox="0 0 176 118">
+        <path d="M 12 100 A 76 76 0 0 1 164 100" fill="none" stroke="var(--track)" stroke-width="14" stroke-linecap="round"/>
+        <path d="M 12 100 A 76 76 0 0 1 164 100" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round"
+              stroke-dasharray="238.76" stroke-dashoffset="54.9"/>
+        <text x="88" y="82" text-anchor="middle" class="gauge-num">77</text>
+        <text x="88" y="102" text-anchor="middle" class="gauge-label">/ 100 HEALTH</text>
+      </svg>
+      <div class="gauge-caption">Weighted across 7 audited categories</div>
+    </div>
+    <div class="catbars">
+      <div class="catbar-row"><span class="name">Content Quality <span class="cat-weight">23%</span></span><span class="val">74</span><div class="catbar-track"><div class="catbar-fill" style="width:74%"></div></div></div>
+      <div class="catbar-row"><span class="name">Technical SEO <span class="cat-weight">22%</span></span><span class="val">74</span><div class="catbar-track"><div class="catbar-fill" style="width:74%"></div></div></div>
+      <div class="catbar-row"><span class="name">On-Page SEO <span class="cat-weight">20%</span></span><span class="val">76</span><div class="catbar-track"><div class="catbar-fill" style="width:76%"></div></div></div>
+      <div class="catbar-row"><span class="name">Performance <span class="cat-weight">10%</span></span><span class="val">83</span><div class="catbar-track"><div class="catbar-fill" style="width:83%"></div></div></div>
+      <div class="catbar-row"><span class="name">AI Search Readiness <span class="cat-weight">10%</span></span><span class="val">77</span><div class="catbar-track"><div class="catbar-fill" style="width:77%"></div></div></div>
+      <div class="catbar-row"><span class="name">Schema <span class="cat-weight">10%</span></span><span class="val">80</span><div class="catbar-track"><div class="catbar-fill" style="width:80%"></div></div></div>
+      <div class="catbar-row"><span class="name">Images <span class="cat-weight">5%</span></span><span class="val">85</span><div class="catbar-track"><div class="catbar-fill" style="width:85%"></div></div></div>
+      <div class="catbar-row"><span class="name">Content Architecture <span class="cat-weight">supp.</span></span><span class="val">68</span><div class="catbar-track"><div class="catbar-fill" style="width:68%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="top-grid">
+    <div class="top-card risks">
+      <h2>Top 5 critical &amp; high issues</h2>
+      <ol>
+        <li><b>Invalid Event schema.</b> <code class="mono">/events/flowconf-2026/</code> ships <code class="mono">startDate:""</code> — fails Google's Event rich-result validation outright.</li>
+        <li><b>Contact page regressed.</b> Mobile Performance fell to 68 (TBT 3,200ms) — the "deferred" Cal.com widget still blocks the main thread once it fires, on the highest-intent page.</li>
+        <li><b>Canonical/trailing-slash mismatch</b> on ~57 of 58 pages — canonicals point to a non-matching URL with no redirect either way.</li>
+        <li><b><code class="mono">/video/</code> is indexable thin content</b> — no noindex, no description, title is literally "video".</li>
+        <li><b>8 category hubs share one meta description</b> — a mail-merge template across 14% of indexed URLs.</li>
+      </ol>
+    </div>
+    <div class="top-card wins">
+      <h2>Top 5 quick wins</h2>
+      <ol>
+        <li>Fix the "three years" (llms.txt) vs. "four years" (homepage) experience contradiction — one-line edit, twice.</li>
+        <li>Add <code class="mono">/video</code> and <code class="mono">/style-guide</code> to the sitemap filter; noindex <code class="mono">video.astro</code>.</li>
+        <li>Guard <code class="mono">startDate</code>/<code class="mono">image</code> in <code class="mono">buildEventLd()</code> the way <code class="mono">datePublished</code> already is.</li>
+        <li>Write 8 unique meta descriptions for the resource-category hubs — a CMS field edit each.</li>
+        <li>Shorten the homepage meta description (185 → ≤160 chars) and 3 over-length case-study ones.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- TECHNICAL -->
+  <section class="category" id="technical">
+    <div class="cat-head"><h2>Technical SEO</h2><span class="cat-score">74 <span class="cat-weight">/ 100 · 22% weight</span></span></div>
+    <div class="works-box"><span class="kicker">Holding up well</span>robots.txt correctly allows AI-citation bots and blocks AI-training bots; sitemap validates; HTTPS + HSTS enforced everywhere; the four thin taxonomy routes stay noindexed and out of the sitemap; fully server-rendered with no JS-rendering dependency; real 404s.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>Canonical URL / actual URL mismatch, sitewide</h3><p><code class="mono">canonicalFor()</code> in <code class="mono">src/lib/seo/site.ts</code> strips the trailing slash, but the site serves and sitemaps every page <em>with</em> one — both forms are live 200s with no redirect between them. Affects ~57 of 58 URLs.</p><p class="rec"><b>Fix:</b> make <code class="mono">canonicalFor()</code>/<code class="mono">absUrl()</code> preserve the trailing slash.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3><code class="mono">/video/</code> is fully indexable thin content</h3><p>No <code class="mono">noindex</code>, no meta description, <code class="mono">&lt;title&gt;video&lt;/title&gt;</code>, zero structured data — and it's in the live sitemap. An orphaned leftover Webflow-export page, unlinked from any navigation.</p><p class="rec"><b>Fix:</b> set <code class="mono">noindex: true</code>, exclude from the sitemap filter, or give it real content.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3><code class="mono">/style-guide/</code> noindexed but still submitted in the sitemap</h3><p>Correctly <code class="mono">noindex</code> in-page, but missed by the <code class="mono">astro.config.mjs</code> sitemap filter that already excludes <code class="mono">/industry/</code>, <code class="mono">/tech-stack/</code>, <code class="mono">/authors/</code>, <code class="mono">/testimonials/</code>.</p><p class="rec"><b>Fix:</b> add <code class="mono">/style-guide</code> to the same filter.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Two-hop redirect chain on the bare apex</h3><p><code class="mono">http://srdjan-jovic.com → https://srdjan-jovic.com → https://www.srdjan-jovic.com</code> — a Vercel domain-config chain, one hop longer than necessary.</p><p class="rec"><b>Fix:</b> point the apex redirect straight at the final <code class="mono">www</code> HTTPS URL.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>No hardening headers beyond HSTS</h3><p>No CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, or Permissions-Policy on any page checked.</p><p class="rec"><b>Fix:</b> add via a Vercel <code class="mono">headers</code> config; extend HSTS with <code class="mono">includeSubDomains; preload</code>.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>Homepage mobile CWV flagged in lab data</h3><p>LCP 3.06s, TBT 1,222ms, Performance 69/100 on this run. See the Performance section for the fuller, multi-page picture and CrUX availability status.</p><p class="rec"><b>Fix:</b> see Performance below.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3>No IndexNow integration; sitemap has no <code class="mono">&lt;lastmod&gt;</code></h3><p>Real <code class="mono">Last-Modified</code> headers exist per page but aren't surfaced in the sitemap.</p><p class="rec"><b>Fix:</b> wire <code class="mono">lastmod</code> from Sanity's <code class="mono">_updatedAt</code>; add an IndexNow ping on publish.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <section class="category" id="content">
+    <div class="cat-head"><h2>Content Quality</h2><span class="cat-score">74 <span class="cat-weight">/ 100 · 23% weight</span></span></div>
+    <div class="works-box"><span class="kicker">Holding up well</span>Articles run 2,100–3,645 words of genuine, first-hand content — not thin. Clean single-H1 hierarchy. Dated incident posts and "what I tell clients" sections are exactly what current quality guidelines reward over generic AI writing. The glossary cluster interlinks itself correctly.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>All 8 resource-category hubs share one meta description</h3><p>Identical template with only the category noun swapped, e.g. <em>"AEO articles and guides from Srdjan Jovic, a Webflow developer and Make automation specialist."</em> — repeated 8 times.</p><p class="rec"><b>Fix:</b> write a distinct 150–160 character description per hub in Sanity.</p></div></div>
+      <div class="finding"><span class="chip high">Medium-High</span><div class="finding-body"><h3>Hub pages are thin with no real heading structure</h3><p>Only 143–148 words of unique copy; the only H2 present is the sitewide footer CTA. <code class="mono">vibe-coding</code> hub lists exactly one article.</p><p class="rec"><b>Fix:</b> add a 100–200 word intro under each hub H1 with 1–2 links to the flagship article.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Case studies never link to resource articles</h3><p>Frontera's migration case study has 22 links on-page and zero point to <code class="mono">/resources/</code>, despite directly relevant methodology posts existing.</p><p class="rec"><b>Fix:</b> add 1–2 contextual links from each case study's Technical Approach section to the matching article.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>No visible in-body author bio</h3><p>Author signal only lives in meta tags / JSON-LD, not as a skimmable on-page credentials block.</p><p class="rec"><b>Fix:</b> add a short bio component under the H1 — years building in Webflow, project count, link to full credentials.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3>The four "webflow-vs-X" comparisons share an identical H2 skeleton</h3><p>Content per section is genuinely differentiated (real pricing, named scenarios), so this is low risk — but the pattern is detectable.</p><p class="rec"><b>Fix:</b> vary 1–2 section headers per article going forward.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3><code class="mono">what-is-vibe-coding</code> sits outside the glossary interlink mesh</h3><p>The other four "what is X" posts cross-link each other; this one doesn't connect back in.</p><p class="rec"><b>Fix:</b> add a two-way link with <code class="mono">what-is-webflow</code>.</p></div></div>
+      <div class="finding"><span class="chip info">Info</span><div class="finding-body"><h3>Publish dates cluster tightly; hub pages show a placeholder date</h3><p>Expected for a brand-new resource center — but the 8 hub pages all report a flat <code class="mono">2026-01-01</code> fallback.</p><p class="rec"><b>Fix:</b> drive hub "updated" dates from the newest article in that category, or suppress the date on archive pages.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ON-PAGE -->
+  <section class="category" id="onpage">
+    <div class="cat-head"><h2>On-Page SEO</h2><span class="cat-score">76 <span class="cat-weight">/ 100 · 20% weight</span></span></div>
+    <div class="works-box"><span class="kicker">Confirmed clean across all 58 URLs</span>Zero duplicate <code class="mono">&lt;title&gt;</code> tags. All canonicals are absolute and internally trailing-slash-consistent. H1 count = 1 on every sampled page type.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip critical">Critical</span><div class="finding-body"><h3>Comparison article buries its data in unstructured prose</h3><p><code class="mono">/resources/webflow-vs-framer-freelancers/</code> renders its entire 6-criteria comparison as one unbroken <code class="mono">&lt;p&gt;</code> — <em>zero</em> <code class="mono">&lt;table&gt;</code> elements — while the SERP it targets is dominated by scannable structured breakdowns. Its Pricing section never states an actual dollar figure.</p><p class="rec"><b>Fix:</b> rebuild as a real table with real pricing numbers; add matching structured data.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>No page serves "hire a Webflow developer" commercial intent</h3><p>That SERP is dominated by directory/marketplace pages leading with rates and process. The homepage is 642 words with one recycled CTA and no visible process or rate-range section — that content exists, but only on a separate blog post.</p><p class="rec"><b>Fix:</b> build a <code class="mono">/services/</code> page or expand the homepage with the process + rate content already written.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Arni Fitness Zone case study has zero client testimonial</h3><p>Strong quantified results (200% conversion, 75% revenue growth) but no third-party quote corroborating them — a trust gap for decision-stage B2B buyers.</p><p class="rec"><b>Fix:</b> embed one of the existing homepage video testimonials directly in the case study.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Core Web Vitals article has no visual proof</h3><p>Competing SERP results lean on before/after PageSpeed screenshots; this article's "real client diagnosis" section has none, and no metrics table.</p><p class="rec"><b>Fix:</b> add a screenshot and a simple 3-row metric/threshold table.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3>Meta descriptions running over length</h3><p>Homepage: 185 characters. Three case studies (Arni Fitness Zone, Four Tress Partners, Xerenta): 163–166. Two category titles (Integrations, Make Automations): 66–70.</p><p class="rec"><b>Fix:</b> trim to ≤160 chars / ~60 chars respectively.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3>CTAs don't vary by reader journey stage</h3><p>"Let's work together" appears identically on the homepage, case studies, and technical articles regardless of intent.</p><p class="rec"><b>Fix:</b> match the closing CTA to each page's likely reader stage.</p></div></div>
+    </div>
+  </section>
+
+  <!-- SCHEMA -->
+  <section class="category" id="schema">
+    <div class="cat-head"><h2>Schema / Structured Data</h2><span class="cat-score">80 <span class="cat-weight">/ 100 · 10% weight</span></span></div>
+    <div class="works-box"><span class="kicker">Confirmed fixed and holding</span>Zero <code class="mono">Review</code>/<code class="mono">aggregateRating</code> JSON-LD anywhere on the live site — the fix that prompted this whole audit (commit <code class="mono">2d69ad1</code>) is verified stable across every page type sampled.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip critical">Critical</span><div class="finding-body"><h3>Event schema ships an empty required property</h3><p><code class="mono">/events/flowconf-2026/</code> emits <code class="mono">"startDate": ""</code>. Sanity's <code class="mono">startDate</code> field exists but isn't populated — only <code class="mono">year</code> is. <code class="mono">buildEventLd()</code> never got the same empty-string guard <code class="mono">datePublished</code> already has.</p><p class="rec"><b>Fix:</b> populate the real date in Sanity; omit <code class="mono">startDate</code>/<code class="mono">image</code> when empty in <code class="mono">jsonld.ts</code>.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Category hub pages ship zero JSON-LD</h3><p>All 7 <code class="mono">/resource-category/[slug]/</code> pages have no structured data at all, despite being deliberately kept indexable as real topic hubs.</p><p class="rec"><b>Fix:</b> add a <code class="mono">CollectionPage</code> block, mirroring the pattern already used for <code class="mono">/resources/</code> and <code class="mono">/events/</code>.</p></div></div>
+      <div class="finding"><span class="chip info">Info</span><div class="finding-body"><h3>FAQPage is correctly built but earns no rich result anymore</h3><p>All 36 resource articles carry valid <code class="mono">FAQPage</code> markup — but Google retired FAQ rich results site-wide on 2026-05-07. Not broken, just inert for Google (may still aid AI answer-engine parsing).</p><p class="rec">No urgent action — don't expect a SERP feature from it.</p></div></div>
+      <div class="finding"><span class="chip info">Info</span><div class="finding-body"><h3>Two minor type/completeness gaps</h3><p>Marko Miladinović's case study types him <code class="mono">Organization</code> instead of <code class="mono">Person</code>; the <code class="mono">/resources/</code> list's article stubs have <code class="mono">@id</code> but no separate <code class="mono">url</code>.</p><p class="rec">Cosmetic — fix opportunistically, no rich-result risk.</p></div></div>
+    </div>
+  </section>
+
+  <!-- PERFORMANCE -->
+  <section class="category" id="performance">
+    <div class="cat-head"><h2>Performance (Core Web Vitals)</h2><span class="cat-score">83 <span class="cat-weight">/ 100 · 10% weight</span></span></div>
+    <p style="font-size:0.85rem;color:var(--ink-muted);margin-top:-0.4rem;">CrUX field data is unavailable sitewide — the domain is too new/low-traffic for Chrome UX Report eligibility. All figures below are single-run Lighthouse lab data.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Page</th><th>Strategy</th><th>Perf.</th><th>LCP</th><th>TBT</th><th>CLS</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">/</td><td>Mobile</td><td class="mono">93</td><td class="mono">2.6s</td><td class="mono">90ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/</td><td>Desktop</td><td class="mono">83</td><td class="mono">0.8s</td><td class="mono">350ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/contact/</td><td>Mobile</td><td class="mono bad">68</td><td class="mono">1.5s</td><td class="mono bad">3,200ms</td><td class="mono">0.001</td></tr>
+          <tr><td class="mono">/contact/</td><td>Desktop</td><td class="mono">87</td><td class="mono">0.4s</td><td class="mono">270ms</td><td class="mono">0.024</td></tr>
+          <tr><td class="mono">/case-studies/frontera/</td><td>Mobile</td><td class="mono">91</td><td class="mono">2.2s</td><td class="mono">320ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/case-studies/frontera/</td><td>Desktop</td><td class="mono">100</td><td class="mono">0.5s</td><td class="mono">60ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/resources/</td><td>Mobile</td><td class="mono">97</td><td class="mono">2.0s</td><td class="mono">110ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/resources/</td><td>Desktop</td><td class="mono">81</td><td class="mono">0.6s</td><td class="mono">440ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/resources/…schema-markup/</td><td>Mobile</td><td class="mono">98</td><td class="mono">2.3s</td><td class="mono">50ms</td><td class="mono">0</td></tr>
+          <tr><td class="mono">/events/</td><td>Mobile / Desktop</td><td class="mono">100 / 100</td><td class="mono">1.4s / 0.5s</td><td class="mono">40 / 60ms</td><td class="mono">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="findings">
+      <div class="finding"><span class="chip critical">Critical</span><div class="finding-body"><h3>Contact page's Cal.com widget still blocks the main thread</h3><p>The "defer" from a prior fix changes <em>when</em> the widget's 3.6s/2MB cost lands, not whether it happens — TBT is now worse than the pre-fix baseline. A duplicate Cal.com avatar request was also found (~77KB wasted).</p><p class="rec"><b>Fix:</b> load Cal.com only on real user intent — click-to-load or a genuine intersection-observer threshold, not idle-callback-on-page-load.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>Render-blocking global stylesheet, ~70% unused per page</h3><p><code class="mono">BaseLayout.css</code> costs 80–320ms of first-paint delay on every template — no page uses more than ~30% of it.</p><p class="rec"><b>Fix:</b> split into per-route/critical CSS, or defer non-critical rules.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>Homepage desktop measured below its recorded baseline</h3><p>83 vs. a previously recorded 92 — worth 2–3 repeat runs to rule out lab noise; <code class="mono">forced-reflow-insight</code> still fails on both strategies.</p><p class="rec"><b>Fix:</b> re-measure, then hunt the remaining geometry-read-after-write call if it reproduces.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>GA4/GTM: a consistent 130–410ms main-thread cost sitewide</h3><p>Expected for a tag manager, but ~72KB of its ~170KB payload is unused on every page; highest on <code class="mono">/resources/</code> desktop (410ms).</p><p class="rec"><b>Fix:</b> consider loading <code class="mono">gtag.js</code> directly to skip the GTM container overhead.</p></div></div>
+      <div class="finding"><span class="chip info">Info</span><div class="finding-body"><h3>CLS is ~0 everywhere; case-study template and events now near-perfect</h3><p>All fixes from the prior optimization pass are holding, and two templates now exceed their post-fix baselines.</p><p class="rec">Flagged for the a11y owner, not performance: <code class="mono">color-contrast</code> fails on body text and a newsletter-modal input on the resource-article template, ratio as low as 1.47:1.</p></div></div>
+    </div>
+  </section>
+
+  <!-- GEO -->
+  <section class="category" id="geo">
+    <div class="cat-head"><h2>AI Search Readiness (GEO)</h2><span class="cat-score">77 <span class="cat-weight">/ 100 · 10% weight</span></span></div>
+    <div class="works-box"><span class="kicker">Practices what it publishes</span>robots.txt AI-bot rules verified live and correct. <code class="mono">llms.txt</code> is present and genuinely well-formed. FAQPage schema matches visible content exactly on every page sampled. Fully server-rendered, zero JS dependency for crawlability.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>A direct, checkable factual contradiction</h3><p><code class="mono">llms.txt</code>: "more than three years of experience." Homepage: "more than four years." Exactly the kind of inconsistency AI entity-resolution penalizes.</p><p class="rec"><b>Fix:</b> pick one number, update both — trivial.</p></div></div>
+      <div class="finding"><span class="chip high">Medium-High</span><div class="finding-body"><h3><code class="mono">sameAs</code> limited to LinkedIn and Instagram</h3><p>No GitHub, YouTube, Reddit, or Wikipedia. YouTube has the strongest measured correlation (~0.737) with AI citation likelihood of any signal checked — the single highest-leverage gap on the site.</p><p class="rec"><b>Fix:</b> add a GitHub link if one exists (near-zero effort); consider a modest YouTube presence over time.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>4 of 6 case studies carry no quantified outcome stat</h3><p>Xerenta, Four Tress Partners, Marko Miladinović, and AnswerLabs have zero numbers, versus Frontera (200% traffic) and Arni Fitness Zone (75% revenue).</p><p class="rec"><b>Fix:</b> add one concrete, defensible metric to each — answer engines strongly prefer specific numbers.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3><code class="mono">/video/</code> has zero structured data</h3><p>Every other page type on the site carries at least one JSON-LD block.</p><p class="rec"><b>Fix:</b> add <code class="mono">VideoObject</code> schema if the page is kept and hosts real video content.</p></div></div>
+      <div class="finding"><span class="chip low">Low</span><div class="finding-body"><h3>Paragraphs run shorter than the optimal citation length</h3><p>Median 59 words vs. the 134–167 word range citation research associates with maximum extraction likelihood.</p><p class="rec"><b>Fix:</b> test consolidating opening paragraphs on the highest-priority AEO articles only, not site-wide.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CLUSTER -->
+  <section class="category" id="cluster">
+    <div class="cat-head"><h2>Content Architecture <span style="font-weight:400;font-size:0.85rem;color:var(--ink-faint);">(supplementary)</span></h2><span class="cat-score">68 <span class="cat-weight">/ 100</span></span></div>
+    <div class="works-box"><span class="kicker">A good instinct already in place</span>The five "what is X" glossary posts already function as de facto cross-cluster pillars through hand-written in-body linking — a pattern most solo blogs don't have. No keyword cannibalization found across all 36 articles.</div>
+    <div class="findings">
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3>The glossary cluster has no shared hub</h3><p><code class="mono">what-is-aeo/seo/webflow/vibe-coding/make</code> are split one-each across five categories with no glossary index — invisible as a group in the navigation even though the linking pattern already treats them as one.</p><p class="rec"><b>Fix:</b> add a glossary index page and a "See also" module on each of the five — zero new articles required.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3><code class="mono">webflow</code> category is an audience-mixed catch-all</h3><p><code class="mono">webflow-for-freelancers-first-client-project</code> shares more DNA with the peer-freelancer <code class="mono">blog</code> posts than the technical posts it's grouped with.</p><p class="rec"><b>Fix:</b> re-tag into a "Freelance Business" cluster — no new content needed.</p></div></div>
+      <div class="finding"><span class="chip high">High</span><div class="finding-body"><h3><code class="mono">vibe-coding</code> is a single orphaned post</h3><p>No spokes exist to reinforce it from within its own category.</p><p class="rec"><b>Fix:</b> publish one companion post before investing further here.</p></div></div>
+      <div class="finding"><span class="chip medium">Medium</span><div class="finding-body"><h3>Two clusters are missing their most-searched companion topics</h3><p>Integrations is missing Zapier and Airtable guides; Comparisons omits Webflow vs. Wix and Webflow vs. Webstudio — all four confirmed as actively targeted by competing 2026 content.</p><p class="rec"><b>Fix:</b> prioritize Zapier and Webstudio (High), Wix and Airtable (Medium) — see the action plan.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ACTION PLAN -->
+  <section id="plan">
+    <div class="cat-head"><h2>Prioritized Action Plan</h2></div>
+    <div class="phases">
+      <div class="phase">
+        <span class="num">PHASE 1</span>
+        <h3>Critical fixes</h3>
+        <div class="when">This week</div>
+        <ol>
+          <li>Fix the Event <code class="mono">startDate</code> schema bug + populate the real date</li>
+          <li>Fix the <code class="mono">/contact/</code> Cal.com performance regression</li>
+          <li>Fix the canonical/trailing-slash mismatch</li>
+          <li>Deindex <code class="mono">/video/</code> and <code class="mono">/style-guide/</code></li>
+        </ol>
+      </div>
+      <div class="phase">
+        <span class="num">PHASE 2</span>
+        <h3>High-impact improvements</h3>
+        <div class="when">Weeks 2–3</div>
+        <ol>
+          <li>Unique meta descriptions + intros for 8 category hubs</li>
+          <li>Add <code class="mono">CollectionPage</code> schema to category hubs</li>
+          <li>Rebuild the Webflow vs. Framer comparison as a real table</li>
+          <li>Build a dedicated hire-intent page or section</li>
+          <li>Fix the "three vs. four years" contradiction</li>
+          <li>Split the render-blocking global stylesheet</li>
+          <li>Add a testimonial + missing case-study stats</li>
+          <li>Add security headers; fix the apex redirect chain</li>
+          <li>Fix the 1.47:1 color-contrast accessibility failures</li>
+        </ol>
+      </div>
+      <div class="phase">
+        <span class="num">PHASE 3</span>
+        <h3>Content &amp; authority</h3>
+        <div class="when">Month 2</div>
+        <ol>
+          <li>Add a visible author bio block to articles</li>
+          <li>Link case studies to their methodology articles</li>
+          <li>Build the glossary index page</li>
+          <li>Re-tag the freelance-business cluster</li>
+          <li>Publish: Zapier, Webstudio, Wix, Airtable, vibe-coding #2</li>
+          <li>Add GitHub to <code class="mono">sameAs</code>; consider YouTube</li>
+          <li>Add proof visuals to the Core Web Vitals article</li>
+        </ol>
+      </div>
+      <div class="phase">
+        <span class="num">PHASE 4</span>
+        <h3>Monitoring</h3>
+        <div class="when">Ongoing</div>
+        <ol>
+          <li>Re-run PSI on <code class="mono">/contact/</code> + homepage post-fix</li>
+          <li>Re-check CrUX field data in 4–6 weeks</li>
+          <li>Validate Event + CollectionPage schema in Rich Results Test</li>
+          <li>Manually check GSC indexing + review-snippet status</li>
+          <li>Re-check AI crawler directives quarterly</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <strong style="color:var(--ink-muted);">Methodology &amp; limitations</strong>
+    <ul>
+      <li>SXO analysis used web-search summaries rather than raw SERP scrapes; 4 of ~6 planned query patterns and 1 of 6 case studies were sampled in depth.</li>
+      <li>CrUX field data is unavailable for the whole domain (insufficient Chrome traffic) — all Core Web Vitals verdicts above are lab-only until real-user data accrues.</li>
+      <li>Search Console and GA4 APIs are not authorized in this environment — indexation and query/traffic data weren't available; a manual GSC check is recommended.</li>
+      <li>No Moz/Bing backlink credentials configured — backlink profile wasn't analyzed this pass.</li>
+    </ul>
+  </footer>
+
+</div>

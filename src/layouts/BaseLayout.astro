@@ -10,6 +10,7 @@ import Nav from '../components/layout/Nav.astro';
 import Footer from '../components/layout/Footer.astro';
 import SiteScripts from '../components/SiteScripts.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import ChatWidget from '../components/ChatWidget.astro';
 
 interface Props {
   seo: {
@@ -142,6 +143,7 @@ const {
     </div>
     {/* Site-wide animated gradient background (desktop only, pointer-events: none). */}
     {chrome && <canvas id="heroCanvas"></canvas>}
+    {chrome && <ChatWidget />}
     <CookieConsent />
     <SiteScripts />
   </body>

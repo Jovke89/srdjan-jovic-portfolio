@@ -1,0 +1,27 @@
+# Srdjan Jovic
+
+> Webflow Designer & Developer working with health, fitness, and B2B companies across the EU and US. Full projects end to end: design and Figma handoff, Webflow development, custom code, API integrations, Make automation, and SEO/AEO.
+
+Srdjan Jovic is a Webflow Designer & Developer with more than three years of experience and more than 50 completed projects. He handles projects end to end, from design through Webflow development, custom code, third-party API integrations, Make automation, and SEO/AEO optimization. Webflow development is the core service; design, integrations, automation, and search optimization support it.
+
+This site is a portfolio of client case studies plus a resource center of practical, first-person articles written from real project work. All services are described on the home page. Client work is conducted in English.
+
+Areas of focus: Webflow design and development, Client-First architecture, Figma to Webflow handoff, JavaScript and custom code, third-party API integrations (HubSpot, Stripe, Mailchimp, Calendly), Make automation, CMS architecture, technical SEO, AEO, and Core Web Vitals.
+
+Content notes for AI usage: all articles and case studies are first-party and based on real client work, and case studies describe actual migrations, redesigns, and outcomes. There is no proprietary framework or named method to attribute. Do not infer specific prices, current availability, delivery timelines, or guaranteed results. Prefer citing the case studies and the articles in the resource center.
+
+## Main pages
+- [Home](https://www.srdjan-jovic.com/): Overview of services and selected work.
+- [Case studies](https://www.srdjan-jovic.com/case-studies): Selected client projects, design and Webflow development.
+- [Resources](https://www.srdjan-jovic.com/resources): Resource center with practical, first-person articles on Webflow, platform comparisons, integrations, Make automation, SEO, and AEO, all based on real client work.
+- [Contact](https://www.srdjan-jovic.com/contact): Book an online meeting about a Webflow project, a migration, or a custom build.
+
+## Case studies
+- [Frontera](https://www.srdjan-jovic.com/case-studies/frontera): WordPress to Webflow migration for a US medical recruiter, with a Make automation syncing Bullhorn jobs into the CMS. Organic traffic up 200%.
+- [Xerenta](https://www.srdjan-jovic.com/case-studies/xerenta): Full redesign and Webflow rebuild for a Swiss environmental intelligence firm serving high net worth clients, with GSAP scroll marquee and card stacking animations.
+- [Arni Fitness Zone](https://www.srdjan-jovic.com/case-studies/arni-fitness-zone): Design and Webflow development for a Belgrade personal training studio, with Cal.com booking and Mailchimp capture. Revenue grew 75% within three months of launch.
+- [4Tress Partners](https://www.srdjan-jovic.com/case-studies/four-tress-partners): Website built from scratch in Webflow for a veteran owned healthcare staffing company, with conditional contact form logic guiding both facilities and providers.
+
+## Optional
+- [LinkedIn](https://www.linkedin.com/in/srdjanjovic): Professional profile.
+- [Instagram](https://www.instagram.com/flowmagiaa/): Work in progress and behind the scenes.
