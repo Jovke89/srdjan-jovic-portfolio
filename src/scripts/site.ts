@@ -7,6 +7,7 @@ import { CustomEase } from 'gsap/CustomEase';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import { initHeroCanvas } from './hero-canvas';
+import { initStagerButtons } from './stager';
 
 gsap.registerPlugin(ScrollTrigger, CustomEase, SplitText);
 
@@ -29,59 +30,6 @@ function initCustomCursor() {
   };
   window.addEventListener('mousemove', onMove);
   return () => window.removeEventListener('mousemove', onMove);
-}
-
-/* --- Stager button (letter roll on [data-stager-text]) --- */
-function initStagerButtons() {
-  document.querySelectorAll<HTMLElement>('[data-stager-text]').forEach((el) => {
-    if (el.dataset.stagerInit) return;
-    el.dataset.stagerInit = '1';
-    const original = el.textContent ?? '';
-    el.innerHTML = '';
-    el.style.position = 'relative';
-    el.style.overflow = 'hidden';
-    el.style.display = 'inline-block';
-    const rowIn = document.createElement('span');
-    rowIn.style.cssText = 'display:flex;';
-    const rowOut = document.createElement('span');
-    rowOut.style.cssText =
-      'display:flex; position:absolute; top:50%; left:0; right:0; justify-content:center; transform:translateY(-50%);';
-    original.split('').forEach((char, i) => {
-      const delay = i * 25 + 'ms';
-      const s1 = document.createElement('span');
-      s1.textContent = char === ' ' ? ' ' : char;
-      s1.style.cssText = `display:inline-block; transition:transform 0.5s ${delay}, opacity 0.4s ${delay}; transition-timing-function:cubic-bezier(0.76,0,0.24,1);`;
-      rowIn.appendChild(s1);
-      const s2 = document.createElement('span');
-      s2.textContent = char === ' ' ? ' ' : char;
-      s2.style.cssText = `display:inline-block; transform:translateY(120%); opacity:0; transition:transform 0.5s ${delay}, opacity 0.4s ${delay}; transition-timing-function:cubic-bezier(0.76,0,0.24,1);`;
-      rowOut.appendChild(s2);
-    });
-    el.appendChild(rowIn);
-    el.appendChild(rowOut);
-    const btn = el.closest<HTMLElement>('[data-stager-btn]');
-    if (!btn) return;
-    btn.addEventListener('mouseenter', () => {
-      rowIn.querySelectorAll('span').forEach((s) => {
-        (s as HTMLElement).style.transform = 'translateY(-120%)';
-        (s as HTMLElement).style.opacity = '0';
-      });
-      rowOut.querySelectorAll('span').forEach((s) => {
-        (s as HTMLElement).style.transform = 'translateY(0)';
-        (s as HTMLElement).style.opacity = '1';
-      });
-    });
-    btn.addEventListener('mouseleave', () => {
-      rowIn.querySelectorAll('span').forEach((s) => {
-        (s as HTMLElement).style.transform = '';
-        (s as HTMLElement).style.opacity = '';
-      });
-      rowOut.querySelectorAll('span').forEach((s) => {
-        (s as HTMLElement).style.transform = 'translateY(120%)';
-        (s as HTMLElement).style.opacity = '0';
-      });
-    });
-  });
 }
 
 /* --- Blink nav link on hover --- */
@@ -258,6 +206,20 @@ function initLoaderThreeSteps() {
   tl.to('.loading-container', { yPercent: -100, duration: 1.15, ease: 'power4.inOut', delay: 0.3 });
   tl.set('.loading-container', { display: 'none', clearProps: 'transform' });
   return tl;
+}
+
+/* --- Loader on first visit only: returning visitors skip the intro. Storage can
+   be blocked (private mode, strict settings); then the loader simply shows. --- */
+const LOADER_SEEN_KEY = 'sj-loader-seen';
+function shouldShowLoader(): boolean {
+  if (!document.querySelector('.loading-container')) return false;
+  try {
+    if (localStorage.getItem(LOADER_SEEN_KEY)) return false;
+    localStorage.setItem(LOADER_SEEN_KEY, '1');
+  } catch {
+    // Storage unavailable: keep the default behaviour and show the loader.
+  }
+  return true;
 }
 
 /* --- Hero heading stagger (desktop), delayed to start as the loader clears --- */
@@ -492,6 +454,43 @@ function initMagneticButton() {
   return () => cleanups.forEach((fn) => fn());
 }
 
+/* --- Deferred init START ---
+   Non-critical setup runs one function per task instead of all at once, so no
+   single long task blocks the main thread during load (Lighthouse TBT). Each
+   step runs inside its gsap.matchMedia context so breakpoint and reduced-motion
+   changes still revert everything it created. */
+const nextTask = () =>
+  new Promise<void>((resolve) => {
+    const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+    if (scheduler?.yield) scheduler.yield().then(resolve);
+    else setTimeout(resolve, 0);
+  });
+
+let refreshQueued = false;
+/* One ScrollTrigger measurement pass after the deferred steps, instead of one per block.
+   Lenis (desktop only) is read from window so either block can queue the pass. */
+function queueRefresh() {
+  if (refreshQueued) return;
+  refreshQueued = true;
+  setTimeout(() => {
+    refreshQueued = false;
+    (window as unknown as { lenis?: Lenis }).lenis?.resize();
+    ScrollTrigger.refresh();
+  }, 100);
+}
+
+function runDeferred(context: gsap.Context, steps: Array<() => void>, isActive: () => boolean, onDone: () => void) {
+  void (async () => {
+    for (const step of steps) {
+      await nextTask();
+      if (!isActive()) return;
+      context.add(step);
+    }
+    onDone();
+  })();
+}
+/* Deferred init END */
+
 /* --- boot --- */
 function boot() {
   initCopyrightYear();
@@ -502,16 +501,23 @@ function boot() {
 
   const mm = gsap.matchMedia();
 
-  mm.add('(prefers-reduced-motion: no-preference)', () => {
-    const cleanCanvas = initHeroCanvas();
+  mm.add('(prefers-reduced-motion: no-preference)', (context) => {
+    let active = true;
+    let cleanCanvas = () => {};
     const cleanCursor = initCustomCursor();
 
-    initMarquee();
-    initSplitHighlight();
+    // The background canvas is decorative: start it once the page has loaded.
+    const startCanvas = () => {
+      if (active) cleanCanvas = initHeroCanvas();
+    };
+    if (document.readyState === 'complete') startCanvas();
+    else window.addEventListener('load', startCanvas, { once: true });
 
-    setTimeout(() => ScrollTrigger.refresh(), 100);
+    runDeferred(context, [initMarquee, initSplitHighlight], () => active, queueRefresh);
 
     return () => {
+      active = false;
+      window.removeEventListener('load', startCanvas);
       cleanCanvas();
       cleanCursor();
     };
@@ -520,7 +526,8 @@ function boot() {
   // Desktop/tablet only (matches Nav.astro's 991px collapse breakpoint) — on
   // mobile, Lenis kept fighting the hamburger menu's own scroll lock (native
   // touch scroll is fine without it there anyway).
-  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px)', () => {
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px)', (context) => {
+    let active = true;
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
@@ -535,23 +542,34 @@ function boot() {
     gsap.ticker.add(rafCb);
     gsap.ticker.lagSmoothing(0);
 
-    initLoaderThreeSteps();
-    initCardStacking();
-    initHeroHeadingStagger();
-    initHeroOverlap();
-    const cleanServices = initServicesHover();
-    const cleanMagnetic = initMagneticButton();
+    // Above the fold: the intro loader (first visit only) and hero heading start immediately.
+    // Without the loader, the heading animates in right away instead of waiting for it.
+    const showLoader = shouldShowLoader();
+    if (showLoader) initLoaderThreeSteps();
+    initHeroHeadingStagger(showLoader ? 4.5 : 0.2);
 
-    setTimeout(() => {
-      lenis.resize();
-      ScrollTrigger.refresh();
-    }, 100);
+    // Everything else is set up in small deferred steps.
+    let cleanServices = () => {};
+    let cleanMagnetic = () => {};
+    runDeferred(
+      context,
+      [
+        initHeroOverlap,
+        initCardStacking,
+        () => (cleanServices = initServicesHover()),
+        () => (cleanMagnetic = initMagneticButton()),
+      ],
+      () => active,
+      queueRefresh,
+    );
 
     return () => {
+      active = false;
       cleanServices();
       cleanMagnetic();
       gsap.ticker.remove(rafCb);
       lenis.destroy();
+      delete (window as unknown as { lenis?: Lenis }).lenis;
     };
   });
 }

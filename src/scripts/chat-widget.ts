@@ -5,6 +5,8 @@
    only site links are turned into anchors, so model output can never inject
    markup. */
 
+import { initStagerButtons } from './stager';
+
 type Message = { role: 'user' | 'assistant'; content: string };
 
 const STORAGE_KEY = 'chatbot-history';
@@ -167,9 +169,10 @@ function buildPanel() {
     <form class="chatbot_form">
       <label class="chatbot_sr-only" for="chatbot-input">Your message</label>
       <textarea class="chatbot_input" id="chatbot-input" rows="1" maxlength="1000" placeholder="Type your question…" required></textarea>
-      <button type="submit" class="chatbot_send">Send</button>
+      <button type="submit" class="chatbot_send" data-stager-btn><span data-stager-text>Send</span></button>
     </form>`;
   document.body.append(panel);
+  initStagerButtons();
 
   list = panel.querySelector('.chatbot_messages')!;
   form = panel.querySelector('.chatbot_form')!;
@@ -199,7 +202,8 @@ function buildPanel() {
   });
   input.addEventListener('input', () => {
     input.style.height = '';
-    input.style.height = `${input.scrollHeight}px`;
+    // scrollHeight excludes the 1px top and bottom borders (box-sizing: border-box)
+    input.style.height = `${input.scrollHeight + 2}px`;
   });
 
   history = loadHistory();

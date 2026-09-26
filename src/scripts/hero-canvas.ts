@@ -6,16 +6,27 @@ export function initHeroCanvas(): () => void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return () => {};
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  /* Render at half resolution and let CSS stretch it to the viewport: the blobs
+     are soft gradients, so this looks identical while filling 4x fewer pixels
+     every frame. Drawing still uses viewport (CSS px) coordinates. */
+  const SCALE = 0.5;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  const sizeCanvas = () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * SCALE);
+    canvas.height = Math.round(height * SCALE);
+    ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+  };
+  sizeCanvas();
 
   /* `document.body.scrollHeight` forces a layout read; caching it and only
      recomputing on resize (instead of every animation frame) avoids doing
      that read 60x/sec for the lifetime of the page. */
   let maxScroll = document.body.scrollHeight - window.innerHeight;
   const onResize = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    sizeCanvas();
     maxScroll = document.body.scrollHeight - window.innerHeight;
   };
   window.addEventListener('resize', onResize);
@@ -76,9 +87,9 @@ export function initHeroCanvas(): () => void {
   }
 
   const blobs = [
-    { x: canvas.width * 0.2, y: canvas.height * 0.3, vx: 0.4, vy: 0.3, size: 350 },
-    { x: canvas.width * 0.6, y: canvas.height * 0.5, vx: -0.3, vy: 0.5, size: 300 },
-    { x: canvas.width * 0.8, y: canvas.height * 0.2, vx: 0.5, vy: -0.4, size: 320 },
+    { x: width * 0.2, y: height * 0.3, vx: 0.4, vy: 0.3, size: 350 },
+    { x: width * 0.6, y: height * 0.5, vx: -0.3, vy: 0.5, size: 300 },
+    { x: width * 0.8, y: height * 0.2, vx: 0.5, vy: -0.4, size: 320 },
   ];
   function drawBlob(blob: (typeof blobs)[number], color: string) {
     const gradient = ctx!.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.size);
@@ -92,17 +103,17 @@ export function initHeroCanvas(): () => void {
 
   let raf = 0;
   function animate() {
-    ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
+    ctx!.clearRect(0, 0, width, height);
     const colors = getCurrentColors();
     blobs.forEach((blob, index) => {
       blob.x += (mouse.x - blob.x) * 0.003 * (index + 1) * 0.3;
       blob.y += (mouse.y - blob.y) * 0.003 * (index + 1) * 0.3;
       blob.x += blob.vx;
       blob.y += blob.vy;
-      if (blob.x > canvas!.width + blob.size) blob.x = -blob.size;
-      if (blob.x < -blob.size) blob.x = canvas!.width + blob.size;
-      if (blob.y > canvas!.height + blob.size) blob.y = -blob.size;
-      if (blob.y < -blob.size) blob.y = canvas!.height + blob.size;
+      if (blob.x > width + blob.size) blob.x = -blob.size;
+      if (blob.x < -blob.size) blob.x = width + blob.size;
+      if (blob.y > height + blob.size) blob.y = -blob.size;
+      if (blob.y < -blob.size) blob.y = height + blob.size;
       drawBlob(blob, colors[index]);
     });
     raf = requestAnimationFrame(animate);
