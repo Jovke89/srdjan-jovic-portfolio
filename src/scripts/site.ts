@@ -208,18 +208,18 @@ function initLoaderThreeSteps() {
   return tl;
 }
 
-/* --- Loader on first visit only: returning visitors skip the intro. Storage can
-   be blocked (private mode, strict settings); then the loader simply shows. --- */
-const LOADER_SEEN_KEY = 'sj-loader-seen';
+/* --- Loader only when the visitor arrives from outside: a first visit, a page
+   refresh, or coming back from another website. Moving around inside the site
+   (menu links, the back button from another page here) skips the intro. --- */
 function shouldShowLoader(): boolean {
   if (!document.querySelector('.loading-container')) return false;
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (navigation?.type === 'reload') return true;
   try {
-    if (localStorage.getItem(LOADER_SEEN_KEY)) return false;
-    localStorage.setItem(LOADER_SEEN_KEY, '1');
+    return !document.referrer || new URL(document.referrer).origin !== location.origin;
   } catch {
-    // Storage unavailable: keep the default behaviour and show the loader.
+    return true;
   }
-  return true;
 }
 
 /* --- Hero heading stagger (desktop), delayed to start as the loader clears --- */
@@ -522,6 +522,14 @@ function onFirstInteraction(fn: () => void, isActive: () => boolean): () => void
   return stop;
 }
 
+/* For effects created while the visitor is already scrolling: a global
+   ScrollTrigger.refresh() would snap every scrubbed animation (like the scrub: 5
+   text highlight) straight to its current progress, which reads as a jump. New
+   triggers measure themselves when created, so only Lenis needs the new page height. */
+function resizeScroller() {
+  requestAnimationFrame(() => (window as unknown as { lenis?: Lenis }).lenis?.resize());
+}
+
 function runDeferred(context: gsap.Context, steps: Array<() => void>, isActive: () => boolean, onDone: () => void) {
   void (async () => {
     for (const step of steps) {
@@ -560,7 +568,7 @@ function boot() {
     // Marquee sits right under the hero, so it gets a deferred step; the text
     // highlight is further down and waits until the visitor scrolls near it.
     runDeferred(context, [initMarquee], isActive, queueRefresh);
-    const stopHighlight = whenNear('.big_text-animation', () => (context.add(initSplitHighlight), queueRefresh()), isActive);
+    const stopHighlight = whenNear('.big_text-animation', () => (context.add(initSplitHighlight), resizeScroller()), isActive);
 
     return () => {
       active = false;
@@ -593,11 +601,34 @@ function boot() {
     // Above the fold: the intro loader (first visit only) and hero heading start immediately.
     // Without the loader, the heading animates in right away instead of waiting for it.
     const showLoader = shouldShowLoader();
-    if (showLoader) initLoaderThreeSteps();
+    // While the loader plays, scrolling is locked and the page starts at the top
+    // (a refresh would otherwise restore the old scroll position behind the loader).
+    const unlockScroll = () => {
+      document.documentElement.style.removeProperty('overflow');
+      lenis.start();
+    };
+    if (showLoader) {
+      history.scrollRestoration = 'manual';
+      // The browser restores a refreshed page's scroll position around the load
+      // event, after this runs, so jump to the top again once the page has loaded.
+      const toTop = () => {
+        window.scrollTo(0, 0);
+        lenis.scrollTo(0, { immediate: true, force: true });
+      };
+      toTop();
+      if (document.readyState !== 'complete') window.addEventListener('load', toTop, { once: true });
+      document.documentElement.style.overflow = 'hidden';
+      lenis.stop();
+      const loader = initLoaderThreeSteps();
+      if (loader) loader.eventCallback('onComplete', unlockScroll);
+      else unlockScroll();
+    }
     initHeroHeadingStagger(showLoader ? 4.5 : 0.2);
 
-    // Everything else is prepared only when needed, so none of it runs during page load:
-    // scroll and hover effects on the first interaction, the card stack when it is near.
+    // Everything else is prepared on the visitor's first interaction, so none of it runs
+    // during page load. The card stack is created here too, while the visitor is still at
+    // the top: creating its pin later, mid-scroll, re-measures every trigger and makes the
+    // scrubbed text highlight jump.
     const isActive = () => active;
     let cleanServices = () => {};
     let cleanMagnetic = () => {};
@@ -605,18 +636,22 @@ function boot() {
       () =>
         runDeferred(
           context,
-          [initHeroOverlap, () => (cleanServices = initServicesHover()), () => (cleanMagnetic = initMagneticButton())],
+          [
+            initHeroOverlap,
+            initCardStacking,
+            () => (cleanServices = initServicesHover()),
+            () => (cleanMagnetic = initMagneticButton()),
+          ],
           isActive,
-          queueRefresh,
+          resizeScroller,
         ),
       isActive,
     );
-    const stopCards = whenNear('.case_study-cards-collection', () => (context.add(initCardStacking), queueRefresh()), isActive);
 
     return () => {
       active = false;
+      unlockScroll();
       stopInteraction();
-      stopCards();
       cleanServices();
       cleanMagnetic();
       gsap.ticker.remove(rafCb);

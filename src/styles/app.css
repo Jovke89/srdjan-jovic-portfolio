@@ -675,3 +675,279 @@ textarea:focus-visible,
   overflow: hidden;
 }
 /* Related case-study cards END */
+
+/* Page transition START */
+/* Page transitions built on native cross-document View Transitions: pure CSS,
+   no JavaScript, and pages still load normally (own <head>, scripts,
+   analytics). Browsers without support simply navigate normally. Adapted from
+   two Osmo Barba transitions; pick one with the data-page-transition attribute
+   on <html> in BaseLayout.astro:
+   - "parallax": the new page slides up over the current one, which moves up
+     25vh and darkens.
+   - "clip": the new page rises from mid-screen inside a rounded window that
+     opens to full screen, while the current page drifts up and scales.
+   - "shutter": ten strips in the background-canvas colours cover the screen from the bottom up,
+     then retract upwards to reveal the new page. The strips are empty elements
+     rendered by BaseLayout (.page-shutters); each has its own
+     view-transition-name, so its transition layer can be coloured and animated. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Nav and chat launcher stay put while the pages move underneath. The name sits
+   on .navbar_component itself: an element with a view-transition-name becomes a
+   backdrop root for its descendants, so naming its parent (.sticky_nav-component)
+   cut off the navbar's backdrop-filter blur. */
+.navbar_component {
+  view-transition-name: site-nav;
+}
+.chatbot_launcher {
+  view-transition-name: chat-launcher;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Variant: parallax */
+  html[data-page-transition='parallax']::view-transition-old(root) {
+    animation: parallax-leave 1.2s cubic-bezier(0.7, 0.05, 0.13, 1) both;
+  }
+  html[data-page-transition='parallax']::view-transition-new(root) {
+    animation: parallax-enter 1.2s cubic-bezier(0.7, 0.05, 0.13, 1) both;
+  }
+
+  /* Variant: clip (position settles in 1s, the rounded window opens over 1.2s) */
+  html[data-page-transition='clip']::view-transition-old(root) {
+    animation: clip-leave 1.2s cubic-bezier(0.625, 0.05, 0, 1) both;
+  }
+  html[data-page-transition='clip']::view-transition-new(root) {
+    animation:
+      clip-enter-move 1s cubic-bezier(0.625, 0.05, 0, 1) both,
+      clip-enter-reveal 1.2s cubic-bezier(0.625, 0.05, 0, 1) both;
+  }
+}
+
+/* Variant: shutter. Timeline (from Osmo): each strip covers in 0.5s, staggered
+   over 0.3s starting with the bottom strip; from 0.8s the strips retract upwards
+   in 0.75s (same stagger) while the new page rises from 20vh. power3.in and
+   expo.out are approximated with cubic-bezier curves. The strip layers move with
+   the independent `translate`/`scale` properties because the browser positions
+   each layer with `transform`. */
+.page-shutters {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+}
+/* Each strip is 4px taller than its slot and overlaps the next one, so no hairline
+   seams show between strips while they cover the screen */
+.page-shutters > span {
+  flex: none;
+  height: calc(10% + 4px);
+  margin-bottom: -4px;
+}
+.page-shutters > span:nth-child(1) {
+  view-transition-name: shutter-1;
+}
+.page-shutters > span:nth-child(2) {
+  view-transition-name: shutter-2;
+}
+.page-shutters > span:nth-child(3) {
+  view-transition-name: shutter-3;
+}
+.page-shutters > span:nth-child(4) {
+  view-transition-name: shutter-4;
+}
+.page-shutters > span:nth-child(5) {
+  view-transition-name: shutter-5;
+}
+.page-shutters > span:nth-child(6) {
+  view-transition-name: shutter-6;
+}
+.page-shutters > span:nth-child(7) {
+  view-transition-name: shutter-7;
+}
+.page-shutters > span:nth-child(8) {
+  view-transition-name: shutter-8;
+}
+.page-shutters > span:nth-child(9) {
+  view-transition-name: shutter-9;
+}
+.page-shutters > span:nth-child(10) {
+  view-transition-name: shutter-10;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-page-transition='shutter']::view-transition-old(root) {
+    animation:
+      shutter-page-leave 0.75s cubic-bezier(0.32, 0, 0.67, 0) both,
+      shutter-page-hide 0s linear 0.8s forwards;
+  }
+  html[data-page-transition='shutter']::view-transition-new(root) {
+    animation:
+      shutter-page-wait 0.8s linear,
+      shutter-page-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+  }
+
+  html[data-page-transition='shutter']::view-transition-group(shutter-1),
+  html[data-page-transition='shutter']::view-transition-group(shutter-2),
+  html[data-page-transition='shutter']::view-transition-group(shutter-3),
+  html[data-page-transition='shutter']::view-transition-group(shutter-4),
+  html[data-page-transition='shutter']::view-transition-group(shutter-5),
+  html[data-page-transition='shutter']::view-transition-group(shutter-6),
+  html[data-page-transition='shutter']::view-transition-group(shutter-7),
+  html[data-page-transition='shutter']::view-transition-group(shutter-8),
+  html[data-page-transition='shutter']::view-transition-group(shutter-9),
+  html[data-page-transition='shutter']::view-transition-group(shutter-10) {
+    background-image: linear-gradient(var(--shutter-from), var(--shutter-to));
+    animation:
+      shutter-cover 0.5s cubic-bezier(0.32, 0, 0.67, 0) var(--shutter-delay) both,
+      shutter-retract 0.75s cubic-bezier(0.16, 1, 0.3, 1) calc(0.8s + var(--shutter-delay)) forwards;
+  }
+
+  /* Stagger from the end: the bottom strip moves first. Each strip holds its slice
+     of one top-to-bottom gradient in the background canvas colours (orange
+     #ff5722, purple #7c3aed, blue #2563eb), so together they read as one surface. */
+  ::view-transition-group(shutter-1) {
+    --shutter-delay: 0.3s;
+    --shutter-from: #ff5722;
+    --shutter-to: #e5514b;
+  }
+  ::view-transition-group(shutter-2) {
+    --shutter-delay: 0.267s;
+    --shutter-from: #e5514b;
+    --shutter-to: #cb4b73;
+  }
+  ::view-transition-group(shutter-3) {
+    --shutter-delay: 0.233s;
+    --shutter-from: #cb4b73;
+    --shutter-to: #b0469c;
+  }
+  ::view-transition-group(shutter-4) {
+    --shutter-delay: 0.2s;
+    --shutter-from: #b0469c;
+    --shutter-to: #9640c4;
+  }
+  ::view-transition-group(shutter-5) {
+    --shutter-delay: 0.167s;
+    --shutter-from: #9640c4;
+    --shutter-to: #7c3aed;
+  }
+  ::view-transition-group(shutter-6) {
+    --shutter-delay: 0.133s;
+    --shutter-from: #7c3aed;
+    --shutter-to: #6b42ed;
+  }
+  ::view-transition-group(shutter-7) {
+    --shutter-delay: 0.1s;
+    --shutter-from: #6b42ed;
+    --shutter-to: #594aec;
+  }
+  ::view-transition-group(shutter-8) {
+    --shutter-delay: 0.067s;
+    --shutter-from: #594aec;
+    --shutter-to: #4853ec;
+  }
+  ::view-transition-group(shutter-9) {
+    --shutter-delay: 0.033s;
+    --shutter-from: #4853ec;
+    --shutter-to: #365beb;
+  }
+  ::view-transition-group(shutter-10) {
+    --shutter-delay: 0.0s;
+    --shutter-from: #365beb;
+    --shutter-to: #2563eb;
+  }
+}
+
+@keyframes shutter-page-leave {
+  to {
+    transform: translateY(-15vh);
+  }
+}
+@keyframes shutter-page-hide {
+  to {
+    opacity: 0;
+  }
+}
+/* Keeps the new page hidden until the strips fully cover the screen */
+@keyframes shutter-page-wait {
+  from,
+  to {
+    opacity: 0;
+  }
+}
+@keyframes shutter-page-enter {
+  from {
+    transform: translateY(20vh);
+  }
+}
+@keyframes shutter-cover {
+  from {
+    clip-path: inset(100% 0 0 0);
+    translate: 0 50%;
+    scale: 1 1.02;
+  }
+  to {
+    clip-path: inset(0);
+    translate: 0 0;
+    scale: 1 1.02;
+  }
+}
+@keyframes shutter-retract {
+  from {
+    clip-path: inset(0);
+    translate: 0 0;
+    scale: 1 1.02;
+  }
+  to {
+    clip-path: inset(0 0 102% 0);
+    translate: 0 -50%;
+    scale: 1 1.02;
+  }
+}
+
+/* Reduced motion: an instant swap, like the originals' reducedMotion branch */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}
+
+/* Parallax: brightness(0.2) matches the original's 80% black overlay */
+@keyframes parallax-leave {
+  to {
+    transform: translateY(-25vh);
+    filter: brightness(0.2);
+  }
+}
+@keyframes parallax-enter {
+  from {
+    transform: translateY(100vh);
+  }
+}
+
+/* Clip: brightness(0.8) matches the original's 20% black overlay */
+@keyframes clip-leave {
+  to {
+    transform: translateY(-10vh) scale(1.2);
+    filter: brightness(0.8);
+  }
+}
+@keyframes clip-enter-move {
+  from {
+    transform: translateY(50vh);
+  }
+}
+@keyframes clip-enter-reveal {
+  from {
+    clip-path: inset(50% round 3em);
+  }
+  to {
+    clip-path: inset(0% round 0em);
+  }
+}
+/* Page transition END */

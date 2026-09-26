@@ -30,6 +30,9 @@ interface Props {
   loader?: boolean;
 }
 
+/* Page transition variant: "shutter", "clip" or "parallax" (see "Page transition" in app.css) */
+const pageTransition: 'shutter' | 'clip' | 'parallax' = 'shutter';
+
 const {
   seo,
   bodyClass,
@@ -40,7 +43,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="en" class="w-mod-js">
+<html lang="en" class="w-mod-js" data-page-transition={pageTransition}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -144,6 +147,14 @@ const {
     {/* Site-wide animated gradient background (desktop only, pointer-events: none). */}
     {chrome && <canvas id="heroCanvas"></canvas>}
     {chrome && <ChatWidget />}
+    {/* Empty strips that the "shutter" page transition colours and animates */}
+    {
+      pageTransition === 'shutter' && (
+        <div class="page-shutters" aria-hidden="true">
+          {Array.from({ length: 10 }, () => <span />)}
+        </div>
+      )
+    }
     <CookieConsent />
     <SiteScripts />
   </body>
