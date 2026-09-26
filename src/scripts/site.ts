@@ -479,6 +479,49 @@ function queueRefresh() {
   }, 100);
 }
 
+/* Runs `fn` once, after the visitor's first interaction, as soon as the first
+   element matching `selector` is within roughly one viewport of the screen.
+   Below-the-fold effects are ready before they are seen, and cost nothing
+   during page load (reaching them always requires a scroll first). */
+function whenNear(selector: string, fn: () => void, isActive: () => boolean): () => void {
+  const target = document.querySelector(selector);
+  if (!target) return () => {};
+  let stopObserving = () => {};
+  const stopWaiting = onFirstInteraction(() => {
+    stopObserving = observeNear(target, fn, isActive);
+  }, isActive);
+  return () => {
+    stopWaiting();
+    stopObserving();
+  };
+}
+
+/* Checks the target's position on scroll (and once right away) until it is
+   within one viewport of the screen, then runs `fn` and stops listening. */
+function observeNear(target: Element, fn: () => void, isActive: () => boolean): () => void {
+  const stop = () => window.removeEventListener('scroll', check);
+  function check() {
+    if (target.getBoundingClientRect().top > window.innerHeight * 2) return;
+    stop();
+    if (isActive()) fn();
+  }
+  window.addEventListener('scroll', check, { passive: true });
+  check();
+  return stop;
+}
+
+/* Runs `fn` once, on the visitor's first scroll, wheel, pointer move, touch or key press. */
+const INTERACTION_EVENTS = ['scroll', 'wheel', 'pointermove', 'touchstart', 'keydown'] as const;
+function onFirstInteraction(fn: () => void, isActive: () => boolean): () => void {
+  const run = () => {
+    stop();
+    if (isActive()) fn();
+  };
+  const stop = () => INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, run));
+  INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, run, { passive: true }));
+  return stop;
+}
+
 function runDeferred(context: gsap.Context, steps: Array<() => void>, isActive: () => boolean, onDone: () => void) {
   void (async () => {
     for (const step of steps) {
@@ -513,10 +556,15 @@ function boot() {
     if (document.readyState === 'complete') startCanvas();
     else window.addEventListener('load', startCanvas, { once: true });
 
-    runDeferred(context, [initMarquee, initSplitHighlight], () => active, queueRefresh);
+    const isActive = () => active;
+    // Marquee sits right under the hero, so it gets a deferred step; the text
+    // highlight is further down and waits until the visitor scrolls near it.
+    runDeferred(context, [initMarquee], isActive, queueRefresh);
+    const stopHighlight = whenNear('.big_text-animation', () => (context.add(initSplitHighlight), queueRefresh()), isActive);
 
     return () => {
       active = false;
+      stopHighlight();
       window.removeEventListener('load', startCanvas);
       cleanCanvas();
       cleanCursor();
@@ -548,23 +596,27 @@ function boot() {
     if (showLoader) initLoaderThreeSteps();
     initHeroHeadingStagger(showLoader ? 4.5 : 0.2);
 
-    // Everything else is set up in small deferred steps.
+    // Everything else is prepared only when needed, so none of it runs during page load:
+    // scroll and hover effects on the first interaction, the card stack when it is near.
+    const isActive = () => active;
     let cleanServices = () => {};
     let cleanMagnetic = () => {};
-    runDeferred(
-      context,
-      [
-        initHeroOverlap,
-        initCardStacking,
-        () => (cleanServices = initServicesHover()),
-        () => (cleanMagnetic = initMagneticButton()),
-      ],
-      () => active,
-      queueRefresh,
+    const stopInteraction = onFirstInteraction(
+      () =>
+        runDeferred(
+          context,
+          [initHeroOverlap, () => (cleanServices = initServicesHover()), () => (cleanMagnetic = initMagneticButton())],
+          isActive,
+          queueRefresh,
+        ),
+      isActive,
     );
+    const stopCards = whenNear('.case_study-cards-collection', () => (context.add(initCardStacking), queueRefresh()), isActive);
 
     return () => {
       active = false;
+      stopInteraction();
+      stopCards();
       cleanServices();
       cleanMagnetic();
       gsap.ticker.remove(rafCb);
