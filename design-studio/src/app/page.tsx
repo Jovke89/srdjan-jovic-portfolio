@@ -1,6 +1,8 @@
 import { AppShell } from "@/components/shell/AppShell";
 import { Breadcrumbs } from "@/components/shell/Breadcrumbs";
 import { SidebarBrand, SidebarFooter, SidebarGroup, SidebarItem } from "@/components/shell/Sidebar";
+import { requireAdmin } from "@/lib/auth/admin";
+import { signOut } from "@/lib/actions/auth";
 import styles from "./page.module.css";
 
 /* Dashboard skeleton START */
@@ -23,6 +25,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  await requireAdmin();
   const { status: rawStatus } = await searchParams;
   const status: Status = isStatus(rawStatus) ? rawStatus : "active";
   const current = statuses.find((item) => item.key === status) ?? statuses[0];
@@ -46,9 +49,11 @@ export default async function DashboardPage({
             ))}
           </SidebarGroup>
           <SidebarFooter>
-            <button type="button" className="button is-ghost" disabled>
-              Sign out
-            </button>
+            <form action={signOut}>
+              <button type="submit" className="button is-ghost">
+                Sign out
+              </button>
+            </form>
           </SidebarFooter>
         </>
       }
