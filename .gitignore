@@ -33,5 +33,6 @@ sanity/migrations/lib/asset-cache.json
 
 .vercel
 .env*
+!.env.example
 
 .vercel
