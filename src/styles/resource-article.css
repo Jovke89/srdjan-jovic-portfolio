@@ -94,3 +94,28 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Article heading wrap START */
+/* Long words in article headings (e.g. "Recommended") overflow narrow screens with the wide display font */
+.resource_template-heading h1,
+.event_body-text :is(h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: anywhere;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  /* Hyphenate only words of 6+ letters, keeping at least 3 letters on each side of the break */
+  -webkit-hyphenate-limit-before: 3;
+  -webkit-hyphenate-limit-after: 3;
+  hyphenate-limit-chars: 6 3 3;
+}
+
+/* Smaller on phones so long words fit whole from 360px up; below that the wrap above is the fallback */
+@media (max-width: 479px) {
+  .resource_template-heading h1 {
+    font-size: 1.5rem;
+  }
+
+  .event_body-text h2 {
+    font-size: 1.3rem;
+  }
+}
+/* Article heading wrap END */
