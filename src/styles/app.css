@@ -600,6 +600,20 @@ p {
 }
 /* Paragraph orphan control END */
 
+/* Inline text link START */
+/* The Client-First export colors .text-style-link with its default blue;
+   inline links use the site's brand yellow instead. */
+.text-style-link {
+  color: var(--_srdjan-variables---brand-color);
+  text-underline-offset: 0.2em;
+  transition: opacity 0.2s;
+}
+
+.text-style-link:hover {
+  opacity: 0.8;
+}
+/* Inline text link END */
+
 /* Card reveal START */
 /* Classes are added only by src/scripts/card-reveal.ts on desktop with a mouse,
    so without JS, on touch devices and for crawlers every card stays visible.
