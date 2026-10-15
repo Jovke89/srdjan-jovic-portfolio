@@ -584,6 +584,22 @@ textarea:focus-visible,
 }
 /* Card image zoom on hover END */
 
+/* Project card image ratio START */
+/* Card thumbnails are uploaded at 4:3 (1195x896); the Webflow export's 16:9
+   frame cropped about a quarter of their height, so match the frame to them. */
+.project_item-img-wrapper:not(.is-related-wrapper) {
+  aspect-ratio: 4 / 3;
+}
+/* Project card image ratio END */
+
+/* Paragraph orphan control START */
+/* Lets the browser rebalance the last lines so a paragraph never ends with a
+   single word on its own line. Browsers without support keep normal wrapping. */
+p {
+  text-wrap: pretty;
+}
+/* Paragraph orphan control END */
+
 /* Magnetic round buttons START */
 .footer_btn,
 .view_site-btn {
