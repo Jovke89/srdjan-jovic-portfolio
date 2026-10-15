@@ -8,6 +8,7 @@ import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
 import { initHeroCanvas } from './hero-canvas';
 import { initStagerButtons } from './stager';
+import { initCardReveal } from './card-reveal';
 
 gsap.registerPlugin(ScrollTrigger, CustomEase, SplitText);
 
@@ -585,6 +586,10 @@ function boot() {
       cleanCursor();
     };
   });
+
+  // Card reveal: desktop with a mouse only. Plain IntersectionObserver + CSS
+  // keyframes, no ScrollTrigger, so it never re-measures the pinned sections.
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 992px) and (pointer: fine)', () => initCardReveal());
 
   // Desktop/tablet only (matches Nav.astro's 991px collapse breakpoint) — on
   // mobile, Lenis kept fighting the hamburger menu's own scroll lock (native
