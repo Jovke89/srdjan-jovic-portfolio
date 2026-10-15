@@ -610,7 +610,7 @@ p {
 }
 
 .card-reveal.is-revealed {
-  animation: card-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) var(--card-reveal-delay, 0ms) both;
+  animation: card-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) var(--card-reveal-delay, 0ms) both;
 }
 
 @keyframes card-reveal {

@@ -13,7 +13,7 @@ const CARD_SELECTOR = [
   '.resource_grid-item',
 ].join(',');
 
-const STAGGER_MS = 100;
+const STAGGER_MS = 150;
 const MAX_STAGGER_STEPS = 5;
 
 export function initCardReveal() {
