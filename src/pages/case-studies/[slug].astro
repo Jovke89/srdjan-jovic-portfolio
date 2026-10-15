@@ -44,6 +44,25 @@ const hero = imgSet(cs.coverImage, { width: 1600 });
 const ogImage = imgSet(cs.seo?.ogImage ?? cs.coverImage ?? cs.cardThumbnail, { width: 1200 })?.src;
 const description = cs.seo?.description || cs.clientDescription || '';
 
+/* Case study text fields are plain strings. Mentions of the client's own domain
+   (taken from `currentWebsite`, e.g. "broworks.net/404") become links; other
+   domain-like words such as "Cal.com" stay plain text. Output is HTML-escaped. */
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+const siteHost = cs.currentWebsite ? new URL(cs.currentWebsite).hostname.replace(/^www\./, '') : null;
+const siteMention = siteHost
+  ? new RegExp(`\\b(?:www\\.)?${siteHost.replace(/\./g, '\\.')}(?:/[\\w\\-/]*[\\w\\-])?`, 'gi')
+  : null;
+const linkify = (text: string) => {
+  const safe = escapeHtml(text);
+  if (!siteMention) return safe;
+  return safe.replace(siteMention, (m) => {
+    const url = new URL(`https://${m.replace(/^www\./i, '')}`);
+    url.hostname = new URL(cs.currentWebsite!).hostname;
+    return `<a href="${url.href}" class="text-style-link" target="_blank" rel="noopener">${m}</a>`;
+  });
+};
+
 const marqueeRows = [
   (cs.marqueeImages ?? []).slice(0, 3),
   (cs.marqueeImages ?? []).slice(3, 6),
@@ -149,7 +168,7 @@ const jsonld = buildArticleLd({
                   </div>
                   {cs.overviewParagraph && (
                     <div class="overwiev_paragraph-wrapper">
-                      <p class="text-size-medium text-style-allcaps">{cs.overviewParagraph}</p>
+                      <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.overviewParagraph)} />
                     </div>
                   )}
                 </div>
@@ -194,8 +213,8 @@ const jsonld = buildArticleLd({
                 </div>
                 <div class="role_content">
                   <div class="role_paragraph-wrapper">
-                    {cs.challengeParagraph1 && <p class="text-size-medium text-style-allcaps">{cs.challengeParagraph1}</p>}
-                    {cs.challengeParagraph2 && <p class="text-size-medium text-style-allcaps">{cs.challengeParagraph2}</p>}
+                    {cs.challengeParagraph1 && <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.challengeParagraph1)} />}
+                    {cs.challengeParagraph2 && <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.challengeParagraph2)} />}
                   </div>
                   {cs.challengeImage && (
                     <div class="challenge_img-wrapper">
@@ -239,8 +258,8 @@ const jsonld = buildArticleLd({
                     </div>
                   )}
                   <div class="role_paragraph-wrapper">
-                    {cs.roleParagraph1 && <p class="text-size-medium text-style-allcaps">{cs.roleParagraph1}</p>}
-                    {cs.roleParagraph2 && <p class="text-size-medium text-style-allcaps">{cs.roleParagraph2}</p>}
+                    {cs.roleParagraph1 && <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.roleParagraph1)} />}
+                    {cs.roleParagraph2 && <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.roleParagraph2)} />}
                   </div>
                 </div>
                 <CornerLines top={false} />
@@ -265,7 +284,7 @@ const jsonld = buildArticleLd({
                 <div class="approach_content">
                   {cs.approachParagraph && (
                     <div class="approach_paragraph-wrapper">
-                      <p class="text-size-medium text-style-allcaps">{cs.approachParagraph}</p>
+                      <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.approachParagraph)} />
                     </div>
                   )}
                   {cs.approachImage && (
@@ -335,7 +354,7 @@ const jsonld = buildArticleLd({
                   <div class="exprecion">]</div>
                 </div>
                 <h2 class="heading-style-h2">Key Takeaway</h2>
-                <p class="text-size-medium text-style-allcaps">{cs.keyTakeaway}</p>
+                <p class="text-size-medium text-style-allcaps" set:html={linkify(cs.keyTakeaway)} />
                 <CornerLines top={false} />
               </div>
             </div>
