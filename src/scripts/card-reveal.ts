@@ -38,7 +38,7 @@ export function initCardReveal() {
           observer.unobserve(card);
         });
     },
-    { rootMargin: '0px 0px -10% 0px' },
+    { rootMargin: '0px 0px -20% 0px' },
   );
 
   waiting.forEach((card) => {
