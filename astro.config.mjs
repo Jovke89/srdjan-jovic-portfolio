@@ -55,7 +55,9 @@ export default defineConfig({
       projectId: PUBLIC_SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET,
       apiVersion: '2025-01-01',
-      useCdn: true,
+      // Static build fetches at build time only, so skip the API CDN: a build
+      // triggered by the publish webhook could otherwise get a stale cached list.
+      useCdn: false,
       // No studioBasePath: the embedded-Studio build (a full React SPA bundled into
       // this Astro build) is what was OOM-killing the Vercel build machine. Studio
       // now lives at its own Sanity-hosted URL; `redirects['/studio']` above sends
