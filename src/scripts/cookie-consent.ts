@@ -93,7 +93,7 @@ if (banner) {
     }
   });
 
-  // Matches the hero heading's 4.5s delay (site.ts, initHeroHeadingStagger)
+  // Matches the hero heading's 4.5s delay (site.ts heroDelay, hero-wave.ts)
   // so the banner doesn't pop in over the intro loader/heading animation.
   if (!consent) setTimeout(open, 4500);
 }

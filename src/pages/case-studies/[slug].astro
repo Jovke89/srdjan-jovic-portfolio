@@ -123,6 +123,15 @@ const jsonld = buildArticleLd({
               <div class="padding-bottom padding-large"></div>
             </div>
             <div class="case_template-hero-img-wrapper">
+              <div
+                class="hero_star-lines"
+                aria-hidden="true"
+                style={/^#[0-9a-fA-F]{6}$/.test(cs.brandColor ?? '') ? `--case-brand: ${cs.brandColor}` : undefined}
+              >
+                <div class="hero_star-lines-field">
+                  {Array.from({ length: 7 }, () => <span class="hero_star-line"></span>)}
+                </div>
+              </div>
               <div class="hero_img-wrapper-template">
                 {
                   hero && (

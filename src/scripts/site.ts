@@ -9,6 +9,7 @@ import Lenis from 'lenis';
 import { initHeroCanvas } from './hero-canvas';
 import { initStagerButtons } from './stager';
 import { initCardReveal } from './card-reveal';
+import { initHeroWave } from './hero-wave';
 
 gsap.registerPlugin(ScrollTrigger, CustomEase, SplitText);
 
@@ -230,25 +231,19 @@ function shouldShowLoader(): boolean {
   }
 }
 
-/* --- Hero heading stagger (desktop), delayed to start as the loader clears --- */
-function initHeroHeadingStagger(delay = 4.5) {
-  if (!document.querySelector('.hero_home-heading')) return;
-  document.fonts.ready.then(() => {
-    SplitText.create('.hero_home-heading', {
-      type: 'words',
-      mask: 'words',
-      autoSplit: true,
-      onSplit(self) {
-        return gsap.from(self.words, {
-          yPercent: 120,
-          duration: 1,
-          stagger: 0.12,
-          ease: 'power4.out',
-          delay,
-        });
-      },
-    });
-  });
+/* Cross-document view transitions (app.css) run on same-origin link and
+   back/forward navigations, not on reloads or arrivals from other sites. The
+   shutter keeps the new page covered for 0.8s and then lifts it, so hero text
+   should start as the page comes into view. */
+function arrivesWithPageTransition(): boolean {
+  if (!('PageRevealEvent' in window) || !document.documentElement.dataset.pageTransition) return false;
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (navigation?.type === 'reload') return false;
+  try {
+    return !!document.referrer && new URL(document.referrer).origin === location.origin;
+  } catch {
+    return false;
+  }
 }
 
 /* --- Hero content overlap / pin (desktop). Per-page settings ported 1:1 from
@@ -430,7 +425,7 @@ function initServicesHover() {
 function initMagneticButton() {
   const configs = [
     { wrap: '.footer_btn-wrapper', btn: '.footer_btn', catch: 330, travel: 130, duration: 0.45 },
-    { wrap: '.view_site-btn-wrapper', btn: '.view_site-btn', catch: 200, travel: 26, duration: 0.3 },
+    { wrap: '.view_site-btn-wrapper', btn: '.view_site-btn', catch: 330, travel: 130, duration: 0.45 },
   ];
   const cleanups: Array<() => void> = [];
   configs.forEach(({ wrap: wrapSelector, btn: btnSelector, catch: catchR, travel, duration }) => {
@@ -635,7 +630,9 @@ function boot() {
       if (loader) loader.eventCallback('onComplete', unlockScroll);
       else unlockScroll();
     }
-    initHeroHeadingStagger(showLoader ? 4.5 : 0.2);
+    const heroDelay = showLoader ? 4.5 : arrivesWithPageTransition() ? 1 : 0.2;
+    // Must match the has-hero-motion condition in BaseLayout, which hides the hero text.
+    if (window.matchMedia('(pointer: fine)').matches) initHeroWave(heroDelay);
 
     // Everything else is prepared on the visitor's first interaction, so none of it runs
     // during page load. The card stack is created here too, while the visitor is still at

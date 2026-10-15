@@ -662,6 +662,146 @@ p {
 }
 /* Magnetic round buttons END */
 
+/* View Website button float START */
+/* Idle hover-in-place on the case study "View Website" button. It runs on the
+   wrapper, so it never fights the magnetic pull GSAP applies to the button. */
+@media (min-width: 992px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .view_site-btn-wrapper {
+    animation: view-site-float 6s ease-in-out infinite;
+  }
+}
+
+/* A slow loop that drifts sideways as well as up and down. */
+@keyframes view-site-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: 1rem -0.75rem;
+  }
+  50% {
+    translate: 0 -1.5rem;
+  }
+  75% {
+    translate: -1rem -0.75rem;
+  }
+}
+/* View Website button float END */
+
+/* Hero wave START */
+/* `has-hero-motion` is set in BaseLayout's head only on desktop with a mouse
+   and motion allowed; src/scripts/hero-wave.ts reveals these (keep both
+   selector lists in sync). The fallback animation shows them after 8s in case
+   the script never runs. */
+html.has-hero-motion h1,
+html.has-hero-motion .section_hero-case-template .section_hero-case-content-wrapper > .text_in-exprecions,
+html.has-hero-motion .section_hero-case-template .case_template-hero-heading p,
+html.has-hero-motion .section_hero-case-template .section_hero-template-info-wrapper .info_wrapper,
+html.has-hero-motion .section_hero-case-template .case_template-hero-img-wrapper,
+html.has-hero-motion .section_resources-template-hero .bak_to-all-posts,
+html.has-hero-motion .section_resources-template-hero .resource_template-info > *,
+html.has-hero-motion .section_resources-template-hero .resource_template-img-mask {
+  visibility: hidden;
+  animation: case-hero-fallback 0s 8s forwards;
+}
+
+@keyframes case-hero-fallback {
+  to {
+    visibility: visible;
+  }
+}
+/* Hero wave END */
+
+/* Case study hero shooting star lines START */
+/* Decorative layer behind the cover image: faint diagonal lines, each with a
+   streak in the client's brand color (--case-brand, set per case study from
+   Sanity, falling back to the site yellow) and a fading tail passing through
+   on its own rhythm. The layer clips itself (not the panel), so the magnetic View Website button
+   can still travel outside the panel. Only transform is animated. */
+.case_template-hero-img-wrapper {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero_img-wrapper-template {
+  z-index: 1;
+}
+
+.hero_star-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.hero_star-lines-field {
+  position: absolute;
+  inset: -50%;
+  /* Positive angle: streaks run left to right and downward, like falling stars. */
+  rotate: 30deg;
+}
+
+.hero_star-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgb(255 255 255 / 6%);
+  overflow: hidden;
+}
+
+.hero_star-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--case-brand, var(--_srdjan-variables---brand-color)));
+  box-shadow: 0 0 6px var(--case-brand, var(--_srdjan-variables---brand-color));
+  translate: -100% 0;
+  animation: hero-star-fall var(--star-duration, 6s) cubic-bezier(0.55, 0, 0.45, 1) var(--star-delay, 0s) infinite;
+}
+
+.hero_star-line:nth-child(1) { top: 14%; --star-duration: 6s; --star-delay: 0.4s; }
+.hero_star-line:nth-child(2) { top: 26%; --star-duration: 8s; --star-delay: 3.2s; }
+.hero_star-line:nth-child(3) { top: 38%; --star-duration: 7s; --star-delay: 1.6s; }
+.hero_star-line:nth-child(4) { top: 50%; --star-duration: 9s; --star-delay: 5s; }
+.hero_star-line:nth-child(5) { top: 62%; --star-duration: 6.5s; --star-delay: 2.4s; }
+.hero_star-line:nth-child(6) { top: 74%; --star-duration: 8.5s; --star-delay: 0s; }
+.hero_star-line:nth-child(7) { top: 86%; --star-duration: 7.5s; --star-delay: 4.2s; }
+
+/* The streak crosses in the first part of each cycle, then the line rests,
+   so stars fall now and then instead of in a constant stream. */
+@keyframes hero-star-fall {
+  0% {
+    translate: -100% 0;
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  35% {
+    translate: 300% 0;
+    opacity: 0;
+  }
+  100% {
+    translate: 300% 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero_star-line::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+/* Case study hero shooting star lines END */
+
 /* Case study "Overview" marquee START */
 /* The Webflow export ships `.marquee` / `.marquee-content` layout but not the
    keyframes. Each `.marquee` holds two `.marquee-content` copies; one row runs

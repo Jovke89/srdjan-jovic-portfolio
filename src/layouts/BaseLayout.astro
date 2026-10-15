@@ -77,6 +77,11 @@ const {
         if ('ontouchstart' in o || (o.DocumentTouch && c instanceof DocumentTouch)) {
           n.className += ' w-mod-touch';
         }
+        // Desktop with a mouse and motion allowed: lets CSS hide hero text that
+        // site.ts animates in, before first paint, so it never flashes.
+        if (o.matchMedia('(min-width: 992px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+          n.className += ' has-hero-motion';
+        }
       })(window, document);
     </script>
   </head>

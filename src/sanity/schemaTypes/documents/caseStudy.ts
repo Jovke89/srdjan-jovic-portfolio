@@ -28,6 +28,14 @@ export const caseStudy = defineType({
     defineField({ name: 'industry', type: 'reference', to: [{ type: 'industry' }], group: 'main' }),
     defineField({ name: 'currentWebsite', title: 'Current website URL', type: 'url', group: 'main' }),
     defineField({
+      name: 'brandColor',
+      title: 'Brand color',
+      description: 'Client brand color as hex (e.g. #00caff). Colors the shooting star lines behind the cover image; empty falls back to the site yellow.',
+      type: 'string',
+      group: 'main',
+      validation: (rule) => rule.regex(/^#[0-9a-fA-F]{6}$/, { name: 'hex color' }),
+    }),
+    defineField({
       name: 'cardThumbnail',
       title: 'Card thumbnail',
       type: 'image',
