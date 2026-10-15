@@ -763,16 +763,16 @@ html.has-hero-motion .section_resources-template-hero .resource_template-img-mas
   background: linear-gradient(90deg, transparent, var(--case-brand, var(--_srdjan-variables---brand-color)));
   box-shadow: 0 0 6px var(--case-brand, var(--_srdjan-variables---brand-color));
   translate: -100% 0;
-  animation: hero-star-fall var(--star-duration, 6s) cubic-bezier(0.55, 0, 0.45, 1) var(--star-delay, 0s) infinite;
+  animation: hero-star-fall var(--star-duration, 9s) cubic-bezier(0.55, 0, 0.45, 1) var(--star-delay, 0s) infinite;
 }
 
-.hero_star-line:nth-child(1) { top: 14%; --star-duration: 6s; --star-delay: 0.4s; }
-.hero_star-line:nth-child(2) { top: 26%; --star-duration: 8s; --star-delay: 3.2s; }
-.hero_star-line:nth-child(3) { top: 38%; --star-duration: 7s; --star-delay: 1.6s; }
-.hero_star-line:nth-child(4) { top: 50%; --star-duration: 9s; --star-delay: 5s; }
-.hero_star-line:nth-child(5) { top: 62%; --star-duration: 6.5s; --star-delay: 2.4s; }
-.hero_star-line:nth-child(6) { top: 74%; --star-duration: 8.5s; --star-delay: 0s; }
-.hero_star-line:nth-child(7) { top: 86%; --star-duration: 7.5s; --star-delay: 4.2s; }
+.hero_star-line:nth-child(1) { top: 14%; --star-duration: 9s; --star-delay: 0.4s; }
+.hero_star-line:nth-child(2) { top: 26%; --star-duration: 12s; --star-delay: 3.2s; }
+.hero_star-line:nth-child(3) { top: 38%; --star-duration: 10.5s; --star-delay: 1.6s; }
+.hero_star-line:nth-child(4) { top: 50%; --star-duration: 13.5s; --star-delay: 5s; }
+.hero_star-line:nth-child(5) { top: 62%; --star-duration: 9.75s; --star-delay: 2.4s; }
+.hero_star-line:nth-child(6) { top: 74%; --star-duration: 12.75s; --star-delay: 0s; }
+.hero_star-line:nth-child(7) { top: 86%; --star-duration: 11.25s; --star-delay: 4.2s; }
 
 /* The streak crosses in the first part of each cycle, then the line rests,
    so stars fall now and then instead of in a constant stream. */
