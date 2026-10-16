@@ -1,0 +1,59 @@
+---
+/* "Try other games" section at the bottom of a game page: two other games
+   from the shared catalogue, picked at random at build time (the site rebuilds
+   on every deploy), in the same two-column card layout as the arcade. */
+import CornerLines from './CornerLines.astro';
+import ProjectCard from './ProjectCard.astro';
+import { GAMES, gameUrl } from '../lib/game-room';
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+const pool = GAMES.filter((g) => g.slug !== current);
+for (let i = pool.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [pool[i], pool[j]] = [pool[j], pool[i]];
+}
+const others = pool.slice(0, 2);
+---
+
+{
+  others.length > 0 && (
+    <section class="section_projcets-related game-related">
+      <div class="container-large">
+        <div class="side_lines">
+          <div class="padding-global padding-section-large">
+            <div class="projects_content-wrapper">
+              <div class="projects_heading-wrapper">
+                <div class="projects_heading">
+                  <div class="text_in-exprecions">
+                    <div class="exprecion">[</div>
+                    <div class="text-color-alternate text-size-regular text-style-allcaps">next level</div>
+                    <div class="exprecion">]</div>
+                  </div>
+                  <h2 class="heading-style-h2">Try other games</h2>
+                </div>
+              </div>
+              <div class="realted_projects-list-wrapper">
+                <div role="list" class="projects_list">
+                  {others.map((g) => (
+                    <ProjectCard
+                      href={gameUrl(g.slug)}
+                      title={g.title}
+                      text={g.text}
+                      imageSrc={g.cover}
+                      imageAlt={`${g.title} cover`}
+                      cta="Start game"
+                    />
+                  ))}
+                </div>
+              </div>
+              <CornerLines />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

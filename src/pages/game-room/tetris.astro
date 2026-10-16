@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import GameRelated from '../../components/GameRelated.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Tetris',
+    description: 'The falling blocks classic in the browser. Clear lines, level up and beat your high score.',
+  }}
+>
+  <GameStars />
+
+  <!-- Tetris game START -->
+  <section class="section_game">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="game_component">
+            <div class="game_header">
+              <div class="game_header-meta">
+                <a href="/game-room/" class="bak_to-all-posts">&lt; game room</a>
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">game 05</div>
+                  <div class="exprecion">]</div>
+                </div>
+              </div>
+              <h1 class="heading-style-h1">Tetris</h1>
+              <p class="text-size-medium text-style-allcaps">
+                The falling blocks classic. Fill a whole row to clear it, four at once is a tetris.
+                Hold a piece for later, watch the next three, and every 10 lines the blocks fall faster.
+              </p>
+            </div>
+
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              Tetris needs a keyboard. Open this page on a desktop to play.
+            </p>
+
+            <div class="game_board" data-tetris>
+              <div class="game_hud text-size-regular text-style-allcaps" aria-live="polite">
+                <div>score <span class="text-color-alternate" data-game-score>0</span></div>
+                <div>lines <span class="text-color-alternate" data-game-lines>0</span></div>
+                <div>level <span class="text-color-alternate" data-game-level>1</span></div>
+                <div>best <span class="text-color-alternate" data-game-best>0</span></div>
+              </div>
+              <div class="game_screen">
+                <canvas class="game_canvas" data-game-canvas role="img" aria-label="Tetris game board"></canvas>
+                <div class="game_overlay" data-game-overlay>
+                  <h2 class="heading-style-h3" data-game-title>Ready?</h2>
+                  <p class="text-size-regular text-style-allcaps" data-game-text>
+                    Arrows or WASD to move, up to rotate, space to drop, C to hold, P to pause.
+                  </p>
+                  <button type="button" data-stager-btn class="button" data-game-start>
+                    <div data-stager-text>Play</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Tetris game END -->
+
+  <GameRelated current="tetris" />
+</BaseLayout>
+
+<script>
+  import '../../scripts/tetris.ts';
+</script>

@@ -7,13 +7,15 @@ interface Props {
   title: string;
   text?: string;
   image?: unknown;
+  /* Plain local image (e.g. Game Room SVG covers) instead of a Sanity image. */
+  imageSrc?: string;
   imageAlt?: string;
   cta: string;
   /* "related works" variant: shorter image wrapper (Webflow `.is-related-wrapper`,
      16rem) and a description clamped to 2 lines (`.related_paragraph`). */
   related?: boolean;
 }
-const { href, title, text, image, imageAlt, cta, related = false } = Astro.props;
+const { href, title, text, image, imageSrc, imageAlt, cta, related = false } = Astro.props;
 const imgWrapClass = related
   ? 'project_item-img-wrapper is-related-wrapper'
   : 'project_item-img-wrapper';
@@ -27,7 +29,9 @@ const textClass = related
   <article class="project_item">
     <div class={imgWrapClass}>
       {
-        image ? (
+        imageSrc ? (
+          <img src={imageSrc} alt={imageAlt ?? title} class="project_item-img" loading="lazy" width="400" height="300" />
+        ) : image ? (
           <ResponsiveImg
             source={image}
             alt={imageAlt ?? title}

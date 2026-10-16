@@ -10,6 +10,8 @@ const links = [
   { label: 'CASE STUDIES', href: '/case-studies/' },
   { label: 'resources', href: '/resources/' },
   { label: 'Events', href: '/events/' },
+  /* The games need a keyboard or mouse, so the link is hidden below 992px. */
+  { label: 'Game room', href: '/game-room/', desktopOnly: true },
 ];
 
 function isCurrent(href: string) {
@@ -43,7 +45,7 @@ function isCurrent(href: string) {
           <ul role="list" class="nav_links-list">
             {
               links.map((l) => (
-                <li class="nav_list-link">
+                <li class:list={['nav_list-link', l.desktopOnly && 'is-desktop-only']}>
                   <a
                     href={l.href}
                     class:list={['nav_link', 'blink-btn', 'w-inline-block', isCurrent(l.href) && 'w--current']}

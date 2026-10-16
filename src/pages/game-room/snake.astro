@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import GameRelated from '../../components/GameRelated.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Snake',
+    description: 'The Nokia 3310 classic, rebuilt in the browser. Eat, grow, and beat your high score.',
+  }}
+>
+  <GameStars />
+
+  <!-- Snake game START -->
+  <section class="section_game">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="game_component">
+            <div class="game_header">
+              <div class="game_header-meta">
+                <a href="/game-room/" class="bak_to-all-posts">&lt; game room</a>
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">game 06</div>
+                  <div class="exprecion">]</div>
+                </div>
+              </div>
+              <h1 class="heading-style-h1">Snake</h1>
+              <p class="text-size-medium text-style-allcaps">
+                The Nokia 3310 classic. Eat coins, grow and never bite your own tail. The edges let
+                you through, the blocks do not. Every 3 coins a new block drops in, every 10 the
+                snake gets faster.
+              </p>
+            </div>
+
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              Snake needs a keyboard. Open this page on a desktop to play.
+            </p>
+
+            <div class="game_board" data-snake>
+              <div class="game_hud text-size-regular text-style-allcaps" aria-live="polite">
+                <div>score <span class="text-color-alternate" data-snake-score>0</span></div>
+                <div>best <span class="text-color-alternate" data-snake-best>0</span></div>
+              </div>
+              <div class="game_screen">
+                <canvas class="game_canvas" data-snake-canvas role="img" aria-label="Snake game board"></canvas>
+                <div class="game_overlay" data-snake-overlay>
+                  <h2 class="heading-style-h3" data-snake-title>Ready?</h2>
+                  <p class="text-size-regular text-style-allcaps" data-snake-text>
+                    Arrow keys or WASD to move, space to pause.
+                  </p>
+                  <button type="button" data-stager-btn class="button" data-snake-start>
+                    <div data-stager-text>Play</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Snake game END -->
+
+  <GameRelated current="snake" />
+</BaseLayout>
+
+<script>
+  import '../../scripts/snake.ts';
+</script>

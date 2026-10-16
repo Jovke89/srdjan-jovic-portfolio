@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import GameRelated from '../../components/GameRelated.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Star Breaker',
+    description: 'Break every brick, catch the power-ups and dodge the falling rockets. A Breakout style game in the browser.',
+  }}
+>
+  <GameStars />
+
+  <!-- Star Breaker game START -->
+  <section class="section_game">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="game_component">
+            <div class="game_header">
+              <div class="game_header-meta">
+                <a href="/game-room/" class="bak_to-all-posts">&lt; game room</a>
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">game 07</div>
+                  <div class="exprecion">]</div>
+                </div>
+              </div>
+              <h1 class="heading-style-h1">Star Breaker</h1>
+              <p class="text-size-medium text-style-allcaps">
+                Break every brick with the ball, catch the power-ups that fall out and keep moving:
+                rockets drop from the sky and the paddle has to dodge them.
+              </p>
+            </div>
+
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              Star Breaker needs a mouse. Open this page on a desktop to play.
+            </p>
+
+            <div class="game_board" data-breaker>
+              <div class="game_hud text-size-regular text-style-allcaps" aria-live="polite">
+                <div>score <span class="text-color-alternate" data-game-score>0</span></div>
+                <div>level <span class="text-color-alternate" data-game-level>1</span></div>
+                <div>lives <span class="text-color-alternate" data-game-lives>3</span></div>
+                <div>best <span class="text-color-alternate" data-game-best>0</span></div>
+              </div>
+              <div class="game_screen">
+                <canvas class="game_canvas" data-game-canvas role="img" aria-label="Star Breaker game board"></canvas>
+                <div class="game_overlay" data-game-overlay>
+                  <h2 class="heading-style-h3" data-game-title>Ready?</h2>
+                  <p class="text-size-regular text-style-allcaps" data-game-text>
+                    Move the paddle with your mouse, click or space to launch, P to pause.
+                  </p>
+                  <button type="button" data-stager-btn class="button" data-game-start>
+                    <div data-stager-text>Play</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Star Breaker game END -->
+
+  <GameRelated current="star-breaker" />
+</BaseLayout>
+
+<script>
+  import '../../scripts/star-breaker.ts';
+</script>

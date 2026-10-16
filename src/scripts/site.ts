@@ -254,7 +254,7 @@ function arrivesWithPageTransition(): boolean {
 function initHeroOverlap() {
   const configs = [
     { sel: '.section_hero-content-wrapper', start: 'top top', end: '+=80%' }, // home
-    { sel: '.projects_hero-heading-wrapper', start: 'top 100px', end: '+=100%' }, // case studies list
+    { sel: '.projects_hero-heading-wrapper', start: 'top 100px', end: '+=100%' }, // case studies list, game room
     { sel: '.events_hero-content-wrapper', start: 'top 100px', end: '+=100%' }, // events list
     { sel: '.resources_hero-content-wrapper', start: 'top top', end: '+=80%' }, // resources list
     { sel: '.hero_animation-target', start: '25%', end: '+=80%' }, // case study detail

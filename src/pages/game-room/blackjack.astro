@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import GameRelated from '../../components/GameRelated.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Blackjack',
+    description: 'Blackjack in the browser. Start with 1000 credits, bet with chips and beat the dealer to 21.',
+  }}
+>
+  <GameStars />
+
+  <!-- Blackjack game START -->
+  <section class="section_game">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="game_component">
+            <div class="game_header">
+              <div class="game_header-meta">
+                <a href="/game-room/" class="bak_to-all-posts">&lt; game room</a>
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">game 02</div>
+                  <div class="exprecion">]</div>
+                </div>
+              </div>
+              <h1 class="heading-style-h1">Blackjack</h1>
+              <p class="text-size-medium text-style-allcaps">
+                Beat the dealer to 21 without going over. You start with 1000 credits, bet with
+                the chips and a blackjack pays 3 to 2.
+              </p>
+            </div>
+
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              Blackjack is built for desktop. Open this page on a larger screen to play.
+            </p>
+
+            <div class="game_board" data-blackjack>
+              <div class="game_hud text-size-regular text-style-allcaps" aria-live="polite">
+                <div>credits <span class="text-color-alternate" data-bj-credits>1000</span></div>
+                <div>bet <span class="text-color-alternate" data-bj-bet>0</span></div>
+                <div>win <span class="text-color-alternate" data-bj-win>0</span></div>
+                <div>best <span class="text-color-alternate" data-game-best>0</span></div>
+              </div>
+              <div class="game_screen bj_table">
+                <div class="bj_chips" role="group" aria-label="Chips">
+                  <button type="button" class="bj_chip is-50" data-chip="50" aria-label="Add 50 to the bet">50</button>
+                  <button type="button" class="bj_chip is-100" data-chip="100" aria-label="Add 100 to the bet">100</button>
+                  <button type="button" class="bj_chip is-500" data-chip="500" aria-label="Add 500 to the bet">500</button>
+                  <button type="button" class="bj_chip is-1000" data-chip="1000" aria-label="Add 1000 to the bet">1000</button>
+                </div>
+                <div class="bj_main">
+                  <div class="bj_hand">
+                    <div class="bj_hand-label text-size-regular text-style-allcaps">
+                      {/* The dealer is the site's AI agent: the chat launcher robot. */}
+                      <span class="bj_dealer-avatar" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 12 12" shape-rendering="crispEdges">
+                          <path fill="currentColor" fill-rule="evenodd" d="M5 0h2v1H5zM5.5 1h1v1h-1zM1 2h10v8H1zM3 4h2v2H3zM7 4h2v2H7zM4 8h4v1H4zM0 5h1v2H0zM11 5h1v2h-1zM3 10h2v1H3zM7 10h2v1H7z" />
+                        </svg>
+                      </span>
+                      dealer
+                    </div>
+                    <div class="bj_cards" data-bj-dealer></div>
+                  </div>
+                  <p class="bj_message text-size-regular text-style-allcaps" data-bj-message aria-live="polite">Place your bet with the chips, then deal.</p>
+                  <div class="bj_hand">
+                    <div class="bj_cards" data-bj-player></div>
+                  </div>
+                  <div class="bj_actions">
+                    <button type="button" class="filter_btn" data-bj-deal>Deal</button>
+                    <button type="button" class="filter_btn" data-bj-clear>Clear</button>
+                    <button type="button" class="filter_btn" data-bj-hit>Hit</button>
+                    <button type="button" class="filter_btn" data-bj-stand>Stand</button>
+                    <button type="button" class="filter_btn" data-bj-double>Double</button>
+                  </div>
+                  <p class="bj_keys text-size-regular text-style-allcaps">H hit, S stand, D double, space or enter deals</p>
+                </div>
+                <div class="bj_totals" aria-live="polite">
+                  <div class="bj_total">
+                    <div class="text-size-regular text-style-allcaps">dealer</div>
+                    <div class="heading-style-h2" data-bj-dealer-total>0</div>
+                  </div>
+                  <div class="bj_total">
+                    <div class="text-size-regular text-style-allcaps">you</div>
+                    <div class="heading-style-h2 text-color-alternate" data-bj-player-total>0</div>
+                  </div>
+                </div>
+                <template data-card-template>
+                  <button type="button" class="playing-card is-down" tabindex="-1" aria-label="Card face down">
+                    <span class="playing-card-inner">
+                      <span class="playing-card-back"></span>
+                      <span class="playing-card-face" data-card-face>
+                        <span class="playing-card-corner"><span data-rank></span><span data-suit></span></span>
+                        <span class="playing-card-suit" data-suit></span>
+                        <span class="playing-card-corner is-bottom"><span data-rank></span><span data-suit></span></span>
+                      </span>
+                    </span>
+                  </button>
+                </template>
+                <div class="game_overlay" data-game-overlay>
+                  <h2 class="heading-style-h3" data-game-title>Ready?</h2>
+                  <p class="text-size-regular text-style-allcaps" data-game-text>
+                    You start with 1000 credits. Blackjack pays 3 to 2.
+                  </p>
+                  <button type="button" data-stager-btn class="button" data-game-start>
+                    <div data-stager-text>Play</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Blackjack game END -->
+
+  <GameRelated current="blackjack" />
+</BaseLayout>
+
+<script>
+  import '../../scripts/blackjack.ts';
+</script>

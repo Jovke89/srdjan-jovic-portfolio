@@ -1,0 +1,13 @@
+---
+/* Fixed starfield behind every Game Room page: twinkling star layers plus
+   five invisible diagonal lines that a blue-white comet crosses now and then.
+   Styles: "Game room starfield" block in app.css. */
+---
+
+<!-- Game room starfield START -->
+<div class="game-room_stars" aria-hidden="true">
+  <div class="game-room_comets">
+    {Array.from({ length: 5 }, () => <span class="game-room_comet"></span>)}
+  </div>
+</div>
+<!-- Game room starfield END -->

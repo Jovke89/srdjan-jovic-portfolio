@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import GameRelated from '../../components/GameRelated.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Tank Battle',
+    description: 'A Battle City style tank game in the browser. Protect the AI agent base through 5 levels of enemy tanks.',
+  }}
+>
+  <GameStars />
+
+  <!-- Tank battle game START -->
+  <section class="section_game">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="game_component">
+            <div class="game_header">
+              <div class="game_header-meta">
+                <a href="/game-room/" class="bak_to-all-posts">&lt; game room</a>
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">game 04</div>
+                  <div class="exprecion">]</div>
+                </div>
+              </div>
+              <h1 class="heading-style-h1">Tank Battle</h1>
+              <p class="text-size-medium text-style-allcaps">
+                Protect the agent. Enemy tanks roll in from the top and shoot at you and at the base.
+                Clear 5 levels, grab the weapon crates and keep the bricks around the agent standing.
+              </p>
+            </div>
+
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              Tank Battle needs a keyboard. Open this page on a desktop to play.
+            </p>
+
+            <div class="game_board" data-tanks>
+              <div class="game_hud text-size-regular text-style-allcaps" aria-live="polite">
+                <div>score <span class="text-color-alternate" data-game-score>0</span></div>
+                <div>level <span class="text-color-alternate" data-game-level>1/5</span></div>
+                <div>lives <span class="text-color-alternate" data-game-lives>3</span></div>
+                <div>best <span class="text-color-alternate" data-game-best>0</span></div>
+              </div>
+              <div class="game_screen">
+                <canvas class="game_canvas" data-game-canvas role="img" aria-label="Tank Battle game board"></canvas>
+                <div class="game_overlay" data-game-overlay>
+                  <h2 class="heading-style-h3" data-game-title>Ready?</h2>
+                  <p class="text-size-regular text-style-allcaps" data-game-text>
+                    Arrow keys or WASD to move, space to fire, P to pause.
+                  </p>
+                  <button type="button" data-stager-btn class="button" data-game-start>
+                    <div data-stager-text>Play</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Tank battle game END -->
+
+  <GameRelated current="tanks" />
+</BaseLayout>
+
+<script>
+  import '../../scripts/tanks.ts';
+</script>

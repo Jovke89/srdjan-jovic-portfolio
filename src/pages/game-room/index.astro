@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CornerLines from '../../components/CornerLines.astro';
+import GameStars from '../../components/GameStars.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { GAMES, gameUrl } from '../../lib/game-room';
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Game Room',
+    description: 'A small arcade of browser games: Snake, Space Defender, Star Breaker, Tank Battle and Blackjack.',
+  }}
+>
+  <GameStars />
+
+  <!-- Game room hero START -->
+  <section class="section_hero-projects">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="projects_hero-content-wrapper">
+            <div class="projects_hero-heading-wrapper">
+              <div class="text_in-exprecions">
+                <div class="exprecion">[</div>
+                <div class="text-color-alternate text-size-regular text-style-allcaps">player one</div>
+                <div class="exprecion">]</div>
+              </div>
+              <div class="project_heading">
+                <h1 class="heading-style-h1">Game room</h1>
+              </div>
+              <div class="project_hero-paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  Insert coin. Pick a game, beat your high score and take a break between projects.
+                  Every pixel built by hand, same as the rest of this site.
+                </p>
+              </div>
+              <a href="#games" class="game-room_press-start text-color-alternate text-size-regular text-style-allcaps hide-tablet">press start</a>
+            </div>
+          </div>
+        </div>
+        <CornerLines />
+      </div>
+    </div>
+  </section>
+  <!-- Game room hero END -->
+
+  <!-- Game room list START -->
+  <div id="games" class="section_resources-articles is-game-room">
+    {/* Second copy of the fixed starfield, clipped to this section: the section
+        stays opaque so the hero overlap slides under it, while the stars and
+        comets continue seamlessly across it. */}
+    <div class="game-room_stars-clip"><GameStars /></div>
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="projects_content-wrapper">
+            <div class="projects_heading-wrapper">
+              <div class="projects_heading">
+                <div class="text_in-exprecions">
+                  <div class="exprecion">[</div>
+                  <div class="text-color-alternate text-size-regular text-style-allcaps">select game</div>
+                  <div class="exprecion">]</div>
+                </div>
+                <h2 class="heading-style-h2">Arcade</h2>
+              </div>
+              <div class="projects_paragraph-wrapper">
+                <p class="text-size-medium text-style-allcaps">
+                  {GAMES.length} games, one high score each. Your best runs are saved in this browser.
+                </p>
+              </div>
+            </div>
+            <p class="game-room_mobile-note text-size-medium text-style-allcaps">
+              The Game Room needs a keyboard and a mouse. Open it on a desktop to play.
+            </p>
+            <div class="projects_list-wrapper game-room_list">
+              <div role="list" class="projects_list">
+                {
+                  GAMES.map((g) => (
+                    <ProjectCard
+                      href={gameUrl(g.slug)}
+                      title={g.title}
+                      text={g.text}
+                      imageSrc={g.cover}
+                      imageAlt={`${g.title} cover`}
+                      cta="Start game"
+                    />
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+          <CornerLines />
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Game room list END -->
+</BaseLayout>
