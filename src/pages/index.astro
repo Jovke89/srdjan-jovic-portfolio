@@ -6,6 +6,7 @@ import ResponsiveImg from '../components/ResponsiveImg.astro';
 import HeroMarquee from '../components/HeroMarquee.astro';
 import ServicesSection from '../components/ServicesSection.astro';
 import TestimonialsSection from '../components/TestimonialsSection.astro';
+import CtaSection from '../components/CtaSection.astro';
 import ResourceCard from '../components/ResourceCard.astro';
 import { HOME_QUERY, SITE_SETTINGS_QUERY } from '../lib/sanity/queries';
 import { buildProfilePageLd } from '../lib/seo/jsonld';
@@ -233,35 +234,7 @@ const jsonld = buildProfilePageLd({
 
   <TestimonialsSection testimonials={testimonials} />
 
-  <section class="section_cta">
-    <div class="container-large">
-      <div class="side_lines">
-        <div class="padding-global padding-section-medium">
-          <div class="container-large">
-            <div class="mx--width">
-              <div class="cta_baner-heading-wrapper">
-                <h2 class="heading-style-h2">Need a website that works?</h2>
-              </div>
-              <div class="cta_baner-paragraph-wrapper">
-                <p class="text-size-medium text-style-allcaps">
-                  Reach out to me today and let's discuss how I can help you achieve your goals.
-                </p>
-              </div>
-              <a data-stager-btn href="/contact/" class="button w-inline-block">
-                <div data-stager-text>Let’s work together</div>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="lines_absoulute-position is-right-tbottom">
-          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
-        </div>
-        <div class="lines_absoulute-position is-left-bottom">
-          <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <CtaSection />
 
   <section class="section_resources">
     <div class="container-large">

@@ -258,6 +258,8 @@ function initHeroOverlap() {
     { sel: '.events_hero-content-wrapper', start: 'top 100px', end: '+=100%' }, // events list
     { sel: '.resources_hero-content-wrapper', start: 'top top', end: '+=80%' }, // resources list
     { sel: '.hero_animation-target', start: '25%', end: '+=80%' }, // case study detail
+    // pricing: the plan cards pin once their bottom reaches the screen bottom, the retainer section slides over them
+    { sel: '.pricing_tabs', start: 'bottom bottom', end: '+=80%' },
   ];
   configs.forEach(({ sel, start, end }) => {
     const el = document.querySelector<HTMLElement>(sel);

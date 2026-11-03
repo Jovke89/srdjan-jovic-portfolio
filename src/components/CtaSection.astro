@@ -1,0 +1,106 @@
+---
+/* Shared closing CTA ("Need a website that works?"), used on Home and Pricing.
+   Two cards: text and button on the left, statue on an animated gradient on the right
+   (shared .statue-glow class in app.css). Styles: "CTA section" block in app.css.
+   Desktop with a mouse: the heading rises letter by letter like the page H1 when it
+   scrolls into view, and the gradient ripples like water under the cursor. */
+---
+
+<!-- CTA section START -->
+<section class="section_cta">
+  <div class="container-large">
+    <div class="side_lines">
+      <div class="padding-global padding-section-medium">
+        <div class="cta_component">
+          <div class="cta_card cta_content">
+            <div class="cta_avatars" aria-hidden="true">
+              <img src="/images/cta/avatar-atlas.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+              <img src="/images/cta/avatar-apollo.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+              <img src="/images/cta/avatar-athena.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            </div>
+            <h2 class="heading-style-h2" data-cta-wave>Need a website that works?</h2>
+            <p class="text-size-medium text-style-allcaps">
+              Reach out to me today and let's discuss how I can help you achieve your goals.
+            </p>
+            <a data-stager-btn href="/contact/" class="button w-inline-block">
+              <div data-stager-text>Let’s work together</div>
+            </a>
+          </div>
+
+          <div class="cta_card cta_image statue-glow" data-cta-water>
+            <canvas class="water-canvas" data-cta-water-canvas aria-hidden="true"></canvas>
+            <picture>
+              <source srcset="/images/cta/cta-statue-700.avif" type="image/avif" />
+              <img
+                src="/images/cta/cta-statue-700.webp"
+                alt="Marble statue in a cap checking a phone, leaning on a giant purple phone handset"
+                width="700"
+                height="823"
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+              />
+            </picture>
+          </div>
+        </div>
+      </div>
+      <div class="lines_absoulute-position is-right-tbottom">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+      <div class="lines_absoulute-position is-left-bottom">
+        <div class="lines_wrapper"><div class="line"></div><div class="line is-vertical"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- CTA section END -->
+
+<script>
+  import { initWaterRipple } from '../scripts/water-ripple';
+
+  /* CTA motion START */
+  // Desktop with a mouse and motion allowed only (site rule: no animations on phones)
+  const motionOk = window.matchMedia('(min-width: 992px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches;
+
+  /* Heading wave START */
+  // Same feel as the page H1 wave: letters rise out of a mask, one after another
+  const heading = document.querySelector<HTMLElement>('[data-cta-wave]');
+  if (heading && motionOk) {
+    const text = heading.textContent?.trim() ?? '';
+    heading.setAttribute('aria-label', text);
+    let i = 0;
+    heading.replaceChildren(
+      ...text.split(' ').flatMap((word, w) => {
+        const wordEl = document.createElement('span');
+        wordEl.className = 'cta_wave-word';
+        wordEl.setAttribute('aria-hidden', 'true');
+        for (const c of word) {
+          const charEl = document.createElement('span');
+          charEl.className = 'cta_wave-char';
+          charEl.style.setProperty('--i', String(i++));
+          charEl.textContent = c;
+          wordEl.append(charEl);
+        }
+        return w === 0 ? [wordEl] : [document.createTextNode(' '), wordEl];
+      }),
+    );
+    heading.classList.add('is-wave-ready');
+    new IntersectionObserver(
+      (entries, io) => {
+        if (!entries[0].isIntersecting) return;
+        heading.classList.add('is-wave-in');
+        io.disconnect();
+      },
+      { threshold: 0.6 },
+    ).observe(heading);
+  }
+  /* Heading wave END */
+
+  /* Water ripples START */
+  // Ripple simulation lives in src/scripts/water-ripple.ts (shared with the process image)
+  const water = document.querySelector<HTMLElement>('[data-cta-water]');
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-cta-water-canvas]');
+  if (water && canvas && motionOk) initWaterRipple(water, canvas);
+  /* Water ripples END */
+  /* CTA motion END */
+</script>

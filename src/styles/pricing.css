@@ -1,0 +1,1088 @@
+/* Pricing page START */
+
+/* Section dividers START */
+/* Same as every other section on the site: a bottom border, crosses sit on its corners (CornerLines) */
+.section_pricing,
+.section_process,
+.section_pricing-compare,
+.section_retainer {
+  border-bottom: 1px solid var(--_srdjan-variables---border-color);
+}
+/* Section dividers END */
+
+/* Retainer overlap START */
+/* The plan cards pin and shrink on scroll (initHeroOverlap in site.ts, desktop only),
+   so the retainer section needs a solid background and a higher layer to slide over them */
+.section_retainer {
+  position: relative;
+  z-index: 2;
+  background-color: var(--_srdjan-variables---bg-color);
+}
+/* After the animation the faded card block stays in the layout (opacity 0), so every later section
+   sits on a higher layer and the invisible cards can never catch clicks meant for them */
+.section_retainer ~ section {
+  position: relative;
+  z-index: 2;
+}
+/* Retainer overlap END */
+
+/* Hero START */
+.pricing_hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 80rem;
+  margin: 0 auto;
+  text-align: center;
+}
+.pricing_hero-text {
+  max-width: 44rem;
+}
+/* Hero END */
+
+/* Tabs START */
+.pricing_tabs {
+  margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+}
+/* Extra room under the cards: the retainer section slides over them later,
+   so the card buttons stay visible for a while after the cards pin */
+@media (min-width: 992px) {
+  .pricing_tabs {
+    padding-bottom: 15vh;
+  }
+}
+/* Heading on the left, project / retainer switch on the right, right above the cards */
+.pricing_tabs-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  margin-bottom: clamp(1.5rem, 1.25rem + 1vw, 2.5rem);
+}
+.pricing_tabs-heading {
+  max-width: 32rem;
+  /* No margin and tight line height, so the last text line ends on the same bottom line as the switch */
+  margin: 0;
+  line-height: 1;
+}
+.pricing_hero-cta {
+  margin-top: .5rem;
+}
+.pricing_tab-list {
+  display: flex;
+  flex: none;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: .25rem;
+  gap: .25rem;
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .5rem;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+.pricing_tab {
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .875rem;
+  text-transform: uppercase;
+  color: var(--_srdjan-variables---body-text-color);
+  background: transparent;
+  border: 0;
+  border-radius: .375rem;
+  padding: .75rem 1.25rem;
+  cursor: pointer;
+  transition: color .3s, background-color .3s;
+  /* Flex centering: the stager label is an inline-block with overflow hidden,
+     which would otherwise sit on the baseline and look shifted */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+/* Only the inactive tab reacts on hover: light yellow background + stager letter roll */
+.pricing_tab:not([aria-selected="true"]):hover {
+  background-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 15%, transparent);
+}
+.pricing_tab[aria-selected="true"] {
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+}
+/* The stager script sets inline styles, so the selected tab locks its label in place */
+.pricing_tab[aria-selected="true"] [data-stager-text] > span:first-child > span {
+  transform: none !important;
+  opacity: 1 !important;
+}
+.pricing_tab[aria-selected="true"] [data-stager-text] > span:last-child > span {
+  opacity: 0 !important;
+}
+.pricing_tab:focus-visible {
+  outline: 2px solid var(--_srdjan-variables---brand-color);
+  outline-offset: 2px;
+}
+/* Tabs END */
+
+/* Plan cards START */
+.pricing_grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Subgrid lines up name, price, best for, list and button across the three cards */
+.pricing_card {
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+  /* One column that can never grow wider than the card, so long prices or words cannot push it out */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+/* Featured card: normal border, soft yellow glow from the top instead */
+.pricing_card.is-featured {
+  background-image: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--_srdjan-variables---brand-color) 14%, transparent), transparent 70%);
+}
+/* Soft yellow border on hover, the same on every card */
+.pricing_card {
+  transition: border-color .35s ease;
+}
+.pricing_card:hover,
+.pricing_card:focus-within {
+  border-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 40%, transparent);
+}
+.pricing_card-top {
+  display: flex;
+  flex-direction: column;
+  gap: .375rem;
+}
+.pricing_card-name {
+  color: var(--_srdjan-variables---heading-color);
+}
+.pricing_card {
+  position: relative;
+}
+/* "Most popular" sits centered on the top border of the featured card:
+   black pill, yellow border, yellow text and lightning bolt */
+.pricing_card-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---brand-color);
+  background-color: var(--_srdjan-variables---bg-color);
+  border: 1px solid var(--_srdjan-variables---brand-color);
+  border-radius: 99px;
+  padding: .4375rem 1rem;
+  white-space: nowrap;
+}
+.pricing_card-badge svg {
+  flex: none;
+}
+/* Spinning border: a bright yellow arc runs around a faint yellow ring, nonstop.
+   The border is drawn by two backgrounds (fill on padding-box, conic ring on border-box). */
+@property --badge-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .pricing_card-badge {
+    border-color: transparent;
+    background:
+      linear-gradient(var(--_srdjan-variables---bg-color), var(--_srdjan-variables---bg-color)) padding-box,
+      conic-gradient(
+        from var(--badge-angle),
+        color-mix(in srgb, var(--_srdjan-variables---brand-color) 25%, transparent) 0deg,
+        var(--_srdjan-variables---brand-color) 60deg,
+        color-mix(in srgb, var(--_srdjan-variables---brand-color) 25%, transparent) 120deg,
+        color-mix(in srgb, var(--_srdjan-variables---brand-color) 25%, transparent) 360deg
+      ) border-box;
+    animation: badge-spin 3s linear infinite;
+  }
+}
+@keyframes badge-spin {
+  to { --badge-angle: 360deg; }
+}
+/* Plan names always stay on one line */
+.pricing_card-name {
+  white-space: nowrap;
+}
+/* Size label under the plan name, in brand yellow so it reads apart from the timeline */
+.pricing_card-subtitle {
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .8125rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---brand-color);
+  margin: 0;
+}
+.pricing_card-timeline,
+.pricing_card-label,
+.pricing_card-from {
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---body-text-color);
+  margin: 0;
+}
+.pricing_card-label {
+  display: block;
+  color: var(--_srdjan-variables---brand-color);
+  margin-bottom: .5rem;
+}
+.pricing_card-price {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--_srdjan-variables---border-color);
+}
+.pricing_card-amount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: .25rem;
+  font-family: var(--_srdjan-variables---heading-type-face);
+  font-size: clamp(2rem, 1.7rem + 1.1vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--_srdjan-variables---heading-color);
+}
+.pricing_card-period {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--_srdjan-variables---body-text-color);
+}
+.pricing_card-list li,
+.pricing_card-best {
+  overflow-wrap: break-word;
+}
+.pricing_card-best {
+  margin: 0;
+  color: var(--_srdjan-variables---heading-color);
+  /* Normal sentence case; the "Best for" label above keeps its own uppercase */
+  text-transform: none;
+}
+.pricing_card-list {
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pricing_card-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--_srdjan-variables---body-text-color);
+  line-height: 1.45;
+  /* Bullets in normal sentence case, not uppercase */
+  text-transform: none;
+}
+.pricing_card-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .45em;
+  width: .5rem;
+  height: .5rem;
+  background-color: var(--_srdjan-variables---brand-color);
+}
+.pricing_card-cta {
+  width: 100%;
+  align-self: end;
+}
+
+@media (max-width: 991px) {
+  .pricing_grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+  .pricing_card {
+    grid-row: auto;
+    grid-template-rows: none;
+  }
+}
+/* Phones: cards sit in one row and swipe sideways like the compare table,
+   subgrid keeps name, price and list lined up across cards */
+@media (max-width: 767px) {
+  .pricing_grid {
+    grid-template-columns: none;
+    grid-template-rows: repeat(5, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: min(85%, 22rem);
+    max-width: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* Room on top so the scroll box does not clip the badge on the card border */
+    padding-top: .875rem;
+    padding-bottom: .25rem;
+  }
+  .pricing_grid::-webkit-scrollbar {
+    display: none;
+  }
+  .pricing_card {
+    grid-row: span 5;
+    grid-template-rows: subgrid;
+    scroll-snap-align: start;
+  }
+}
+@media (max-width: 479px) {
+  .pricing_tab {
+    padding: .625rem .75rem;
+    font-size: .75rem;
+  }
+}
+/* Plan cards END */
+
+/* Process (launch sequence) START */
+/* Step timeline: six markers on a line, one card below (fixed image left, step content right).
+   ProcessSection.astro sets data-status / data-current; every reached marker
+   becomes a filled yellow node with the bolt, like the launch step. */
+.process_head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 48rem;
+  margin: 0 auto clamp(2.5rem, 2rem + 2vw, 4rem);
+  text-align: center;
+}
+
+/* Progress line and markers */
+.process_progress {
+  position: relative;
+  margin-bottom: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+}
+.process_progress-line {
+  position: absolute;
+  /* From the center of the first column to the center of the last, through the dot middles */
+  left: calc(100% / 12);
+  right: calc(100% / 12);
+  top: 1.375rem;
+  height: 2px;
+  translate: 0 -50%;
+  background-color: var(--_srdjan-variables---border-color);
+}
+.process_progress-fill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--_srdjan-variables---brand-color);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.process_markers {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.process_marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+}
+.process_marker:focus-visible {
+  outline: none;
+}
+.process_marker:focus-visible .process_marker-dot {
+  outline: 2px solid var(--_srdjan-variables---brand-color);
+  outline-offset: 4px;
+}
+.process_marker-dot {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 2px solid var(--_srdjan-variables---border-color);
+  border-radius: 50%;
+  background-color: var(--_srdjan-variables---bg-color);
+  /* Bolt stays hidden until the step is reached */
+  color: transparent;
+  box-shadow: 0 0 0 4px var(--_srdjan-variables---bg-color);
+}
+.process_marker:hover .process_marker-dot {
+  border-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 60%, transparent);
+}
+/* Reached: filled yellow with the bolt and a soft glow */
+.process_marker[data-status="active"] .process_marker-dot {
+  border-color: var(--_srdjan-variables---brand-color);
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+  box-shadow: 0 0 0 4px var(--_srdjan-variables---bg-color), 0 0 18px 2px color-mix(in srgb, var(--_srdjan-variables---brand-color) 45%, transparent);
+}
+/* Current step is a little bigger */
+.process_marker[data-current] .process_marker-dot {
+  scale: 1.15;
+}
+
+/* Card */
+.process_card {
+  display: grid;
+  --process-pad: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(2rem, 1rem + 3vw, 4.5rem);
+  min-height: clamp(30rem, 24rem + 15vw, 38rem);
+  padding: var(--process-pad);
+  /* The image column bleeds to the card edges, the card clips it to its rounded corners */
+  overflow: hidden;
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+.process_content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.process_nav {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+/* Soft yellow border on both arrows */
+.retainer_arrow.process_arrow {
+  border-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 40%, transparent);
+}
+/* The last used arrow (next by default) keeps the yellow hover look */
+.process_arrow.is-active {
+  border-color: var(--_srdjan-variables---brand-color);
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+}
+.process_arrow:disabled {
+  opacity: .35;
+  cursor: default;
+  pointer-events: none;
+}
+/* All slides share one grid cell, so the card keeps the height of the tallest one */
+.process_slides {
+  display: grid;
+}
+.process_slide {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+}
+.process_slide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.process_slide[data-current] {
+  visibility: visible;
+  opacity: 1;
+}
+.process_title {
+  margin: 0;
+}
+.process_text {
+  margin: 0;
+  max-width: 34rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--_srdjan-variables---heading-color);
+  text-transform: none;
+}
+.process_points {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.process_points li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: .9375rem;
+  color: var(--_srdjan-variables---body-text-color);
+  text-transform: none;
+}
+.process_points .check-mark {
+  flex: none;
+}
+.process_you {
+  margin: 0;
+  padding-top: 1rem;
+  width: 100%;
+  max-width: 34rem;
+  border-top: 1px solid var(--_srdjan-variables---border-color);
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .875rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---body-text-color);
+}
+.process_you-label {
+  color: var(--_srdjan-variables---brand-color);
+}
+/* Fixed image: lavender to purple box from the top to the bottom of the card,
+   the statue stands on the bottom edge and reaches out of the box on the left */
+.process_image {
+  position: relative;
+  align-self: stretch;
+  margin: calc(-1 * var(--process-pad)) calc(-1 * var(--process-pad)) calc(-1 * var(--process-pad)) 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Gradient box from the shared .statue-glow class (app.css), starting 18% in */
+  --statue-glow-left: 18%;
+}
+.process_image picture {
+  display: block;
+  width: 100%;
+}
+.process_image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+/* Phones: text first, image under it */
+@media (max-width: 767px) {
+  .process_card {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  /* Phones: image under the content, bleeding to the bottom and side edges */
+  .process_image {
+    margin: 0 calc(-1 * var(--process-pad)) calc(-1 * var(--process-pad));
+    padding-top: 2rem;
+  }
+  .process_image {
+    --statue-glow-left: 0%;
+  }
+  .process_marker-dot {
+    width: 2.125rem;
+    height: 2.125rem;
+  }
+  .process_progress-line {
+    top: 1.0625rem;
+  }
+}
+
+/* Motion: the fill slides to the step and the new step fades in; tablet and up only */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .process_progress-fill {
+    transition: transform .6s cubic-bezier(.65, 0, .35, 1);
+  }
+  .process_marker-dot {
+    transition: background-color .3s ease .15s, border-color .3s ease .15s, color .3s ease .15s, box-shadow .3s ease .15s, scale .4s cubic-bezier(.2, .8, .2, 1);
+  }
+  .process_slide {
+    transition: opacity .35s ease, visibility 0s linear .35s, translate .5s cubic-bezier(.2, .8, .2, 1);
+    translate: 0 .75rem;
+  }
+  .process_slide[data-current] {
+    translate: 0 0;
+    transition: opacity .45s ease .1s, visibility 0s, translate .6s cubic-bezier(.2, .8, .2, 1) .1s;
+  }
+}
+/* Process (launch sequence) END */
+
+/* Compare table START */
+.pricing_compare-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 48rem;
+  margin: 0 auto clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  text-align: center;
+}
+.pricing_compare-scroll {
+  /* The wide table scrolls inside this box and never widens the page */
+  width: 100%;
+  max-width: 100%;
+  contain: inline-size;
+  overflow-x: auto;
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+.pricing_compare-scroll:focus-visible {
+  outline: 2px solid var(--_srdjan-variables---brand-color);
+  outline-offset: 2px;
+}
+.pricing_compare-table {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+}
+.pricing_compare-table th,
+.pricing_compare-table td {
+  padding: 1.125rem 1.25rem;
+  border-bottom: 1px solid var(--_srdjan-variables---border-color);
+  text-align: center;
+  vertical-align: middle;
+}
+.pricing_compare-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.pricing_compare-table thead th {
+  text-align: left;
+  font-size: .8125rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--_srdjan-variables---body-text-color);
+}
+.pricing_compare-table thead th.is-me {
+  color: var(--_srdjan-variables---brand-color);
+}
+.pricing_compare-table tbody th {
+  text-align: left;
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: .875rem;
+  color: var(--_srdjan-variables---heading-color);
+  width: 20%;
+}
+/* My column is highlighted so the eye lands on it first */
+.pricing_compare-table .is-me {
+  background-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 7%, transparent);
+}
+/* Mark and a short explanation side by side, left aligned */
+.pricing_compare-table td {
+  text-align: left;
+}
+.pricing_compare-cell {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+}
+.pricing_compare-cell .check-mark {
+  flex: none;
+}
+.pricing_compare-text {
+  font-size: .875rem;
+  line-height: 1.4;
+  color: var(--_srdjan-variables---body-text-color);
+}
+.pricing_compare-table .is-me .pricing_compare-text {
+  color: var(--_srdjan-variables---heading-color);
+}
+/* First column stays visible while the table scrolls sideways on phones */
+@media (max-width: 767px) {
+  .pricing_compare-table tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--_srdjan-variables---card-bg-color);
+    min-width: 9rem;
+  }
+  /* Wider value cells so short texts wrap in 2 to 3 lines, not 5 */
+  .pricing_compare-table td {
+    min-width: 12rem;
+  }
+}
+/* Compare table END */
+
+/* Retainer showcase START */
+.retainer_layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+  gap: 1.25rem;
+}
+.retainer_stage {
+  position: relative;
+  overflow: hidden;
+  height: clamp(32rem, 26rem + 14vw, 42rem);
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  background:
+    radial-gradient(60% 70% at 70% 75%, color-mix(in srgb, var(--_srdjan-variables---brand-color) 10%, transparent), transparent 70%),
+    var(--_srdjan-variables---card-bg-color);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.retainer_stage.is-dragging {
+  cursor: grabbing;
+}
+.retainer_stage:focus-visible {
+  outline: 2px solid var(--_srdjan-variables---brand-color);
+  outline-offset: 3px;
+}
+.retainer_line {
+  position: absolute;
+  inset: 0;
+}
+
+/* Drag cursor START */
+/* Replaces the mouse pointer (and the site cursor dot) while over the stage, desktop mouse only */
+.retainer_stage.has-drag-cursor,
+.retainer_stage.has-drag-cursor * {
+  cursor: none;
+}
+/* Over the arrows block the normal cursor and the site cursor dot come back, like on every other button */
+.retainer_stage.has-drag-cursor .retainer_arrows {
+  cursor: default;
+}
+.retainer_stage.has-drag-cursor .retainer_arrow,
+.retainer_stage.has-drag-cursor .retainer_arrow * {
+  cursor: pointer;
+}
+body:has(.retainer_stage.has-drag-cursor:hover):not(:has(.retainer_arrows:hover)) .cursor {
+  opacity: 0;
+}
+.retainer_drag-cursor {
+  position: absolute;
+  z-index: 300;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: scale .25s cubic-bezier(.2, .8, .2, 1);
+}
+/* Squeezes a little while dragging (outer layer, so it never fights the enter / exit stretch) */
+.retainer_stage.is-dragging .retainer_drag-cursor {
+  scale: .88;
+}
+.retainer_drag-pill {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  /* Centered on the pointer whatever the label width (JS moves the outer layer with transform) */
+  translate: -50% -50%;
+  padding: .625rem 1rem;
+  border-radius: 99px;
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .8125rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: inset 3px 3px 4px #ffffff5e, 0 8px 24px rgb(0 0 0 / .35);
+  opacity: 0;
+  scale: 0;
+}
+/* Enter: stretches wide and flat, then bounces back to its size */
+.retainer_drag-pill.is-in {
+  animation: summon-in .55s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+/* Exit: stretches wide, then snaps into a point */
+.retainer_drag-pill.is-out {
+  animation: summon-out .35s cubic-bezier(.5, 0, .75, 0) forwards;
+}
+@keyframes summon-in {
+  0% { opacity: 0; scale: .3 .3; }
+  40% { opacity: 1; scale: 1.28 .76; }
+  65% { scale: .9 1.1; }
+  82% { scale: 1.04 .97; }
+  100% { opacity: 1; scale: 1 1; }
+}
+@keyframes summon-out {
+  0% { opacity: 1; scale: 1 1; }
+  40% { opacity: 1; scale: 1.25 .78; }
+  100% { opacity: 0; scale: .15 .15; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .retainer_drag-cursor {
+    transition: none;
+  }
+  .retainer_drag-pill.is-in {
+    animation: none;
+    opacity: 1;
+    scale: 1;
+  }
+  .retainer_drag-pill.is-out {
+    animation: none;
+    opacity: 0;
+  }
+}
+/* Drag cursor END */
+.retainer_figure {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform, filter;
+}
+.retainer_figure picture,
+.retainer_figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  /* The statue is a bust, so its cut edge fades into the stage */
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 98%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 98%);
+  pointer-events: none;
+}
+.retainer_intro {
+  position: absolute;
+  z-index: 200;
+  top: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  left: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  max-width: 32rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  pointer-events: none;
+}
+/* Two lines: "What you get / with a retainer" */
+.retainer_intro h2 {
+  text-wrap: balance;
+}
+.retainer_intro-text {
+  max-width: 22rem;
+}
+.retainer_intro .text_in-exprecions {
+  align-self: flex-start;
+}
+.retainer_intro-text {
+  color: var(--_srdjan-variables---body-text-color);
+}
+/* Darkens the top left corner so the heading stays readable over the figures behind it */
+.retainer_stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  background: radial-gradient(55% 60% at 0% 0%, var(--_srdjan-variables---card-bg-color) 35%, transparent 100%);
+}
+.retainer_bottom {
+  position: absolute;
+  z-index: 200;
+  left: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  right: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  bottom: clamp(1.25rem, 1rem + 1vw, 2rem);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "counter counter" "name arrows";
+  align-items: end;
+  gap: .5rem 1rem;
+}
+.retainer_counter {
+  grid-area: counter;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .8125rem;
+  color: var(--_srdjan-variables---brand-color);
+}
+.retainer_name-window {
+  grid-area: name;
+  --name-line: clamp(2rem, 1.6rem + 1.6vw, 3rem);
+  height: var(--name-line);
+  overflow: hidden;
+  min-width: 0;
+}
+/* Font size is set here as the maximum; JS shrinks it so the longest name always fits in full */
+.retainer_name-roll {
+  will-change: transform;
+  font-family: var(--_srdjan-variables---heading-type-face);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem);
+  text-transform: uppercase;
+  color: var(--_srdjan-variables---heading-color);
+}
+.retainer_name-roll > span {
+  display: block;
+  width: max-content;
+  height: var(--name-line);
+  line-height: var(--name-line);
+  white-space: nowrap;
+}
+.retainer_arrows {
+  grid-area: arrows;
+  display: flex;
+  gap: .5rem;
+}
+.retainer_arrow {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid var(--_srdjan-variables---border-color);
+  background-color: var(--_srdjan-variables---bg-color);
+  color: var(--_srdjan-variables---heading-color);
+  cursor: pointer;
+  transition: border-color .3s, background-color .3s, color .3s;
+}
+.retainer_arrow:hover {
+  border-color: var(--_srdjan-variables---brand-color);
+  background-color: var(--_srdjan-variables---brand-color);
+  color: var(--_srdjan-variables---bg-color);
+}
+.retainer_arrow:focus-visible {
+  outline: 2px solid var(--_srdjan-variables---brand-color);
+  outline-offset: 2px;
+}
+
+/* Detail panel */
+.retainer_panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+.retainer_panel-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1;
+  animation: retainer-panel-in .45s ease both;
+}
+.retainer_panel-item[hidden] {
+  display: none;
+}
+.retainer_plan {
+  align-self: flex-start;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .6875rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---brand-color);
+  border: 1px solid color-mix(in srgb, var(--_srdjan-variables---brand-color) 50%, transparent);
+  border-radius: 99px;
+  padding: .25rem .625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+/* Small yellow dot in front of the plan names */
+.retainer_plan::before {
+  content: "";
+  flex: none;
+  width: .375rem;
+  height: .375rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+.retainer_panel-title {
+  color: var(--_srdjan-variables---heading-color);
+}
+.retainer_panel-block p {
+  margin: 0;
+  color: var(--_srdjan-variables---heading-color);
+  line-height: 1.5;
+}
+.retainer_label {
+  display: block;
+  margin-bottom: .375rem;
+  font-family: var(--_srdjan-variables---body-text-type-face);
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--_srdjan-variables---brand-color);
+}
+.retainer_points {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin: 0;
+  padding: 1.25rem 0 0;
+  list-style: none;
+  border-top: 1px solid var(--_srdjan-variables---border-color);
+}
+.retainer_points li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  color: var(--_srdjan-variables---body-text-color);
+  text-transform: none;
+  font-size: .875rem;
+  line-height: 1.35;
+}
+.retainer_points .check-mark {
+  flex: none;
+}
+.retainer_cta {
+  width: 100%;
+}
+@keyframes retainer-panel-in {
+  from { opacity: 0; transform: translateY(.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 991px) {
+  .retainer_layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 479px) {
+  .retainer_stage {
+    height: 30rem;
+  }
+  .retainer_intro-text {
+    display: none;
+  }
+  /* Phones: arrows sit next to the counter so the feature name gets the full width */
+  .retainer_bottom {
+    grid-template-areas: "counter arrows" "name name";
+    align-items: center;
+  }
+  .retainer_name-window {
+    --name-line: 2rem;
+  }
+  .retainer_name-roll {
+    font-size: 1.125rem;
+  }
+  .retainer_arrow {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .retainer_panel-item {
+    animation: none;
+  }
+  .retainer_arrow {
+    transition: none;
+  }
+}
+/* Retainer showcase END */
+
+/* FAQ START */
+.section_faq .faq_toggle {
+  cursor: pointer;
+}
+/* FAQ END */
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing_tab,
+  .pricing_card {
+    transition: none;
+  }
+}
+
+/* Pricing page END */

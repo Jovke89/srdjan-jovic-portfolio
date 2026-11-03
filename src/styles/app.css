@@ -403,6 +403,23 @@ textarea:focus-visible,
   .nav_link.blink-btn .button_text-blink {
     line-height: 1;
   }
+  .nav_link.blink-btn {
+    white-space: nowrap;
+  }
+}
+/* Six links (Pricing added) on small laptops: tighter spacing and text so nothing wraps or clips */
+@media screen and (min-width: 992px) and (max-width: 1279px) {
+  .nav_container {
+    grid-column-gap: 1rem;
+  }
+  .nav_links-list {
+    gap: 0;
+  }
+  .nav_link.blink-btn {
+    font-size: .8125rem;
+    padding-left: .4rem;
+    padding-right: .4rem;
+  }
 }
 /* Nav END */
 
@@ -1705,3 +1722,173 @@ html {
   }
 }
 /* Blackjack END */
+
+/* Statue glow START */
+/* Lavender to purple box behind a statue image, with a soft glow drifting over it.
+   Used by the pricing process card and the CTA card. --statue-glow-left moves the
+   box start to the right so the statue can reach out of it. */
+.statue-glow {
+  position: relative;
+  isolation: isolate;
+}
+.statue-glow::before,
+.statue-glow::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: var(--statue-glow-left, 0);
+  right: 0;
+  pointer-events: none;
+}
+.statue-glow::before {
+  /* Purple; yellow variant was #fffaeb, #fff1c2, #ffd34d, #e6a800 */
+  background-image: linear-gradient(180deg, #f6f1ff 0%, #ede4ff 28%, #b79cf2 62%, #6b42c4 100%);
+}
+.statue-glow::after {
+  background:
+    radial-gradient(40% 30% at 30% 70%, rgb(255 255 255 / .45), transparent 70%),
+    radial-gradient(35% 25% at 75% 40%, rgb(155 110 245 / .55), transparent 70%);
+  mix-blend-mode: soft-light;
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* The gradient slowly breathes up and down, the glow drifts around */
+  .statue-glow::before {
+    background-size: 100% 160%;
+    animation: statue-gradient 9s ease-in-out infinite alternate;
+  }
+  .statue-glow::after {
+    background-size: 200% 200%;
+    animation: statue-glow-drift 14s ease-in-out infinite alternate;
+  }
+}
+@keyframes statue-gradient {
+  from { background-position: 50% 0%; }
+  to { background-position: 50% 100%; }
+}
+@keyframes statue-glow-drift {
+  0% { background-position: 0% 100%, 100% 0%; }
+  50% { background-position: 100% 40%, 20% 80%; }
+  100% { background-position: 40% 0%, 80% 100%; }
+}
+/* Water ripples: low resolution canvas over the gradient box, under the statue
+   (src/scripts/water-ripple.ts). It covers the same area as the box. */
+.water-canvas {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: var(--statue-glow-left, 0);
+  right: 0;
+  width: calc(100% - var(--statue-glow-left, 0%));
+  height: 100%;
+  pointer-events: none;
+}
+/* Statue glow END */
+
+/* CTA section START */
+/* Two cards side by side: text + button left, statue on the gradient right */
+.cta_component {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.cta_card {
+  min-height: clamp(34rem, 24rem + 26vw, 48rem);
+  border: 1px solid var(--_srdjan-variables---border-color);
+  border-radius: .6rem;
+  overflow: hidden;
+}
+.cta_content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: clamp(2rem, 1rem + 3vw, 4rem);
+  background-color: var(--_srdjan-variables---card-bg-color);
+}
+/* Three overlapping statue heads above the heading, the middle one bigger */
+.cta_avatars {
+  display: flex;
+  align-items: center;
+}
+.cta_avatars img {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  /* Same border as the card the avatars sit in */
+  border: 1px solid var(--_srdjan-variables---border-color);
+  background-image: linear-gradient(180deg, #f6f1ff 0%, #b79cf2 100%);
+  object-fit: cover;
+}
+.cta_avatars img + img {
+  margin-left: -.75rem;
+}
+.cta_avatars img:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  width: 3.75rem;
+  height: 3.75rem;
+}
+/* The site button has margin-top: auto, keep it right under the text here */
+.cta_content .button {
+  margin-top: 0;
+}
+.cta_content p {
+  max-width: 28rem;
+  margin: 0;
+}
+/* The statue hangs from the top edge (phone cord) and stands on the bottom edge */
+.cta_image {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+/* The image always fills the full card height, so the cord touches the top edge
+   and the statue stands on the bottom edge; a narrow card crops the empty sides */
+.cta_image picture {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+}
+.cta_image img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  user-select: none;
+}
+/* Heading wave: letters wait under a word mask, then rise one by one (JS adds the classes) */
+.cta_wave-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Room for descenders inside the mask */
+  padding-bottom: .12em;
+  margin-bottom: -.12em;
+}
+.is-wave-ready .cta_wave-char {
+  display: inline-block;
+  translate: 0 120%;
+  transition: translate 1s cubic-bezier(.16, 1, .3, 1);
+  transition-delay: calc(var(--i) * 30ms);
+}
+.is-wave-in .cta_wave-char {
+  translate: 0 0;
+}
+@media (max-width: 767px) {
+  .cta_component {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cta_card {
+    min-height: 0;
+  }
+  .cta_image {
+    height: 26rem;
+  }
+}
+/* CTA section END */

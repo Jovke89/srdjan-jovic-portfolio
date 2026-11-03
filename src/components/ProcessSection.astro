@@ -1,0 +1,195 @@
+---
+/* Process section START */
+/* "Launch sequence" step timeline (same idea as the Oryx About timeline):
+   a line with six markers on top, one card below with the step content on the left
+   and a fixed image on the right. Arrows, markers, Left/Right keys and swipe change the step.
+   Every reached marker turns into a filled yellow node with the lightning bolt.
+   Styles live in pricing.css, block "Process (launch sequence)". */
+import CornerLines from './CornerLines.astro';
+import CheckMark from './CheckMark.astro';
+import { processSteps, processImage } from '../lib/pricing';
+---
+
+<!-- Pricing process START -->
+<section class="section_process" aria-labelledby="process-heading">
+  <div class="container-large">
+    <div class="side_lines">
+      <div class="padding-global padding-section-medium">
+        <div class="process_head">
+          <div class="text_in-exprecions">
+            <div class="exprecion">[</div>
+            <div class="text-color-alternate text-size-regular text-style-allcaps">process</div>
+            <div class="exprecion">]</div>
+          </div>
+          <h2 id="process-heading" class="heading-style-h2">Your launch sequence</h2>
+          <p class="text-size-medium text-style-allcaps">
+            Six steps from the first call to a live website. You always know what happens next, and what I need from you.
+          </p>
+        </div>
+
+        <div class="process_component" data-process>
+          <div class="process_progress">
+            <div class="process_progress-line" aria-hidden="true">
+              <span class="process_progress-fill" data-process-fill></span>
+            </div>
+            <ol class="process_markers" role="list">
+              {
+                processSteps.map((s, i) => (
+                  <li>
+                    <button
+                      type="button"
+                      class="process_marker"
+                      data-process-marker
+                      data-status={i === 0 ? 'active' : 'inactive'}
+                      aria-pressed={i === 0 ? 'true' : 'false'}
+                      aria-label={`Show step ${s.code}, ${s.title}`}
+                    >
+                      <span class="process_marker-dot">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                          <path d="M13.5 2 4 13.5h6.5L9.5 22 20 9.5h-6.5L13.5 2Z" fill="currentColor" />
+                        </svg>
+                      </span>
+                    </button>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+
+          <div class="process_card" data-process-list>
+            <div class="process_content">
+              <div class="process_nav">
+                <button type="button" class="retainer_arrow process_arrow" data-process-prev aria-label="Previous step" disabled>
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+                </button>
+                <button type="button" class="retainer_arrow process_arrow" data-process-next aria-label="Next step">
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+                </button>
+              </div>
+
+              <div class="process_slides" aria-live="polite">
+                {
+                  processSteps.map((s, i) => (
+                    <div class="process_slide" data-process-slide data-current={i === 0 ? '' : undefined} inert={i !== 0}>
+                      <h3 class="heading-style-h3 process_title">{s.title}</h3>
+                      <p class="process_text">{s.text}</p>
+                      <ul class="process_points" role="list">
+                        {s.points.map((pt) => (
+                          <li>
+                            <CheckMark yes={true} />
+                            <span>{pt}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p class="process_you">
+                        <span class="process_you-label">You:</span> {s.you}
+                      </p>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+
+            <!-- One fixed image, only the step content on the left changes -->
+            <div class="process_image statue-glow" data-process-water>
+              <canvas class="water-canvas" data-process-water-canvas aria-hidden="true"></canvas>
+              <picture>
+                <source srcset={processImage.avif} type="image/avif" />
+                <img src={processImage.webp} alt={processImage.alt} width="800" height="716" loading="lazy" decoding="async" draggable="false" />
+              </picture>
+            </div>
+          </div>
+        </div>
+      </div>
+      <CornerLines />
+    </div>
+  </div>
+</section>
+<!-- Pricing process END -->
+
+<script>
+  import { initWaterRipple } from '../scripts/water-ripple';
+
+  /* Process timeline START */
+  const root = document.querySelector<HTMLElement>('[data-process]');
+  if (root) {
+    const fill = root.querySelector<HTMLElement>('[data-process-fill]');
+    const markers = [...root.querySelectorAll<HTMLButtonElement>('[data-process-marker]')];
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-process-slide]')];
+    const prev = root.querySelector<HTMLButtonElement>('[data-process-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-process-next]');
+    const list = root.querySelector<HTMLElement>('[data-process-list]');
+    const lastIndex = slides.length - 1;
+    let current = 0;
+    // The last used arrow keeps the yellow hover look, the next arrow by default
+    let lastArrow = next;
+
+    const go = (index: number, focusMarker = false) => {
+      current = Math.min(Math.max(index, 0), lastIndex);
+      markers.forEach((m, i) => {
+        m.dataset.status = i <= current ? 'active' : 'inactive';
+        m.toggleAttribute('data-current', i === current);
+        m.setAttribute('aria-pressed', String(i === current));
+      });
+      slides.forEach((el, i) => el.toggleAttribute('data-current', i === current));
+      slides.forEach((el, i) => (el.inert = i !== current));
+      // Markers sit in equal columns and the line runs center to center, so the fill is a plain fraction
+      if (fill) fill.style.transform = `scaleX(${lastIndex ? current / lastIndex : 0})`;
+      if (prev) prev.disabled = current === 0;
+      if (next) next.disabled = current === lastIndex;
+      // A disabled arrow cannot stay highlighted, the other one takes over
+      if (lastArrow?.disabled) lastArrow = lastArrow === next ? prev : next;
+      prev?.classList.toggle('is-active', lastArrow === prev);
+      next?.classList.toggle('is-active', lastArrow === next);
+      // A disabled arrow drops focus, hand it to the other one
+      const focused = document.activeElement;
+      if ((focused === prev || focused === next) && (focused as HTMLButtonElement).disabled) (focused === prev ? next : prev)?.focus();
+      if (focusMarker) markers[current].focus();
+    };
+
+    markers.forEach((m, i) => {
+      m.addEventListener('click', () => go(i));
+      m.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        go(current + (e.key === 'ArrowRight' ? 1 : -1), true);
+      });
+    });
+    prev?.addEventListener('click', () => {
+      lastArrow = prev;
+      go(current - 1);
+    });
+    next?.addEventListener('click', () => {
+      lastArrow = next;
+      go(current + 1);
+    });
+
+    // Horizontal swipe on the card changes the step on touch screens
+    if (list) {
+      let startX = 0;
+      let startY = 0;
+      list.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      list.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+      }, { passive: true });
+    }
+
+    go(0);
+  }
+  /* Process timeline END */
+
+  /* Process water START */
+  // Same water ripples as the CTA card, on the gradient box behind the statue (desktop with a mouse)
+  const processWater = document.querySelector<HTMLElement>('[data-process-water]');
+  const processCanvas = document.querySelector<HTMLCanvasElement>('[data-process-water-canvas]');
+  if (processWater && processCanvas && window.matchMedia('(min-width: 992px) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+    initWaterRipple(processWater, processCanvas);
+  }
+  /* Process water END */
+</script>
+<!-- Process section END -->

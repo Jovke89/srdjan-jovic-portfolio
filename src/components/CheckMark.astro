@@ -1,0 +1,40 @@
+---
+/* CheckMark START */
+/* Yes/no mark for the compare table: open ring with a gap in the top right,
+   the check (or one stroke of the X) breaks out through that gap. */
+interface Props {
+  yes: boolean;
+}
+const { yes } = Astro.props;
+---
+
+<span class:list={['check-mark', yes ? 'is-yes' : 'is-no']}>
+  <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M37.41 18.82A17 17 0 1 1 27.81 10.03" stroke-width="4"></path>
+    {
+      yes ? (
+        <path d="M13 25l7 9L45 4" stroke-width="4.5" />
+      ) : (
+        <>
+          <path d="M15 16l15 17" stroke-width="4.5" />
+          <path d="M14 36L45 5" stroke-width="4.5" />
+        </>
+      )
+    }
+  </svg>
+  <span class="sr-only">{yes ? 'Yes' : 'No'}</span>
+</span>
+
+<style>
+  .check-mark {
+    display: inline-flex;
+    line-height: 0;
+  }
+  .check-mark.is-yes {
+    color: #3ddc84;
+  }
+  .check-mark.is-no {
+    color: #ff4d4d;
+  }
+</style>
+<!-- CheckMark END -->

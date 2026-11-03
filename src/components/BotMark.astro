@@ -1,0 +1,56 @@
+---
+/* BotMark START */
+/* The site's pixel AI bot as a yes/no mark: green bot with a check, red bot with an X.
+   Same 12x12 artwork as the chat launcher, plus a small badge in the corner. */
+interface Props {
+  yes: boolean;
+}
+const { yes } = Astro.props;
+---
+
+<span class:list={['bot-mark', yes ? 'is-yes' : 'is-no']}>
+  <svg width="40" height="40" viewBox="0 0 18 18" shape-rendering="crispEdges" aria-hidden="true">
+    <g fill="currentColor">
+      <rect x="5" y="0" width="2" height="1"></rect>
+      <rect x="5.5" y="1" width="1" height="1"></rect>
+      <path fill-rule="evenodd" d="M1 2h10v8H1zM3 4h2v2H3zM7 4h2v2H7zM4 8h4v1H4z"></path>
+      <rect x="0" y="5" width="1" height="2"></rect>
+      <rect x="11" y="5" width="1" height="2"></rect>
+      <rect x="3" y="10" width="2" height="1"></rect>
+      <rect x="7" y="10" width="2" height="1"></rect>
+    </g>
+    <rect class="bot-mark_gap" x="9" y="9" width="9" height="9"></rect>
+    <g class="bot-mark_badge">
+      <rect x="10" y="10" width="8" height="8"></rect>
+      {
+        yes ? (
+          <path class="bot-mark_sign" d="M11 13h1v1h-1zM12 14h1v1h-1zM13 15h1v1h-1zM14 14h1v1h-1zM15 13h1v1h-1zM16 12h1v1h-1z" />
+        ) : (
+          <path class="bot-mark_sign" d="M12 12h1v1h-1zM13 13h1v1h-1zM14 14h1v1h-1zM15 15h1v1h-1zM15 12h1v1h-1zM14 13h1v1h-1zM13 14h1v1h-1zM12 15h1v1h-1z" />
+        )
+      }
+    </g>
+  </svg>
+  <span class="sr-only">{yes ? 'Yes' : 'No'}</span>
+</span>
+
+<style>
+  .bot-mark {
+    display: inline-flex;
+    line-height: 0;
+  }
+  .bot-mark.is-yes {
+    color: #3ddc84;
+  }
+  .bot-mark.is-no {
+    color: #ff4d4d;
+  }
+  .bot-mark_badge rect {
+    fill: currentColor;
+  }
+  .bot-mark_gap,
+  .bot-mark_sign {
+    fill: var(--_srdjan-variables---bg-color, #060501);
+  }
+</style>
+<!-- BotMark END -->

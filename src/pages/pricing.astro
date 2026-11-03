@@ -1,0 +1,312 @@
+---
+import { sanityClient } from 'sanity:client';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CornerLines from '../components/CornerLines.astro';
+import { imgSet } from '../lib/sanity/image';
+import { absUrl } from '../lib/seo/site';
+import CheckMark from '../components/CheckMark.astro';
+import TestimonialsSection from '../components/TestimonialsSection.astro';
+import CtaSection from '../components/CtaSection.astro';
+import RetainerShowcase from '../components/RetainerShowcase.astro';
+import ProcessSection from '../components/ProcessSection.astro';
+import { SITE_SETTINGS_QUERY, HOME_QUERY } from '../lib/sanity/queries';
+import {
+  projectPlans,
+  retainerPlans,
+  compareColumns,
+  compareRows,
+  pricingFaqs,
+  type Plan,
+} from '../lib/pricing';
+import '../styles/pricing.css';
+
+const [settings, home] = await Promise.all([
+  sanityClient.fetch(SITE_SETTINGS_QUERY),
+  sanityClient.fetch(HOME_QUERY),
+]);
+// Same testimonials as the Case Studies page: video first, then text
+const testimonials = [...(home?.videoTestimonials ?? []), ...(home?.textTestimonials ?? [])];
+const ogImage = imgSet(settings?.defaultOgImage, { width: 1200 })?.src;
+const description =
+  'Starting prices for Webflow websites, redesigns and migrations, plus monthly plans after launch. Small sites from $5,000, retainers from $1,900 a month.';
+
+const tabs: { id: string; label: string; plans: Plan[] }[] = [
+  { id: 'projects', label: 'One-time projects', plans: projectPlans },
+  { id: 'retainers', label: 'Monthly retainers', plans: retainerPlans },
+];
+---
+
+<BaseLayout
+  seo={{
+    title: 'SRDJAN JOVIC · Pricing',
+    description,
+    canonical: absUrl('/pricing'),
+    ogImage,
+  }}
+>
+  <!-- Pricing hero and plans START -->
+  <section class="section_pricing">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="pricing_hero">
+            <div class="text_in-exprecions">
+              <div class="exprecion">[</div>
+              <div class="text-color-alternate text-size-regular text-style-allcaps">pricing</div>
+              <div class="exprecion">]</div>
+            </div>
+            <h1 class="heading-style-h1">Clear prices for Webflow websites</h1>
+            <p class="text-size-medium text-style-allcaps pricing_hero-text">
+              Starting prices for new sites, redesigns and migrations, and monthly plans for everything after launch. You get an exact quote after our discovery call.{' '}
+              <span class="text-color-alternate">You always work directly with me, the person who builds your site.</span>
+            </p>
+            <a data-stager-btn href="/contact/" class="button w-inline-block pricing_hero-cta">
+              <div data-stager-text>Book a strategy call</div>
+            </a>
+          </div>
+
+          <div class="pricing_tabs" data-pricing-tabs>
+            <div class="pricing_tabs-head">
+              <h2 class="heading-style-h3 pricing_tabs-heading" id="plans-heading">Choose your website destiny</h2>
+              <div class="pricing_tab-list" role="tablist" aria-labelledby="plans-heading">
+              {
+                tabs.map((t, i) => (
+                  <button
+                    type="button"
+                    class="pricing_tab"
+                    data-stager-btn
+                    aria-label={t.label}
+                    role="tab"
+                    id={`tab-${t.id}`}
+                    aria-controls={`panel-${t.id}`}
+                    aria-selected={i === 0 ? 'true' : 'false'}
+                    tabindex={i === 0 ? 0 : -1}
+                  >
+                    <span data-stager-text>{t.label}</span>
+                  </button>
+                ))
+              }
+              </div>
+            </div>
+
+            {
+              tabs.map((t, i) => (
+                <div
+                  class="pricing_panel"
+                  role="tabpanel"
+                  id={`panel-${t.id}`}
+                  aria-labelledby={`tab-${t.id}`}
+                  hidden={i !== 0}
+                >
+                  <ul class="pricing_grid" role="list">
+                    {t.plans.map((p) => (
+                      <li class:list={['pricing_card', p.featured && 'is-featured']}>
+                        <div class="pricing_card-top">
+                          <h3 class="heading-style-h5 pricing_card-name">{p.name}</h3>
+                          {p.badge && (
+                            <span class="pricing_card-badge">
+                              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                                <path d="M13.5 2 4 13.5h6.5L9.5 22 20 9.5h-6.5L13.5 2Z" fill="currentColor" />
+                              </svg>
+                              {p.badge}
+                            </span>
+                          )}
+                          {p.subtitle && <p class="pricing_card-subtitle">{p.subtitle}</p>}
+                          <p class="pricing_card-timeline">{p.timeline}</p>
+                        </div>
+                        <div class="pricing_card-price">
+                          {p.period || p.price.startsWith('$') ? <span class="pricing_card-from">Starting at</span> : null}
+                          <span class="pricing_card-amount">
+                            {p.price}
+                            {p.period && <span class="pricing_card-period">{p.period}</span>}
+                          </span>
+                        </div>
+                        <p class="pricing_card-best">
+                          <span class="pricing_card-label">Best for</span>
+                          {p.bestFor}
+                        </p>
+                        <div class="pricing_card-includes">
+                          <span class="pricing_card-label">{p.includesLead}</span>
+                          <ul class="pricing_card-list" role="list">
+                            {p.includes.map((item) => (
+                              <li>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <a
+                          data-stager-btn
+                          href={p.cta.href}
+                          class:list={[
+                            'button w-inline-block pricing_card-cta',
+                            !p.featured && 'w-variant-d23600a3-4e48-e35d-80a8-3397b31211b0',
+                          ]}
+                        >
+                          <div data-stager-text>{p.cta.label}</div>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+        <CornerLines />
+      </div>
+    </div>
+  </section>
+  <!-- Pricing hero and plans END -->
+
+  <RetainerShowcase />
+
+  <ProcessSection />
+
+  <!-- Pricing compare START -->
+  <section class="section_pricing-compare">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-medium">
+          <div class="pricing_compare-head">
+            <div class="text_in-exprecions">
+              <div class="exprecion">[</div>
+              <div class="text-color-alternate text-size-regular text-style-allcaps">compare</div>
+              <div class="exprecion">]</div>
+            </div>
+            <h2 class="heading-style-h2">How I compare to your other options</h2>
+            <p class="text-size-medium text-style-allcaps">
+              An agency, a hire or a marketplace freelancer can all build a Webflow site. Here is what changes for you.
+            </p>
+          </div>
+
+          <div class="pricing_compare-scroll" tabindex="0" role="region" aria-label="Comparison table, scroll sideways on small screens">
+            <table class="pricing_compare-table">
+              <thead>
+                <tr>
+                  <td></td>
+                  {
+                    compareColumns.map((c, i) => (
+                      <th scope="col" class:list={[i === 0 && 'is-me']}>
+                        {c}
+                      </th>
+                    ))
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  compareRows.map((row) => (
+                    <tr>
+                      <th scope="row">{row.label}</th>
+                      {row.values.map((v, i) => (
+                        <td class:list={[i === 0 && 'is-me']}>
+                          <div class="pricing_compare-cell">
+                            {v.mark !== undefined && <CheckMark yes={v.mark} />}
+                            <span class="pricing_compare-text">{v.text}</span>
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <CornerLines top={false} />
+      </div>
+    </div>
+  </section>
+  <!-- Pricing compare END -->
+
+
+  <TestimonialsSection testimonials={testimonials} />
+
+  <CtaSection />
+
+  <!-- Pricing FAQ START -->
+  <section class="section_faq">
+    <div class="container-large">
+      <div class="side_lines">
+        <div class="padding-global padding-section-large">
+          <div class="faq_content">
+            <div class="faq_heading-wrapper">
+              <div class="heading-style-h2">Frequently asked questions about:</div>
+              <h2 class="heading-style-h2">Pricing</h2>
+            </div>
+            <div class="faq_wrapper">
+              {
+                pricingFaqs.map((f, i) => (
+                  <div id={`faq-blok-${i + 1}`} class="faq_block">
+                    <button class="faq_toggle" aria-expanded="false" aria-controls={`faq-answer-${i + 1}`}>
+                      <div class="faq_heading-wrap">
+                        <h3 class="heading-style-h5">{f.question}</h3>
+                      </div>
+                      <div class="faq_icon">
+                        <div class="faq_minus" />
+                        <div class="faq_plus" />
+                      </div>
+                    </button>
+                    <div class="faq_dropdown" id={`faq-answer-${i + 1}`}>
+                      <div class="faq_dropdown-inner">
+                        <div class="faq_space-block" />
+                        <div class="faq_answer-wrapper">
+                          <p class="text-size-medium text-style-allcaps">{f.answer}</p>
+                        </div>
+                        <div class="faq_space-block" />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+        <CornerLines />
+      </div>
+    </div>
+  </section>
+  <!-- Pricing FAQ END -->
+</BaseLayout>
+
+<script>
+  /* Pricing tabs START */
+  // Accessible tabs: click or arrow keys switch between one-time projects and retainers
+  const root = document.querySelector<HTMLElement>('[data-pricing-tabs]');
+  if (root) {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    };
+    // /pricing/#retainers opens the retainer tab directly (links from other pages)
+    const fromHash = tabs.find((t) => t.id === `tab-${location.hash.slice(1)}`);
+    if (fromHash) select(fromHash);
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        e.preventDefault();
+        select(tabs[(i + step + tabs.length) % tabs.length], true);
+      });
+    });
+  }
+  /* Pricing tabs END */
+
+  /* Pricing FAQ accordion START */
+  // Same open/close behavior as the resource FAQ, styles live in app.css
+  document.querySelectorAll<HTMLElement>('.section_faq .faq_block').forEach((block) => {
+    const toggle = block.querySelector<HTMLButtonElement>('.faq_toggle');
+    toggle?.addEventListener('click', () => {
+      const open = block.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  });
+  /* Pricing FAQ accordion END */
+</script>
