@@ -1,11 +1,43 @@
 /* Pricing page content. Prices are edited here (no CMS on purpose: they change rarely). */
 
+/* Currency switch START */
+export const currencies = [
+  { id: 'usd', symbol: '$', label: '$ USD' },
+  { id: 'eur', symbol: '€', label: '€ EUR' },
+  { id: 'gbp', symbol: '£', label: '£ GBP' },
+] as const;
+
+export type CurrencyId = (typeof currencies)[number]['id'];
+
+/* Fixed rates on purpose, so a price never moves between two visits. Update them by hand.
+   ECB reference rates on 2026-11-05: EUR 0.89095, GBP 0.74299 */
+const RATE_PER_USD: Record<CurrencyId, number> = { usd: 1, eur: 0.89, gbp: 0.74 };
+
+/* Prices round to the nearest 100 so they read as set prices, not as a conversion */
+export function priceParts(usd: number, currency: CurrencyId): { symbol: string; amount: string } {
+  const value = Math.round((usd * RATE_PER_USD[currency]) / 100) * 100;
+  const parts = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).formatToParts(value);
+  return {
+    symbol: parts.find((part) => part.type === 'currency')?.value ?? '',
+    amount: parts
+      .filter((part) => part.type !== 'currency')
+      .map((part) => part.value)
+      .join(''),
+  };
+}
+/* Currency switch END */
+
 export interface Plan {
   name: string;
   /* Plain size label under the plan name */
   subtitle?: string;
   timeline: string;
-  price: string;
+  /* A number is a price in USD, a string is shown as is ("Let's talk") */
+  price: number | string;
   period?: string;
   bestFor: string;
   includesLead: string;
@@ -20,7 +52,7 @@ export const projectPlans: Plan[] = [
     name: 'Web Starter',
     subtitle: 'Small websites',
     timeline: '4 to 6 weeks',
-    price: '$5,000',
+    price: 5_000,
     bestFor: 'Companies that need a fast, credible site with a few pages and simple content.',
     includesLead: 'What you get',
     includes: [
@@ -41,11 +73,12 @@ export const projectPlans: Plan[] = [
     name: 'Web Engine',
     subtitle: 'Mid-sized websites',
     timeline: '6 to 8 weeks',
-    price: '$8,500',
+    price: 8_500,
     badge: 'Most popular',
     bestFor: 'Growing B2B and service companies that get most of their leads from the website.',
     includesLead: 'Everything in Web Starter, plus',
     includes: [
+      'Unlimited pages',
       'Unlimited CMS collections',
       'Copywriting',
       'Website migration',
@@ -67,7 +100,7 @@ export const projectPlans: Plan[] = [
     name: 'Web Master',
     subtitle: 'Enterprise websites',
     timeline: '8 to 12 weeks',
-    price: '$14,000',
+    price: 14_000,
     bestFor: 'Companies with a lot of content, several languages or custom integrations.',
     includesLead: 'Everything in Web Engine, plus',
     includes: [
@@ -82,90 +115,28 @@ export const projectPlans: Plan[] = [
   },
 ];
 
-/* Compare table START */
-/* Every cell has a short text; mark: true = green check, false = red X, omitted = text only */
-export interface CompareCell {
-  mark?: boolean;
-  text: string;
-}
+/* Plan compare table START */
+/* Only what differs between the three project plans. Every value comes from the plan lists above,
+   so update both together. A number is a USD price, true is a check, false is a dash. */
+export type PlanCompareCell = number | string | boolean;
 
-export const compareColumns = ['Srdjan Jovic', 'Agencies', 'In-house team', 'Freelance marketplaces'];
-
-export const compareRows: { label: string; values: CompareCell[] }[] = [
-  {
-    label: 'Yearly cost',
-    values: [
-      { text: '$23k to $42k' },
-      { text: '$60k and up' },
-      { text: '$120k and up, with salary and tools' },
-      { text: '$10k and up, plus fixes later' },
-    ],
-  },
-  {
-    label: 'Webflow expertise',
-    values: [
-      { mark: true, text: 'Webflow only, every day' },
-      { mark: true, text: 'Yes, if Webflow is their main tool' },
-      { mark: false, text: 'Usually a generalist' },
-      { mark: false, text: 'Hard to check before you hire' },
-    ],
-  },
-  {
-    label: 'Who you talk to',
-    values: [
-      { mark: true, text: 'The person who builds your site' },
-      { mark: false, text: 'An account manager' },
-      { mark: true, text: 'Your own team' },
-      { mark: true, text: 'The freelancer, through the platform' },
-    ],
-  },
-  {
-    label: 'AI search optimization (AEO)',
-    values: [
-      { mark: true, text: 'Schema, llms.txt and AI search checks' },
-      { mark: true, text: 'Often as an extra service' },
-      { mark: false, text: 'Rarely a skill on the team' },
-      { mark: false, text: 'Rarely offered' },
-    ],
-  },
-  {
-    label: 'No hiring or managing people',
-    values: [
-      { mark: true, text: 'I run the project for you' },
-      { mark: true, text: 'They manage their own team' },
-      { mark: false, text: 'You hire, train and manage' },
-      { mark: false, text: 'You find, test and manage them' },
-    ],
-  },
-  {
-    label: 'Clear price before work starts',
-    values: [
-      { mark: true, text: 'Written quote with a clear scope' },
-      { mark: true, text: 'Yes, but changes often cost extra' },
-      { mark: false, text: 'Salaries, tools and hidden costs' },
-      { mark: false, text: 'Hourly rates, final cost unclear' },
-    ],
-  },
-  {
-    label: 'Support after launch',
-    values: [
-      { mark: true, text: 'Included on Web Engine and Web Master, then a retainer' },
-      { mark: true, text: 'Usually as a paid retainer' },
-      { mark: true, text: 'Yes, while the person stays' },
-      { mark: false, text: 'Often ends with the project' },
-    ],
-  },
-  {
-    label: 'Response time',
-    values: [
-      { text: 'Same day' },
-      { text: '2 to 3 days' },
-      { text: 'Same day' },
-      { text: 'It depends on the freelancer' },
-    ],
-  },
+export const planCompareRows: { label: string; values: PlanCompareCell[] }[] = [
+  { label: 'Starting price', values: projectPlans.map((plan) => plan.price) },
+  { label: 'Timeline', values: projectPlans.map((plan) => plan.timeline) },
+  { label: 'Pages', values: ['Up to 10', 'Unlimited', 'Unlimited'] },
+  { label: 'CMS collections', values: ['Up to 3', 'Unlimited', 'Unlimited, with linked collections'] },
+  { label: 'Copywriting', values: [false, true, true] },
+  { label: 'Website migration', values: [false, true, true] },
+  { label: 'SEO and AI search', values: ['Technical SEO', 'SEO optimization and AEO', 'SEO optimization and AEO'] },
+  { label: 'Integrations', values: [false, 'CRM, API and Make automations', 'Custom integrations and API work'] },
+  { label: 'Multi-language setup', values: [false, true, true] },
+  { label: 'Animations', values: ['Simple text animations', 'Custom animations', 'Custom code and GSAP'] },
+  { label: 'Roles and publishing workflow', values: [false, false, true] },
+  { label: 'Team training', values: [false, 'Training video', 'Live training session'] },
+  { label: 'Support', values: [false, '60 days', '90 days'] },
 ];
-/* Compare table END */
+/* Plan compare table END */
+
 
 /* What you get with a retainer: one card per feature (Greek figure image), detail panel on the right.
    Figures are cut out on a 1000 x 1000 transparent canvas, bottom aligned, exported at 800 px. */
@@ -191,9 +162,9 @@ export const retainerFeatures: RetainerFeature[] = [
     figure: 'Atlas',
     plans: 'Web Copilot and Web Autopilot',
     what: 'I keep your Webflow site running every month: fixes, updates, forms, links and security checks.',
-    why: 'A site that slowly breaks loses visitors you never hear about. Regular maintenance keeps it fast and working, so it keeps bringing in leads.',
+    why: 'A site that slowly breaks loses visitors you never hear about. Regular maintenance keeps it fast and working.',
     points: [
-      'Monthly check of forms, links and integrations',
+      'Monthly check of forms and links',
       'Fixes within one business day',
       'Security and backup check',
       'Webflow updates and cleanup',
@@ -246,12 +217,11 @@ export const retainerFeatures: RetainerFeature[] = [
     name: 'Reports and growth',
     figure: 'Athena',
     plans: 'Web Autopilot',
-    what: 'A short monthly report and a conversion audit every quarter, with A/B tests on the pages that matter most.',
+    what: 'A short monthly report and a conversion audit every quarter, on the pages that matter most.',
     why: 'You see what the website brings in, and every change is based on numbers, not guesses.',
     points: [
       'Monthly traffic and leads report',
       'Conversion audit every quarter',
-      'A/B tests on key pages',
       'Clear next steps every month',
     ],
     image: figureImage('athena', 'Marble statue working on a laptop'),
@@ -359,7 +329,7 @@ export const retainerPlans: Plan[] = [
     name: 'Web Copilot',
     subtitle: 'Growth plan',
     timeline: 'Monthly, cancel with 30 days notice',
-    price: '$1,900',
+    price: 1_900,
     period: '/mo',
     bestFor: 'Companies that want their site fast, safe and up to date, without hiring.',
     includesLead: 'What you get',
@@ -379,7 +349,7 @@ export const retainerPlans: Plan[] = [
     name: 'Web Autopilot',
     subtitle: 'Performance plan',
     timeline: 'Monthly, cancel with 30 days notice',
-    price: '$3,500',
+    price: 3_500,
     period: '/mo',
     badge: 'Most popular',
     bestFor: 'Companies that use the website as their main lead channel.',
@@ -388,7 +358,7 @@ export const retainerPlans: Plan[] = [
       'Unlimited pages, landing pages and content updates',
       '8 blog articles a month, written for SEO and AI search',
       'AI search optimization (AEO) and schema',
-      'Conversion audit every quarter, with A/B tests',
+      'Conversion audit every quarter',
       'Monthly report on traffic and leads',
       'Priority queue for your requests',
     ],

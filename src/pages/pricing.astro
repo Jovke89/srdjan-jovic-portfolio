@@ -4,7 +4,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CornerLines from '../components/CornerLines.astro';
 import { imgSet } from '../lib/sanity/image';
 import { absUrl } from '../lib/seo/site';
-import CheckMark from '../components/CheckMark.astro';
 import TestimonialsSection from '../components/TestimonialsSection.astro';
 import CtaSection from '../components/CtaSection.astro';
 import RetainerShowcase from '../components/RetainerShowcase.astro';
@@ -13,9 +12,10 @@ import { SITE_SETTINGS_QUERY, HOME_QUERY } from '../lib/sanity/queries';
 import {
   projectPlans,
   retainerPlans,
-  compareColumns,
-  compareRows,
+  planCompareRows,
   pricingFaqs,
+  currencies,
+  priceParts,
   type Plan,
 } from '../lib/pricing';
 import '../styles/pricing.css';
@@ -66,8 +66,27 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
           </div>
 
           <div class="pricing_tabs" data-pricing-tabs>
+            <!-- Hidden heading: keeps the page outline and names the tab list for screen readers -->
+            <h2 class="sr-only" id="plans-heading">Website plans</h2>
             <div class="pricing_tabs-head">
-              <h2 class="heading-style-h3 pricing_tabs-heading" id="plans-heading">Choose your website destiny</h2>
+              <!-- Currency switch START -->
+              <div class="pricing_tab-list" role="group" aria-label="Currency">
+                {
+                  currencies.map((c, i) => (
+                    <button
+                      type="button"
+                      class="pricing_tab"
+                      data-stager-btn
+                      data-currency={c.id}
+                      aria-label={c.label}
+                      aria-pressed={i === 0 ? 'true' : 'false'}
+                    >
+                      <span data-stager-text>{c.label}</span>
+                    </button>
+                  ))
+                }
+              </div>
+              <!-- Currency switch END -->
               <div class="pricing_tab-list" role="tablist" aria-labelledby="plans-heading">
               {
                 tabs.map((t, i) => (
@@ -115,9 +134,20 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
                           <p class="pricing_card-timeline">{p.timeline}</p>
                         </div>
                         <div class="pricing_card-price">
-                          {p.period || p.price.startsWith('$') ? <span class="pricing_card-from">Starting at</span> : null}
+                          {typeof p.price === 'number' && <span class="pricing_card-from">Starting at</span>}
                           <span class="pricing_card-amount">
-                            {p.price}
+                            {typeof p.price === 'number' ? (
+                              <span>
+                                <span class="pricing_card-symbol" data-usd={priceParts(p.price, 'usd').symbol} data-eur={priceParts(p.price, 'eur').symbol} data-gbp={priceParts(p.price, 'gbp').symbol}>
+                                  {priceParts(p.price, 'usd').symbol}
+                                </span>
+                                <span data-usd={priceParts(p.price, 'usd').amount} data-eur={priceParts(p.price, 'eur').amount} data-gbp={priceParts(p.price, 'gbp').amount}>
+                                  {priceParts(p.price, 'usd').amount}
+                                </span>
+                              </span>
+                            ) : (
+                              p.price
+                            )}
                             {p.period && <span class="pricing_card-period">{p.period}</span>}
                           </span>
                         </div>
@@ -157,36 +187,29 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
   </section>
   <!-- Pricing hero and plans END -->
 
-  <RetainerShowcase />
-
-  <ProcessSection />
-
-  <!-- Pricing compare START -->
-  <section class="section_pricing-compare">
+  <!-- Plan compare START -->
+  <section class="section_plan-compare" aria-labelledby="plan-compare-heading">
     <div class="container-large">
       <div class="side_lines">
         <div class="padding-global padding-section-medium">
-          <div class="pricing_compare-head">
+          <div class="plan_compare-head">
             <div class="text_in-exprecions">
               <div class="exprecion">[</div>
-              <div class="text-color-alternate text-size-regular text-style-allcaps">compare</div>
+              <div class="text-color-alternate text-size-regular text-style-allcaps">plans</div>
               <div class="exprecion">]</div>
             </div>
-            <h2 class="heading-style-h2">How I compare to your other options</h2>
-            <p class="text-size-medium text-style-allcaps">
-              An agency, a hire or a marketplace freelancer can all build a Webflow site. Here is what changes for you.
-            </p>
+            <h2 class="heading-style-h2" id="plan-compare-heading">Compare the three plans</h2>
           </div>
-
-          <div class="pricing_compare-scroll" tabindex="0" role="region" aria-label="Comparison table, scroll sideways on small screens">
-            <table class="pricing_compare-table">
+          <div class="plan_compare-scroll" tabindex="0" role="region" aria-label="Plan comparison, scroll sideways on small screens">
+            <span class="plan_compare-fill" aria-hidden="true"></span>
+            <table class="plan_compare-table">
               <thead>
                 <tr>
-                  <td></td>
+                  <th scope="col">Feature</th>
                   {
-                    compareColumns.map((c, i) => (
-                      <th scope="col" class:list={[i === 0 && 'is-me']}>
-                        {c}
+                    projectPlans.map((plan) => (
+                      <th scope="col" class:list={[plan.featured && 'is-featured']}>
+                        {plan.name}
                       </th>
                     ))
                   }
@@ -194,15 +217,34 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
               </thead>
               <tbody>
                 {
-                  compareRows.map((row) => (
+                  planCompareRows.map((row) => (
                     <tr>
                       <th scope="row">{row.label}</th>
-                      {row.values.map((v, i) => (
-                        <td class:list={[i === 0 && 'is-me']}>
-                          <div class="pricing_compare-cell">
-                            {v.mark !== undefined && <CheckMark yes={v.mark} />}
-                            <span class="pricing_compare-text">{v.text}</span>
-                          </div>
+                      {row.values.map((value, i) => (
+                        <td class:list={[projectPlans[i].featured && 'is-featured']}>
+                          {typeof value === 'number' ? (
+                            <span
+                              data-usd={Object.values(priceParts(value, 'usd')).join('')}
+                              data-eur={Object.values(priceParts(value, 'eur')).join('')}
+                              data-gbp={Object.values(priceParts(value, 'gbp')).join('')}
+                            >
+                              {Object.values(priceParts(value, 'usd')).join('')}
+                            </span>
+                          ) : value === true ? (
+                            <>
+                              <svg class="plan_compare-check" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                                <path d="m3 8.5 3.25 3.25L13 5" fill="none" stroke="currentColor" stroke-width="1.5" />
+                              </svg>
+                              <span class="sr-only">Included</span>
+                            </>
+                          ) : value === false ? (
+                            <>
+                              <span class="plan_compare-dash" aria-hidden="true"></span>
+                              <span class="sr-only">Not included</span>
+                            </>
+                          ) : (
+                            value
+                          )}
                         </td>
                       ))}
                     </tr>
@@ -216,7 +258,12 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
       </div>
     </div>
   </section>
-  <!-- Pricing compare END -->
+  <!-- Plan compare END -->
+
+  <RetainerShowcase />
+
+  <ProcessSection />
+
 
 
   <TestimonialsSection testimonials={testimonials} />
@@ -274,7 +321,10 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
   const root = document.querySelector<HTMLElement>('[data-pricing-tabs]');
   if (root) {
     const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    // The plan table compares project plans, so it only shows with the project tab
+    const planCompare = document.querySelector<HTMLElement>('.section_plan-compare');
     const select = (tab: HTMLButtonElement, focus = false) => {
+      if (planCompare) planCompare.hidden = tab.id !== 'tab-projects';
       tabs.forEach((t) => {
         const on = t === tab;
         t.setAttribute('aria-selected', String(on));
@@ -298,6 +348,39 @@ const tabs: { id: string; label: string; plans: Plan[] }[] = [
     });
   }
   /* Pricing tabs END */
+
+  /* Plan compare fill START */
+  // Fits the fill to the featured column, whose width depends on the table layout
+  const planTable = document.querySelector<HTMLTableElement>('.plan_compare-table');
+  const planFill = document.querySelector<HTMLElement>('.plan_compare-fill');
+  const featuredHead = planTable?.querySelector<HTMLElement>('thead .is-featured');
+  if (planTable && planFill && featuredHead) {
+    const placeFill = () => {
+      planFill.style.setProperty('--fill-x', `${featuredHead.offsetLeft}px`);
+      planFill.style.setProperty('--fill-w', `${featuredHead.offsetWidth}px`);
+    };
+    // Also runs once on load, and when the table reappears on the project tab
+    new ResizeObserver(placeFill).observe(planTable);
+    // Column widths change without the table resizing when the web fonts arrive
+    void document.fonts.ready.then(placeFill);
+  }
+  /* Plan compare fill END */
+
+  /* Currency switch START */
+  // Both prices are rendered on each card, the switch only swaps the visible one
+  const currencyButtons = document.querySelectorAll<HTMLButtonElement>('[data-currency]');
+  const prices = document.querySelectorAll<HTMLElement>('[data-usd]');
+  currencyButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const currency = button.dataset.currency as 'usd' | 'eur' | 'gbp';
+      root?.setAttribute('data-active-currency', currency);
+      currencyButtons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+      prices.forEach((price) => {
+        price.textContent = price.dataset[currency] ?? '';
+      });
+    });
+  });
+  /* Currency switch END */
 
   /* Pricing FAQ accordion START */
   // Same open/close behavior as the resource FAQ, styles live in app.css

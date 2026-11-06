@@ -6,7 +6,7 @@
    Every reached marker turns into a filled yellow node with the lightning bolt.
    Styles live in pricing.css, block "Process (launch sequence)". */
 import CornerLines from './CornerLines.astro';
-import CheckMark from './CheckMark.astro';
+import ListArrow from './ListArrow.astro';
 import { processSteps, processImage } from '../lib/pricing';
 ---
 
@@ -76,7 +76,7 @@ import { processSteps, processImage } from '../lib/pricing';
                       <ul class="process_points" role="list">
                         {s.points.map((pt) => (
                           <li>
-                            <CheckMark yes={true} />
+                            <ListArrow />
                             <span>{pt}</span>
                           </li>
                         ))}

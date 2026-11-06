@@ -3,8 +3,8 @@
 /* Section dividers START */
 /* Same as every other section on the site: a bottom border, crosses sit on its corners (CornerLines) */
 .section_pricing,
+.section_plan-compare,
 .section_process,
-.section_pricing-compare,
 .section_retainer {
   border-bottom: 1px solid var(--_srdjan-variables---border-color);
 }
@@ -12,10 +12,15 @@
 
 /* Retainer overlap START */
 /* The plan cards pin and shrink on scroll (initHeroOverlap in site.ts, desktop only),
-   so the retainer section needs a solid background and a higher layer to slide over them */
+   so the section right after them needs a solid background and a higher layer to slide over them.
+   That is the plan table, or the retainer section on the retainer tab, where the table is hidden */
+.section_plan-compare,
 .section_retainer {
   position: relative;
   z-index: 2;
+}
+.section_plan-compare,
+.section_plan-compare[hidden] + .section_retainer {
   background-color: var(--_srdjan-variables---bg-color);
 }
 /* After the animation the faded card block stays in the layout (opacity 0), so every later section
@@ -43,7 +48,7 @@
 
 /* Tabs START */
 .pricing_tabs {
-  margin-top: clamp(2.5rem, 2rem + 2vw, 4rem);
+  margin-top: 5rem;
 }
 /* Extra room under the cards: the retainer section slides over them later,
    so the card buttons stay visible for a while after the cards pin */
@@ -52,23 +57,23 @@
     padding-bottom: 15vh;
   }
 }
-/* Heading on the left, project / retainer switch on the right, right above the cards */
+/* Currency switch on the left, project / retainer switch on the right, right above the cards */
 .pricing_tabs-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: space-between;
   gap: 1.25rem 2rem;
   margin-bottom: clamp(1.5rem, 1.25rem + 1vw, 2.5rem);
 }
-.pricing_tabs-heading {
-  max-width: 32rem;
-  /* No margin and tight line height, so the last text line ends on the same bottom line as the switch */
-  margin: 0;
-  line-height: 1;
-}
 .pricing_hero-cta {
   margin-top: .5rem;
+}
+/* Phones: 2rem above the hero button (.75rem plus the 1.25rem hero gap) */
+@media (max-width: 767px) {
+  .pricing_hero-cta {
+    margin-top: .75rem;
+  }
 }
 .pricing_tab-list {
   display: flex;
@@ -101,19 +106,19 @@
   line-height: 1;
 }
 /* Only the inactive tab reacts on hover: light yellow background + stager letter roll */
-.pricing_tab:not([aria-selected="true"]):hover {
+.pricing_tab:not([aria-selected="true"], [aria-pressed="true"]):hover {
   background-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 15%, transparent);
 }
-.pricing_tab[aria-selected="true"] {
+.pricing_tab:is([aria-selected="true"], [aria-pressed="true"]) {
   background-color: var(--_srdjan-variables---brand-color);
   color: var(--_srdjan-variables---bg-color);
 }
 /* The stager script sets inline styles, so the selected tab locks its label in place */
-.pricing_tab[aria-selected="true"] [data-stager-text] > span:first-child > span {
+.pricing_tab:is([aria-selected="true"], [aria-pressed="true"]) [data-stager-text] > span:first-child > span {
   transform: none !important;
   opacity: 1 !important;
 }
-.pricing_tab[aria-selected="true"] [data-stager-text] > span:last-child > span {
+.pricing_tab:is([aria-selected="true"], [aria-pressed="true"]) [data-stager-text] > span:last-child > span {
   opacity: 0 !important;
 }
 .pricing_tab:focus-visible {
@@ -263,6 +268,14 @@
   line-height: 1;
   color: var(--_srdjan-variables---heading-color);
 }
+/* Small gap so the currency sign does not touch the first digit */
+.pricing_card-symbol {
+  margin-right: .15em;
+}
+/* The heading typeface draws these signs very wide, so they use the body typeface */
+:is([data-active-currency="eur"], [data-active-currency="gbp"]) .pricing_card-symbol {
+  font-family: var(--_srdjan-variables---body-text-type-face);
+}
 .pricing_card-period {
   font-size: 1rem;
   font-weight: 400;
@@ -319,7 +332,7 @@
     grid-template-rows: none;
   }
 }
-/* Phones: cards sit in one row and swipe sideways like the compare table,
+/* Phones: cards sit in one row and swipe sideways like the plan table,
    subgrid keeps name, price and list lined up across cards */
 @media (max-width: 767px) {
   .pricing_grid {
@@ -349,6 +362,12 @@
   .pricing_tab {
     padding: .625rem .75rem;
     font-size: .75rem;
+  }
+}
+/* Smallest phones: tighter tabs so the two project / retainer labels fit the row */
+@media (max-width: 339px) {
+  .pricing_tab {
+    padding-inline: .375rem;
   }
 }
 /* Plan cards END */
@@ -529,7 +548,7 @@
   color: var(--_srdjan-variables---body-text-color);
   text-transform: none;
 }
-.process_points .check-mark {
+.process_points .list-arrow {
   flex: none;
 }
 .process_you {
@@ -612,103 +631,117 @@
 }
 /* Process (launch sequence) END */
 
-/* Compare table START */
-.pricing_compare-head {
+/* Plan compare table START */
+.plan_compare-head {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
   max-width: 48rem;
-  margin: 0 auto clamp(2rem, 1.5rem + 2vw, 3.5rem);
+  margin: 0 auto 5rem;
   text-align: center;
 }
-.pricing_compare-scroll {
-  /* The wide table scrolls inside this box and never widens the page */
+/* Open layout: no boxes or column fills, only thin lines between the rows */
+.plan_compare-scroll {
+  /* position: relative keeps the absolute .sr-only labels inside the overflow clip,
+     isolation keeps the fill's negative z-index inside this box */
+  position: relative;
+  isolation: isolate;
   width: 100%;
-  max-width: 100%;
   contain: inline-size;
   overflow-x: auto;
   border: 1px solid var(--_srdjan-variables---border-color);
-  border-radius: .6rem;
-  background-color: var(--_srdjan-variables---card-bg-color);
+  border-radius: 4px;
 }
-.pricing_compare-scroll:focus-visible {
+.plan_compare-scroll:focus-visible {
   outline: 2px solid var(--_srdjan-variables---brand-color);
   outline-offset: 2px;
 }
-.pricing_compare-table {
+.plan_compare-table {
   width: 100%;
   min-width: 44rem;
-  border-collapse: collapse;
+  /* Separate borders: cells ignore border-radius when borders collapse */
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: var(--_srdjan-variables---body-text-type-face);
-}
-.pricing_compare-table th,
-.pricing_compare-table td {
-  padding: 1.125rem 1.25rem;
-  border-bottom: 1px solid var(--_srdjan-variables---border-color);
-  text-align: center;
-  vertical-align: middle;
-}
-.pricing_compare-table tbody tr:last-child > * {
-  border-bottom: 0;
-}
-.pricing_compare-table thead th {
-  text-align: left;
-  font-size: .8125rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  color: var(--_srdjan-variables---body-text-color);
-}
-.pricing_compare-table thead th.is-me {
-  color: var(--_srdjan-variables---brand-color);
-}
-.pricing_compare-table tbody th {
-  text-align: left;
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: .875rem;
-  color: var(--_srdjan-variables---heading-color);
-  width: 20%;
-}
-/* My column is highlighted so the eye lands on it first */
-.pricing_compare-table .is-me {
-  background-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 7%, transparent);
-}
-/* Mark and a short explanation side by side, left aligned */
-.pricing_compare-table td {
-  text-align: left;
-}
-.pricing_compare-cell {
-  display: flex;
-  align-items: center;
-  gap: .625rem;
-}
-.pricing_compare-cell .check-mark {
-  flex: none;
-}
-.pricing_compare-text {
-  font-size: .875rem;
+  font-size: .9375rem;
   line-height: 1.4;
   color: var(--_srdjan-variables---body-text-color);
 }
-.pricing_compare-table .is-me .pricing_compare-text {
+.plan_compare-table th,
+.plan_compare-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--_srdjan-variables---border-color);
+  text-align: left;
+  vertical-align: middle;
+}
+.plan_compare-table th:first-child {
+  width: 34%;
+}
+.plan_compare-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.plan_compare-table thead th {
+  font-size: .8125rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.plan_compare-table tbody th {
+  font-weight: 400;
   color: var(--_srdjan-variables---heading-color);
+}
+/* The featured plan's column gets brighter text, its fill and ring sit behind and over the table */
+.plan_compare-table .is-featured {
+  color: var(--_srdjan-variables---heading-color);
+}
+.plan_compare-table thead th.is-featured {
+  color: var(--_srdjan-variables---brand-color);
+}
+/* Yellow tint and thin border behind the featured column, so the eye lands on it first.
+   One element, because a column cannot carry a single border across its cells.
+   The script sets --fill-x and --fill-w to match the column. */
+.plan_compare-fill {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: var(--fill-w, 0);
+  border: 1px solid color-mix(in srgb, var(--_srdjan-variables---brand-color) 25%, transparent);
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--_srdjan-variables---brand-color) 5%, transparent);
+  transform: translateX(var(--fill-x, 0));
+}
+.plan_compare-check {
+  display: block;
+  color: var(--_srdjan-variables---brand-color);
+}
+.plan_compare-dash {
+  display: block;
+  width: .75rem;
+  height: 1px;
+  background-color: currentColor;
 }
 /* First column stays visible while the table scrolls sideways on phones */
 @media (max-width: 767px) {
-  .pricing_compare-table tbody th {
+  .plan_compare-table {
+    min-width: 40rem;
+  }
+  .plan_compare-table tbody th,
+  .plan_compare-table thead th:first-child {
     position: sticky;
     left: 0;
     z-index: 1;
-    background-color: var(--_srdjan-variables---card-bg-color);
-    min-width: 9rem;
+    background-color: var(--_srdjan-variables---bg-color);
   }
-  /* Wider value cells so short texts wrap in 2 to 3 lines, not 5 */
-  .pricing_compare-table td {
-    min-width: 12rem;
+  .plan_compare-table th:first-child {
+    width: 10rem;
   }
 }
-/* Compare table END */
+/* Plan compare table END */
+
 
 /* Retainer showcase START */
 .retainer_layout {
@@ -1023,7 +1056,7 @@ body:has(.retainer_stage.has-drag-cursor:hover):not(:has(.retainer_arrows:hover)
   font-size: .875rem;
   line-height: 1.35;
 }
-.retainer_points .check-mark {
+.retainer_points .list-arrow {
   flex: none;
 }
 .retainer_cta {
@@ -1034,6 +1067,12 @@ body:has(.retainer_stage.has-drag-cursor:hover):not(:has(.retainer_arrows:hover)
   to { opacity: 1; transform: none; }
 }
 
+/* Side by side the stage is tall enough for the longest card, so the panel always matches it */
+@media (min-width: 992px) {
+  .retainer_stage {
+    height: 42.5rem;
+  }
+}
 @media (max-width: 991px) {
   .retainer_layout {
     grid-template-columns: minmax(0, 1fr);

@@ -2,7 +2,7 @@
 /* What you get with a retainer: figures stand in a line that fades into the distance on the left.
    The front figure is the active feature; arrows, drag, keys or a click on a figure walk the line.
    The panel on the right shows what the active feature is and why it matters. */
-import CheckMark from './CheckMark.astro';
+import ListArrow from './ListArrow.astro';
 import { retainerFeatures } from '../lib/pricing';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -96,7 +96,7 @@ const total = retainerFeatures.length;
                   <ul class="retainer_points" role="list">
                     {f.points.map((pt) => (
                       <li>
-                        <CheckMark yes={true} />
+                        <ListArrow />
                         <span>{pt}</span>
                       </li>
                     ))}
