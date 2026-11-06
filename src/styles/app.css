@@ -1294,9 +1294,12 @@ html {
   display: none;
 }
 
-/* Mouse-driven games hide the system cursor over the board while playing. */
+/* Mouse-driven games hide the system cursor and the yellow dot while playing. */
 .game_canvas.is-playing {
   cursor: none;
+}
+body:has(.game_canvas.is-playing) .cursor {
+  opacity: 0;
 }
 
 .game_overlay .button {
@@ -1892,3 +1895,47 @@ html {
   }
 }
 /* CTA section END */
+
+/* Footer on large phones START */
+/* The Webflow phone rules stop at 479px, so between that and tablet width the fixed
+   35rem button wrapper and the single row of links stick out and widen the page */
+@media (max-width: 767px) {
+  .footer_btn-wrapper {
+    max-width: 100%;
+  }
+  .footer_links,
+  .main_links,
+  .social_networks {
+    flex-wrap: wrap;
+  }
+  .footer_links {
+    gap: 1rem 2rem;
+  }
+}
+/* Footer on large phones END */
+
+/* Page width fixes START */
+/* Home: the longest word of the big text is wider than the screen between the phone and tablet rules */
+@media (min-width: 480px) and (max-width: 767px) {
+  .big_text-animation {
+    font-size: min(3.75rem, 11vw);
+  }
+}
+/* Resources: 1fr columns grow to fit the card content, minmax(0, 1fr) keeps them inside the page */
+@media (min-width: 768px) {
+  .resources-articles_list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* Resources: the filter row scrolls inside its box on laptop widths too, like it does on tablets */
+.filters_list-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+}
+/* The corner crosses of .side_lines sit 13px outside the container, which fills the screen up to
+   about 1300px wide. clip cuts them at the screen edge and, unlike hidden, does not create a
+   scroll container, so the sticky nav and the pinned sections keep working */
+.page-wrapper {
+  overflow-x: clip;
+}
+/* Page width fixes END */

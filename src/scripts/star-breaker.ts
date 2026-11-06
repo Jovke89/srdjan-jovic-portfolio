@@ -5,7 +5,8 @@
    capsule (wide paddle, multi ball, slow ball, extra life). Rockets also fall
    from the top after a short "!" warning and must be dodged. Clearing all
    bricks starts the next level with a faster ball, more tough bricks and more
-   rockets. Click or Space to launch, P or Escape to pause. Best score is kept
+   rockets. Click or Space to launch, then click, P or Escape to pause. The mouse
+   is locked to the game while playing and released on pause. Best score is kept
    per browser in localStorage. */
 const W = 960;
 const H = 600;
@@ -537,6 +538,22 @@ function initStarBreaker() {
     else window.scrollTo({ top: y, behavior: 'smooth' });
   };
 
+  /* Mouse lock START */
+  /* Pointer Lock keeps the mouse inside the game. The browser can refuse it, for example right
+     after Escape, and then the game simply goes on with the normal mouse. */
+  const isLocked = () => document.pointerLockElement === canvas;
+  const lockMouse = () => {
+    void Promise.resolve(canvas.requestPointerLock()).catch(() => {});
+  };
+  const releaseMouse = () => {
+    if (isLocked()) document.exitPointerLock();
+  };
+  /* Escape and switching windows end the lock from the browser side, so the game pauses too */
+  document.addEventListener('pointerlockchange', () => {
+    if (!isLocked()) pause();
+  });
+  /* Mouse lock END */
+
   const play = () => {
     if (state === 'playing') return;
     if (state === 'over' || state === 'ready') reset();
@@ -545,6 +562,7 @@ function initStarBreaker() {
     canvas.classList.add('is-playing');
     keys.clear();
     centerBoard();
+    lockMouse();
     lastTime = performance.now();
     rafId = requestAnimationFrame(loop);
   };
@@ -553,12 +571,14 @@ function initStarBreaker() {
     if (state !== 'playing') return;
     state = 'paused';
     cancelAnimationFrame(rafId);
+    releaseMouse();
     showOverlay('Paused', 'Press P or the button to continue.', 'Continue');
   };
 
   function gameOver() {
     state = 'over';
     cancelAnimationFrame(rafId);
+    releaseMouse();
     if (score > best) {
       best = score;
       bestEl.textContent = String(best);
@@ -571,14 +591,24 @@ function initStarBreaker() {
   const KEY_MAP: Record<string, string> = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right' };
 
   startBtn.addEventListener('click', play);
-  canvas.addEventListener('click', launch);
+  // First click launches the ball, a click with the ball in play pauses and frees the mouse.
+  canvas.addEventListener('click', () => {
+    if (attached) launch();
+    else pause();
+  });
 
-  // The paddle follows the mouse anywhere over the page while playing.
+  // Locked, the mouse only reports how far it moved. Unlocked, the paddle follows it anywhere on the page.
   window.addEventListener('pointermove', (e) => {
     if (state !== 'playing' || e.pointerType !== 'mouse') return;
     const rect = canvas.getBoundingClientRect();
-    paddleX = ((e.clientX - rect.left) / rect.width) * W;
+    if (isLocked()) paddleX += (e.movementX / rect.width) * W;
+    else paddleX = ((e.clientX - rect.left) / rect.width) * W;
   });
+
+  // The wheel must not scroll the board away while the mouse is locked to it.
+  canvas.addEventListener('wheel', (e) => {
+    if (state === 'playing') e.preventDefault();
+  }, { passive: false });
 
   window.addEventListener('keydown', (e) => {
     const action = KEY_MAP[e.code];
